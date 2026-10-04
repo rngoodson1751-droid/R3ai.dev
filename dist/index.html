@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>R3 AI · Robert, Rachelle and River</title>
 <meta name="description" content="Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.">
 <link rel="canonical" href="https://r3ai.dev/">
@@ -10,47 +10,74 @@
 <meta property="og:description" content="Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/">
+<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<header class="site-head"><div class="wrap">
-  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup><span>r3ai.dev</span></a>
-  <nav class="nav" aria-label="Main">
-    <a href="/work/">At work</a>
-    <a href="/home/">At home</a>
-    <a href="/blog/">Blog</a>
-    <a href="/about/">About</a>
-  </nav>
-</div></header>
-<main>
-<div class="wrap">
-<section class="hero">
-  <p class="eyebrow">R cubed</p>
-  <h1 class="equation" aria-label="Robert times Rachelle times River equals R cubed"><span class="r1">Robert</span><i>&times;</i><span>Rachelle</span><i>&times;</i><span class="r3">River</span><i>=</i><span>R<sup>3</sup></span></h1>
-  <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<section class="glass hero rise">
+  <div>
+    <h1>R cubed is <span class="grad">Robert, Rachelle and River.</span></h1>
+    <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
+    <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn clear" href="/home/">See the home side</a></div>
+  </div>
+  <div class="scene" aria-hidden="true"><div class="cube">
+    <div class="face f1"><b>R</b><span>Robert</span></div>
+    <div class="face f2"><b>R</b><span>Rachelle</span></div>
+    <div class="face f3"><b>R</b><span>River</span></div>
+    <div class="face f4"><b>R<sup>3</sup></b></div>
+    <div class="face f5"></div><div class="face f6"></div>
+  </div></div>
 </section>
-<section class="doors" aria-label="Sections">
-  <a class="door work" href="/work/"><p class="eyebrow">Weekdays</p><h2>At work</h2><p>Transit software, process fixes and notes from a City Transit division.</p><span class="go">Go to work &rarr;</span></a>
-  <a class="door home" href="/home/"><p class="eyebrow">Evenings and weekends</p><h2>At home</h2><p>Games, experiments and things made for River and the family. Start with the kart racer.</p><span class="go">Go home &rarr;</span></a>
-</section>
-<section class="block"><h2>Latest posts</h2><ul class="list"><li>
-  <div><time datetime="2026-10-04">October 4, 2026</time><br><span class="chip home">At home</span></div>
-  <div><h3><a href="/blog/sloth-rocket-grand-prix/">Sloth Rocket Grand Prix: a kart racer in one HTML file</a></h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
-</li>
-<li>
-  <div><time datetime="2026-10-04">October 4, 2026</time><br><span class="chip work">At work</span></div>
-  <div><h3><a href="/blog/notes-from-the-transit-side/">What goes in the work section</a></h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
-</li></ul><p><a href="/blog/">All posts</a></p></section>
+<div class="bento">
+  <a class="glass tint tile work rise" style="--i:1" href="/work/">
+    <h2>At work</h2>
+    <p>Transit software, process fixes and notes from a City Transit division.</p>
+    <div class="end chips"><span class="chip work">7 projects</span><span class="chip work">1 post</span></div>
+  </a>
+  <a class="glass tint tile home rise" style="--i:2" href="/home/">
+    <h2>At home</h2>
+    <p>Games, experiments and things made for River and the family.</p>
+    <div class="end chips"><span class="chip home">1 game</span><span class="chip home">1 post</span></div>
+  </a>
+  <article class="glass tile home span-2 rise" style="--i:3">
+    <div class="chips"><span class="chip home">Play now</span></div>
+    <h2>Sloth Rocket Grand Prix</h2>
+    <p>A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.</p>
+    <div class="end"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a class="btn clear" href="/blog/sloth-rocket-grand-prix/">Read the build notes</a></div>
+  </article>
+  <section class="tile span-4 rise" style="--i:4;padding:0" aria-label="Latest posts">
+    <ul class="glass list"><li><a href="/blog/sloth-rocket-grand-prix/">
+  <time datetime="2026-10-04">October 4, 2026<span class="chip home">At home</span></time>
+  <div><h3>Sloth Rocket Grand Prix: a kart racer in one HTML file</h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
+</a></li>
+<li><a href="/blog/notes-from-the-transit-side/">
+  <time datetime="2026-10-04">October 4, 2026<span class="chip work">At work</span></time>
+  <div><h3>What goes in the work section</h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
+</a></li></ul>
+  </section>
 </div>
 </main>
-<footer class="site-foot"><div class="wrap">
+<footer class="wrap foot">
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
-</div></footer>
+</footer>
+<script>
+document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
+document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
+</script>
 </body>
 </html>

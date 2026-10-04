@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>At home · R3 AI</title>
 <meta name="description" content="Games, experiments and family projects built with AI.">
 <link rel="canonical" href="https://r3ai.dev/home/">
@@ -10,42 +10,47 @@
 <meta property="og:description" content="Games, experiments and family projects built with AI.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/home/">
+<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body data-section="home">
-<header class="site-head"><div class="wrap">
-  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup><span>r3ai.dev</span></a>
-  <nav class="nav" aria-label="Main">
-    <a href="/work/">At work</a>
-    <a href="/home/" aria-current="page">At home</a>
-    <a href="/blog/">Blog</a>
-    <a href="/about/">About</a>
-  </nav>
-</div></header>
-<main>
-<div class="band"><div class="wrap"><p class="eyebrow">Section</p><h1>At home</h1><p>What I build away from work, mostly for River and the family: games, experiments and whatever we think up next.</p></div></div>
-<div class="wrap">
-<section class="block"><h2>Games and projects</h2><div class="cards"><article class="card">
-  <p class="eyebrow">Game</p>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/" aria-current="page">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/" aria-current="page">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<section class="glass tint head rise"><h1>At home</h1><p>What I build away from work, mostly for River and the family: games, experiments and whatever we think up next.</p></section>
+<h2 class="h2">Games and projects</h2>
+<div class="cards"><article class="glass card">
+  <div class="chips"><span class="chip">Game</span></div>
   <h3>Sloth Rocket Grand Prix</h3>
   <p>A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.</p>
-  <div class="links"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a href="/blog/sloth-rocket-grand-prix/">Read the build notes</a></div>
-</article></div></section>
-<section class="block" id="posts"><h2>Posts</h2><ul class="list"><li>
-  <div><time datetime="2026-10-04">October 4, 2026</time></div>
-  <div><h3><a href="/blog/sloth-rocket-grand-prix/">Sloth Rocket Grand Prix: a kart racer in one HTML file</a></h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
-</li></ul></section>
+  <div class="end"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a href="/blog/sloth-rocket-grand-prix/">Read the build notes</a></div>
+</article></div>
 
-</div>
+<h2 class="h2" id="posts">Posts</h2>
+<ul class="glass list"><li><a href="/blog/sloth-rocket-grand-prix/">
+  <time datetime="2026-10-04">October 4, 2026</time>
+  <div><h3>Sloth Rocket Grand Prix: a kart racer in one HTML file</h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
+</a></li></ul>
+
 </main>
-<footer class="site-foot"><div class="wrap">
+<footer class="wrap foot">
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
-</div></footer>
+</footer>
+<script>
+document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
+document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
+</script>
 </body>
 </html>

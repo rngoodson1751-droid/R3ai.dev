@@ -88,14 +88,15 @@ const posts = loadPosts();
 const projects = JSON.parse(readFileSync('content/projects.json', 'utf8'));
 
 // ---------- templates ----------
+const NAV = [['/work/', 'At work', 'work'], ['/home/', 'At home', 'home'], ['/blog/', 'Blog', 'blog'], ['/about/', 'About', 'about']];
 function layout({ title, description, path, section = '', nav = '', body }) {
   const full = title ? `${title} · ${SITE.name}` : `${SITE.name} · Robert, Rachelle and River`;
-  const link = (href, label, key) => `<a href="${href}"${nav === key ? ' aria-current="page"' : ''}>${label}</a>`;
+  const links = NAV.map(([href, label, key]) => `<a href="${href}"${nav === key ? ' aria-current="page"' : ''}>${label}</a>`).join('');
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(full)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${SITE.url}${path}">
@@ -103,52 +104,58 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE.url}${path}">
+<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name}" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body${section ? ` data-section="${section}"` : ''}>
-<header class="site-head"><div class="wrap">
-  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup><span>r3ai.dev</span></a>
-  <nav class="nav" aria-label="Main">
-    ${link('/work/', 'At work', 'work')}
-    ${link('/home/', 'At home', 'home')}
-    ${link('/blog/', 'Blog', 'blog')}
-    ${link('/about/', 'About', 'about')}
-  </nav>
-</div></header>
-<main>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main">${links}</nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar">${links}</nav>
+<main class="wrap">
 ${body}
 </main>
-<footer class="site-foot"><div class="wrap">
+<footer class="wrap foot">
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; ${new Date().getUTCFullYear()} ${SITE.author}. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
-</div></footer>
+</footer>
+<script>
+document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
+document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
+</script>
 </body>
 </html>
 `;
 }
 const chip = s => `<span class="chip ${s}">${SECTIONS[s].label}</span>`;
 function postList(list, showChip = true) {
-  if (!list.length) return '<p class="empty">No posts here yet.</p>';
-  return '<ul class="list">' + list.map(p => `<li>
-  <div><time datetime="${p.date}">${longDate(p.date)}</time>${showChip ? `<br>${chip(p.section)}` : ''}</div>
-  <div><h3><a href="${p.url}">${esc(p.title)}</a></h3><p>${esc(p.summary)}</p></div>
-</li>`).join('\n') + '</ul>';
+  if (!list.length) return '<div class="glass"><p class="empty">No posts here yet.</p></div>';
+  return '<ul class="glass list">' + list.map(p => `<li><a href="${p.url}">
+  <time datetime="${p.date}">${longDate(p.date)}${showChip ? chip(p.section) : ''}</time>
+  <div><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p></div>
+</a></li>`).join('\n') + '</ul>';
 }
 function projectCards(section) {
   const list = projects.filter(p => p.section === section);
   if (!list.length) return '';
-  return '<div class="cards">' + list.map(p => `<article class="card">
-  <p class="eyebrow">${esc(p.kind)}${p.status ? ' · ' + esc(p.status) : ''}</p>
+  return '<div class="cards">' + list.map(p => `<article class="glass card">
+  <div class="chips"><span class="chip">${esc(p.kind)}</span>${p.status ? `<span class="chip live">${esc(p.status)}</span>` : ''}</div>
   <h3>${esc(p.title)}</h3>
   <p>${esc(p.summary)}</p>
-  ${(p.links || []).length ? `<div class="links">${p.links.map((l, i) => `<a${i === 0 ? ' class="btn"' : ''} href="${l.href}">${esc(l.label)}</a>`).join('')}</div>` : '<p class="meta">Write-up coming</p>'}
+  <div class="end">${(p.links || []).length ? p.links.map((l, i) => `<a${i === 0 ? ' class="btn"' : ''} href="${l.href}">${esc(l.label)}</a>`).join('') : '<span class="chip">Write-up coming</span>'}</div>
 </article>`).join('\n') + '</div>';
 }
+const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const inSection = (list, s) => list.filter(x => x.section === s);
 
 // ---------- pages ----------
 rmSync(OUT, { recursive: true, force: true });
@@ -156,20 +163,44 @@ mkdirSync(OUT, { recursive: true });
 if (existsSync('static')) cpSync('static', OUT, { recursive: true });
 writeFileSync(join(OUT, 'styles.css'), readFileSync('src/styles.css'));
 
+const featured = projects.find(p => p.section === 'home' && (p.links || []).length);
 write('index.html', layout({
   title: '', path: '/',
   description: 'Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.',
-  body: `<div class="wrap">
-<section class="hero">
-  <p class="eyebrow">R cubed</p>
-  <h1 class="equation" aria-label="Robert times Rachelle times River equals R cubed"><span class="r1">Robert</span><i>&times;</i><span>Rachelle</span><i>&times;</i><span class="r3">River</span><i>=</i><span>R<sup>3</sup></span></h1>
-  <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
+  body: `<section class="glass hero rise">
+  <div>
+    <h1>R cubed is <span class="grad">Robert, Rachelle and River.</span></h1>
+    <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
+    <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn clear" href="/home/">See the home side</a></div>
+  </div>
+  <div class="scene" aria-hidden="true"><div class="cube">
+    <div class="face f1"><b>R</b><span>Robert</span></div>
+    <div class="face f2"><b>R</b><span>Rachelle</span></div>
+    <div class="face f3"><b>R</b><span>River</span></div>
+    <div class="face f4"><b>R<sup>3</sup></b></div>
+    <div class="face f5"></div><div class="face f6"></div>
+  </div></div>
 </section>
-<section class="doors" aria-label="Sections">
-  <a class="door work" href="/work/"><p class="eyebrow">Weekdays</p><h2>At work</h2><p>Transit software, process fixes and notes from a City Transit division.</p><span class="go">Go to work &rarr;</span></a>
-  <a class="door home" href="/home/"><p class="eyebrow">Evenings and weekends</p><h2>At home</h2><p>Games, experiments and things made for River and the family. Start with the kart racer.</p><span class="go">Go home &rarr;</span></a>
-</section>
-<section class="block"><h2>Latest posts</h2>${postList(posts.slice(0, 5))}<p><a href="/blog/">All posts</a></p></section>
+<div class="bento">
+  <a class="glass tint tile work rise" style="--i:1" href="/work/">
+    <h2>At work</h2>
+    <p>Transit software, process fixes and notes from a City Transit division.</p>
+    <div class="end chips"><span class="chip work">${count(inSection(projects, 'work').length, 'project', 'projects')}</span><span class="chip work">${count(inSection(posts, 'work').length, 'post', 'posts')}</span></div>
+  </a>
+  <a class="glass tint tile home rise" style="--i:2" href="/home/">
+    <h2>At home</h2>
+    <p>Games, experiments and things made for River and the family.</p>
+    <div class="end chips"><span class="chip home">${count(inSection(projects, 'home').length, 'game', 'games')}</span><span class="chip home">${count(inSection(posts, 'home').length, 'post', 'posts')}</span></div>
+  </a>
+  ${featured ? `<article class="glass tile home span-2 rise" style="--i:3">
+    <div class="chips"><span class="chip home">Play now</span></div>
+    <h2>${esc(featured.title)}</h2>
+    <p>${esc(featured.summary)}</p>
+    <div class="end">${featured.links.map((l, i) => `<a class="btn${i ? ' clear' : ''}" href="${l.href}">${esc(l.label)}</a>`).join('')}</div>
+  </article>` : ''}
+  <section class="tile ${featured ? 'span-4' : 'span-6'} rise" style="--i:4;padding:0" aria-label="Latest posts">
+    ${postList(posts.slice(0, 4))}
+  </section>
 </div>`,
 }));
 
@@ -192,38 +223,39 @@ for (const [key, s] of Object.entries(SECTIONS)) {
   const c = sectionCopy[key], cards = projectCards(key);
   write(`${key}/index.html`, layout({
     title: s.label, path: s.path, section: key, nav: key, description: c.description,
-    body: `<div class="band"><div class="wrap"><p class="eyebrow">Section</p><h1>${s.label}</h1><p>${c.intro}</p></div></div>
-<div class="wrap">
-<section class="block"><h2>${c.projectsTitle}</h2>${cards || `<p class="empty">${c.projectsEmpty}</p>`}${cards && c.projectsNote ? `<p class="note">${c.projectsNote}</p>` : ''}</section>
-<section class="block" id="posts"><h2>Posts</h2>${postList(posts.filter(p => p.section === key), false)}</section>
-${key === 'work' ? '<p class="note">Everything in this section is my own account of my work. None of it is an official statement from my employer.</p>' : ''}
-</div>`,
+    body: `<section class="glass tint head rise"><h1>${s.label}</h1><p>${c.intro}</p></section>
+<h2 class="h2">${c.projectsTitle}</h2>
+${cards || `<div class="glass"><p class="empty">${c.projectsEmpty}</p></div>`}
+${cards && c.projectsNote ? `<p class="note">${c.projectsNote}</p>` : ''}
+<h2 class="h2" id="posts">Posts</h2>
+${postList(inSection(posts, key), false)}
+${key === 'work' ? '<p class="note">Everything in this section is my own account of my work. None of it is an official statement from my employer.</p>' : ''}`,
   }));
 }
 
 write('blog/index.html', layout({
   title: 'Blog', path: '/blog/', nav: 'blog', description: 'Every post from both sides of the site, newest first.',
-  body: `<div class="band"><div class="wrap"><p class="eyebrow">${posts.length} ${posts.length === 1 ? 'post' : 'posts'}</p><h1>Blog</h1><p>Every post from both sides of the site, newest first. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></div></div>
-<div class="wrap"><section class="block">${postList(posts)}</section></div>`,
+  body: `<section class="glass head rise"><h1>Blog</h1><p>Every post from both sides of the site, newest first. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
+${postList(posts)}`,
 }));
 
 for (const p of posts) {
   write(`blog/${p.slug}/index.html`, layout({
     title: p.title, path: p.url, section: p.section, nav: 'blog', description: p.summary,
-    body: `<div class="wrap"><article class="post">
-<header><p class="meta"><time datetime="${p.date}">${longDate(p.date)}</time> &nbsp; ${chip(p.section)}</p><h1>${esc(p.title)}</h1></header>
+    body: `<article class="glass strong post rise">
+<header><p class="when"><time datetime="${p.date}">${longDate(p.date)}</time>${chip(p.section)}</p><h1>${esc(p.title)}</h1></header>
 <div class="prose">
 ${p.html}
 </div>
-<p class="back"><a href="${SECTIONS[p.section].path}">&larr; More from ${SECTIONS[p.section].label.toLowerCase()}</a></p>
-</article></div>`,
+<p><a class="btn clear" href="${SECTIONS[p.section].path}">More from ${SECTIONS[p.section].label.toLowerCase()}</a></p>
+</article>`,
   }));
 }
 
 write('about/index.html', layout({
   title: 'About', path: '/about/', nav: 'about', description: 'Who is behind r3ai.dev and what the name means.',
-  body: `<div class="band"><div class="wrap"><p class="eyebrow">About</p><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></div></div>
-<div class="wrap"><div class="post"><div class="prose">
+  body: `<section class="glass head rise"><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></section>
+<div class="glass strong post"><div class="prose">
 <h2>What this site is</h2>
 <p>I'm a self-taught web developer who manages a City Transit division. At work I build the tools the job needs. At home I build things for my family, like a kart racing game with sloths in it.</p>
 <p>Most of what you'll find here was built with AI doing a large share of the typing. I write about what worked, what didn't and what I'd do differently.</p>
@@ -237,12 +269,12 @@ write('about/index.html', layout({
 <p>The site is plain HTML produced by a small build script, with posts written as text files. It is hosted on Cloudflare and the source lives on <a href="https://github.com/rngoodson1751-droid/R3ai.dev">GitHub</a>.</p>
 <h2>The fine print</h2>
 <p>This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
-</div></div></div>`,
+</div></div>`,
 }));
 
 write('404.html', layout({
   title: 'Page not found', path: '/404.html', description: 'That page does not exist.',
-  body: `<div class="band"><div class="wrap"><p class="eyebrow">Error 404</p><h1>Wrong stop</h1><p>There's no page at this address. Try the <a href="/">home page</a> or the <a href="/blog/">blog</a>.</p></div></div>`,
+  body: `<section class="glass head rise"><h1>Wrong stop</h1><p>There's no page at this address. Try the <a href="/">home page</a> or the <a href="/blog/">blog</a>.</p></section>`,
 }));
 
 // ---------- feed, sitemap, robots ----------
