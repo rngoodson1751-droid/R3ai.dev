@@ -82,7 +82,7 @@ function loadPosts() {
     if (!SECTIONS[meta.section]) throw new Error(`${f}: section must be "work" or "home"`);
     const slug = f.replace(/\.md$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
     return { ...meta, slug, url: `/blog/${slug}/`, html: markdown(m[2]) };
-  }).filter(p => p.draft !== 'true').sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.title.localeCompare(b.title)));
+  }).filter(p => p.draft !== 'true').sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (Number(a.order) || 50) - (Number(b.order) || 50) || a.title.localeCompare(b.title)));
 }
 const posts = loadPosts();
 const projects = JSON.parse(readFileSync('content/projects.json', 'utf8'));
@@ -104,8 +104,8 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE.url}${path}">
-<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name}" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
@@ -150,7 +150,7 @@ function projectCards(section) {
   <div class="chips"><span class="chip">${esc(p.kind)}</span>${p.status ? `<span class="chip live">${esc(p.status)}</span>` : ''}</div>
   <h3>${esc(p.title)}</h3>
   <p>${esc(p.summary)}</p>
-  <div class="end">${(p.links || []).length ? p.links.map((l, i) => `<a${i === 0 ? ' class="btn"' : ''} href="${l.href}">${esc(l.label)}</a>`).join('') : '<span class="chip">Write-up coming</span>'}</div>
+  <div class="end">${(p.links || []).length ? p.links.map((l, i) => `<a${i === 0 ? ` class="btn${l.href.startsWith('/games/') ? '' : ' glass'}"` : ''} href="${l.href}">${esc(l.label)}</a>`).join('') : '<span class="chip">Write-up coming</span>'}</div>
 </article>`).join('\n') + '</div>';
 }
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
@@ -170,7 +170,7 @@ write('index.html', layout({
   body: `<section class="hero">
   <div>
     <h1>R cubed is Robert, Rachelle and River.</h1>
-    <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
+    <p>I'm Robert. I build software with AI: tools for public transit at work, and games, boats and go-karts for my family at home. This site keeps both in one place.</p>
     <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn glass" href="/home/">See the home side</a></div>
   </div>
   <div class="scene" aria-hidden="true"><div class="cube">
@@ -189,8 +189,8 @@ write('index.html', layout({
   </a>
   <a class="sheet tile reveal" href="/home/">
     <h2 style="view-transition-name:title-home">At home</h2>
-    <p>Games, experiments and things made for River and the family.</p>
-    <div class="end chips"><span class="chip">${count(inSection(projects, 'home').length, 'game', 'games')}</span><span class="chip">${count(inSection(posts, 'home').length, 'post', 'posts')}</span></div>
+    <p>Games, sailing, a go-kart with wings and things made for River.</p>
+    <div class="end chips"><span class="chip">${count(inSection(projects, 'home').length, 'project', 'projects')}</span><span class="chip">${count(inSection(posts, 'home').length, 'post', 'posts')}</span></div>
   </a>
   ${featured ? `<article class="sheet tile span-2 reveal">
     <div class="chips"><span class="chip live">Play now</span></div>
@@ -206,17 +206,16 @@ write('index.html', layout({
 
 const sectionCopy = {
   work: {
-    intro: 'I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. This section collects those tools and what I learn building them.',
+    intro: 'I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. Each project here has a write-up covering the problem, the tool and what I learned.',
     projectsEmpty: 'Project write-ups are on the way.',
-    projectsNote: 'These are short descriptions for now. Full write-ups will cover the problem, the tool and what changed.',
     projectsTitle: 'Projects',
     description: 'Transit software and notes from a City Transit division.',
   },
   home: {
-    intro: 'What I build away from work, mostly for River and the family: games, experiments and whatever we think up next.',
+    intro: 'What I do away from work: games for River, sailboat racing, a go-kart that thinks it is a Formula 1 car and whatever we think up next.',
     projectsEmpty: 'Nothing here yet.',
     projectsTitle: 'Games and projects',
-    description: 'Games, experiments and family projects built with AI.',
+    description: 'Games, sailing, go-karts and family projects built with AI.',
   },
 };
 for (const [key, s] of Object.entries(SECTIONS)) {
@@ -257,12 +256,13 @@ write('about/index.html', layout({
   body: `<section class="head"><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></section>
 <div class="sheet strong post"><div class="prose">
 <h2>What this site is</h2>
-<p>I'm a self-taught web developer who manages a City Transit division. At work I build the tools the job needs. At home I build things for my family, like a kart racing game with sloths in it.</p>
+<p>I'm a self-taught web developer who manages a City Transit division. At work I build the tools the job needs. At home I build things for my family, like a rocket game for River and a kart racing game with sloths in it.</p>
+<p>I'm also a sailor. I race a Sunfish, sail a Flying Scot, serve as the commodore of our local yacht club and teach its free learn-to-sail week every June. Blue and green are my colors, which is why the site looks like water.</p>
 <p>Most of what you'll find here was built with AI doing a large share of the typing. I write about what worked, what didn't and what I'd do differently.</p>
 <h2>How it's split</h2>
 <ul>
 <li><a href="/work/">At work</a> covers transit software and what I learn from running a City Transit division.</li>
-<li><a href="/home/">At home</a> covers games, experiments and family projects.</li>
+<li><a href="/home/">At home</a> covers games, sailing, the go-kart and family projects.</li>
 <li>The <a href="/blog/">blog</a> holds posts from both.</li>
 </ul>
 <h2>How it's built</h2>

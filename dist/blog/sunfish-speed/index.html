@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Making a Sunfish faster without breaking the rules · R3 AI</title>
+<meta name="description" content="My tuning notes for the Sunfish: the four sail controls, a few ideas I want to test, and the only class-legal way to rig a vang.">
+<link rel="canonical" href="https://r3ai.dev/blog/sunfish-speed/">
+<meta property="og:title" content="Making a Sunfish faster without breaking the rules">
+<meta property="og:description" content="My tuning notes for the Sunfish: the four sail controls, a few ideas I want to test, and the only class-legal way to rig a vang.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/sunfish-speed/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-sunfish-speed">Making a Sunfish faster without breaking the rules</h1></header>
+<div class="prose">
+<p>I was invited to sail in the Sunfish World Championship, and I want my boat to be as fast as the rules allow.</p>
+<p>The Sunfish is a one-design class. Everyone sails the same boat, and the rules stop you from buying speed. Whatever speed there is comes from preparation and from how you sail. So I sat down and built myself a full tuning guide, starting from Scott Kyle's well-known guide and everything else I could find.</p>
+<h3>Four controls do most of the work</h3>
+<p>A Sunfish has no standing rigging to adjust. Sail shape comes from four things.</p>
+<ul><li><strong>Halyard position.</strong> Where the halyard is tied on the upper spar sets how high the sail sits and how much power it has.</li><li><strong>Gooseneck position.</strong> Sliding the gooseneck along the boom moves the sail forward or back over the daggerboard. This is the main control for helm balance.</li><li><strong>Outhaul.</strong> Controls how full the bottom third of the sail is.</li><li><strong>Cunningham.</strong> Tightens the front edge and moves the deep part of the sail forward or back.</li></ul>
+<p>The simplest tip in the whole guide: mark the boom in one-inch steps where the gooseneck sits, so the setting is a glance and not a guess. As the wind builds, the gooseneck moves back. If the boat keeps trying to turn into the wind, it needs to go back further.</p>
+<h3>The sail is lopsided, and that's useful</h3>
+<p>The mast sits on one side of the sail. So the sail is flatter on port tack and fuller on starboard. In medium wind it barely matters. In light air, don't pull the sail in too tight on port. In heavy air, be ready to ease sooner on starboard.</p>
+<h3>Ideas I want to test</h3>
+<p>These aren't proven. They're experiments, to be tried one at a time against a tuning partner.</p>
+<ul><li>Slightly different cunningham settings on each tack to even out that lopsided sail.</li><li>Using the Jens rig in light air. It's normally a heavy-air trick to tame the sail, but it may also help the boat point.</li><li>Practicing puff anticipation as a drill. Easing the sail just before a puff hits keeps the boat flat. Easing after costs you seconds going sideways.</li></ul>
+<h3>The vang that isn't a vang</h3>
+<p>A vang holds the boom down. The Sunfish never came with one, and the class rules don't let you add hardware the builder didn't supply. A little block and tackle would be illegal.</p>
+<p>The halyard is already legal, though. After the sail is up, the leftover tail runs through the fairlead on the deck and loops around the gooseneck, then cleats off. That holds the gooseneck four to six inches above the deck and keeps the boom from lifting.</p>
+<p>I wanted more pull, and my first idea was extra wraps. Wraps only add friction. For real mechanical advantage you tie a fixed loop in the halyard tail and lead the line back through it. That gives a two-to-one purchase made of nothing but rope, which is the same trick the outhaul and cunningham already use. It's still only the halyard doing extra work, so nothing has been added to the boat.</p>
+<p>If you race, check the current class rules yourself, and ask your fleet measurer before you fasten anything new to the boom.</p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

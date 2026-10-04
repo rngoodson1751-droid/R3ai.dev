@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A dispatch board for when a driver calls in · R3 AI</title>
+<meta name="description" content="An eight-week driver rotation in a spreadsheet, plus a one-page board that works out who covers which route when someone calls in.">
+<link rel="canonical" href="https://r3ai.dev/blog/driver-dispatch-board/">
+<meta property="og:title" content="A dispatch board for when a driver calls in">
+<meta property="og:description" content="An eight-week driver rotation in a spreadsheet, plus a one-page board that works out who covers which route when someone calls in.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/driver-dispatch-board/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At work</span></p><h1 style="view-transition-name:post-driver-dispatch-board">A dispatch board for when a driver calls in</h1></header>
+<div class="prose">
+<p>The hardest part of scheduling a small bus system isn't the schedule. It's the early morning phone call when someone is out and every route still has to leave on time.</p>
+<h3>The problem</h3>
+<p>We run five routes with hourly trips from 5:45 in the morning to 5:45 in the evening, and nine drivers to cover them. On paper that works. In practice the plan changes the moment one person is out, and whoever is on the phone has to work out the new plan from memory.</p>
+<h3>What I built</h3>
+<p>Two pieces that share the same data.</p>
+<p>The first is a spreadsheet with an eight-week rotation. It has a read-me page, the driver roster, the daily schedule, the weekly rotation and a call-in quick lookup. Anyone can open it and see who drives what on any day.</p>
+<p>The second is the dispatch board. It's a single web page that opens in any browser, with nothing to install.</p>
+<ul><li>Pick the rotation week and the day.</li><li>Tap &quot;Called in&quot; next to anyone who is out.</li><li>The board reassigns their route from the extra board.</li><li>If the extra board is empty, it falls back to supervisors.</li><li>If nobody is left, it flags the route &quot;NO COVERAGE&quot; in a way you can't miss.</li></ul>
+<p>There's also a custom day mode for the days that fit no pattern. Every assignment becomes a dropdown, and the board warns you if you put the same person on two routes. One button resets the day and another prints it.</p>
+<h3>What I learned</h3>
+<p>The rules were already in people's heads. The work was getting them written down precisely enough for a computer to follow. Who covers first? Who covers next? What happens when nobody is left? Once those answers are on paper, the code is the easy part.</p>
+<p>I also learned to keep the spreadsheet. People trust a spreadsheet. The board sits on top of it instead of replacing it.</p>
+</div>
+<p><a class="btn glass" href="/work/">More from at work</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

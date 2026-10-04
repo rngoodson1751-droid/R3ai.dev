@@ -29,7 +29,7 @@
     g.style.setProperty('--my', (e.clientY - b.top) + 'px');
   }, { passive: true });
 
-  // ---------- silk: a slow shader behind the page ----------
+  // ---------- water: a slow blue and green shader behind the page ----------
   (function silk() {
     var c = document.getElementById('silk');
     if (!c) return;
@@ -37,7 +37,7 @@
     if (!gl) { c.remove(); return; }
     var vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
     var fs = [
-      'precision mediump float;uniform vec2 r;uniform float t;uniform vec2 m;uniform vec3 a;uniform vec3 b;uniform vec3 k;',
+      'precision mediump float;uniform vec2 r;uniform float t;uniform vec2 m;uniform vec3 a;uniform vec3 b;uniform vec3 k;uniform vec3 g;',
       'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
       'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}',
       'float f(vec2 p){float v=0.,s=.5;for(int i=0;i<4;i++){v+=s*n(p);p=p*2.03+vec2(3.1,1.7);s*=.5;}return v;}',
@@ -45,7 +45,7 @@
       'vec2 q=vec2(f(p+t*.022),f(p+vec2(5.2,1.3)-t*.018));',
       'vec2 w=vec2(f(p+2.6*q+vec2(1.7,9.2)+t*.014),f(p+2.6*q+vec2(8.3,2.8)-t*.012));',
       'float s=f(p+3.*w);float fold=smoothstep(.32,.78,s);',
-      'vec3 col=mix(a,b,fold);col=mix(col,k,smoothstep(.5,.95,length(w))*.1);',
+      'vec3 col=mix(a,b,fold);col=mix(col,k,smoothstep(.45,.95,length(w))*.34);col=mix(col,g,smoothstep(.42,.78,q.y)*.3);',
       'col+=(.5-abs(fract(s*5.)-.5))*.012;',
       'gl_FragColor=vec4(col,1.);}'
     ].join('\n');
@@ -57,11 +57,11 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    var U = {}; ['r', 't', 'm', 'a', 'b', 'k'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+    var U = {}; ['r', 't', 'm', 'a', 'b', 'k', 'g'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
     var mouse = [.5, .5], aim = [.5, .5];
     function colors() {
-      if (isDark()) { gl.uniform3f(U.a, .092, .088, .08); gl.uniform3f(U.b, .15, .142, .128); gl.uniform3f(U.k, .88, .54, .4); }
-      else { gl.uniform3f(U.a, .972, .962, .935); gl.uniform3f(U.b, .9, .878, .828); gl.uniform3f(U.k, .73, .33, .18); }
+      if (isDark()) { gl.uniform3f(U.a, .022, .078, .108); gl.uniform3f(U.b, .036, .145, .175); gl.uniform3f(U.k, .07, .34, .66); gl.uniform3f(U.g, .05, .5, .4); }
+      else { gl.uniform3f(U.a, .93, .972, .978); gl.uniform3f(U.b, .8, .915, .94); gl.uniform3f(U.k, .36, .66, .94); gl.uniform3f(U.g, .42, .84, .7); }
     }
     function size() {
       var s = Math.min(window.devicePixelRatio || 1, 2) * .5;

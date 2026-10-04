@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How to score a race when the boats don't match · R3 AI</title>
+<meta name="description" content="Club races put fast boats and slow boats on the same course. The Portsmouth yardstick is the simple math that makes it fair.">
+<link rel="canonical" href="https://r3ai.dev/blog/portsmouth-scoring/">
+<meta property="og:title" content="How to score a race when the boats don't match">
+<meta property="og:description" content="Club races put fast boats and slow boats on the same course. The Portsmouth yardstick is the simple math that makes it fair.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/portsmouth-scoring/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-portsmouth-scoring">How to score a race when the boats don't match</h1></header>
+<div class="prose">
+<p>At a small club you race whatever shows up. I sail a Flying Scot, which is a nineteen foot boat with a crew. Next to me on the start line there might be a Sunfish with one person on it. The Scot is faster, so the first boat across the line tells you very little about who sailed best.</p>
+<h3>The yardstick</h3>
+<p>The Portsmouth yardstick fixes this with one number per type of boat. A slower boat gets a higher number. After the race you take each boat's time and correct it.</p>
+<p>Corrected time is the elapsed time, multiplied by 100, divided by the boat's Portsmouth number.</p>
+<p>The lowest corrected time wins.</p>
+<h3>A made-up example</h3>
+<p>Say a Flying Scot carries a number of about 90 and a Sunfish about 100.</p>
+<ul><li>The Scot finishes in 45 minutes. 45 times 100, divided by 90, is 50 minutes.</li><li>The Sunfish finishes in 49 minutes. 49 times 100, divided by 100, is 49 minutes.</li></ul>
+<p>The Sunfish crossed the line four minutes later and won by a minute. The number says a well-sailed Sunfish should take about eleven percent longer than a well-sailed Scot. This Sunfish took less than that, so it sailed the better race.</p>
+<h3>What it's like in practice</h3>
+<p>I scored one of our club races this way, with some help from Claude. I finished third on corrected time. I mention that only to show the math doesn't play favorites with whoever is running it.</p>
+<h3>What the number can't do</h3>
+<p>The yardstick assumes average conditions. In very light wind or a real blow, some boats do better than their number says. There are wind-adjusted versions of the numbers for that. For a weeknight club race, the plain number is close enough and nobody has to argue past dinner.</p>
+<h3>Why I like it</h3>
+<p>It means anyone can race. You don't need the same boat as everyone else. You need a boat, a start line and somebody willing to do a little division afterward.</p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

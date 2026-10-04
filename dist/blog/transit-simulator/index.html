@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A driving game set on our real bus routes · R3 AI</title>
+<meta name="description" content="A 3D driving game in the browser built from real route data, real streets and about 40,000 real building footprints. It started as a trolley simulator and kept growing.">
+<link rel="canonical" href="https://r3ai.dev/blog/transit-simulator/">
+<meta property="og:title" content="A driving game set on our real bus routes">
+<meta property="og:description" content="A 3D driving game in the browser built from real route data, real streets and about 40,000 real building footprints. It started as a trolley simulator and kept growing.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/transit-simulator/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At work</span></p><h1 style="view-transition-name:post-transit-simulator">A driving game set on our real bus routes</h1></header>
+<div class="prose">
+<p>This started as a trolley simulator and got out of hand in the best way.</p>
+<h3>Real data, not a made-up town</h3>
+<p>The routes and stops come from the same schedule data we publish for trip-planning apps. The streets and about 40,000 building footprints come from the City's GIS data and from public building datasets. So when you drive the game, the turns are the real turns and the stops are where the stops are.</p>
+<p>It runs in a web browser, built with Three.js. You can drive the trolley or a 35 foot Gillig bus, which is the bus you'd see on the street. The handling comes from real vehicle specs, so the bus feels like a bus. That means slowly, and with respect for corners.</p>
+<h3>What's in it</h3>
+<ul><li>Xbox controller support, and two-player split screen.</li><li>An in-game radio.</li><li>A free drive mode with pickups that only make sense in Louisiana: hot sauce rockets, blue crabs, crawfish and a shield made of Mardi Gras beads.</li><li>An on-foot mode, so you can step off and walk around.</li></ul>
+<h3>And then Formula 1 showed up</h3>
+<p>My son loves F1, so there's now a Grand Prix mode. It's a five-lap street circuit along the lakefront in an F1-style car. It has the five-light start, a racing line you can switch on, a pause map and a podium at the end. Nobody asked for this. I regret nothing.</p>
+<h3>Why a transit manager is building a video game</h3>
+<p>Partly because it's fun. Partly because a game is the most approachable version of a route map there is. A kid who has driven a route in a game knows where it goes.</p>
+<h3>What's next</h3>
+<p>I plan to film the real routes with a 360 degree camera as reference for the next round of work. It's still in progress, and I'll post it here when it's ready for other people to drive.</p>
+</div>
+<p><a class="btn glass" href="/work/">More from at work</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

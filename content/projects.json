@@ -2,46 +2,88 @@
   {
     "kind": "Scheduling",
     "title": "Driver scheduling system",
-    "summary": "A scheduling system for bus operators, with a dispatch board that runs in the browser.",
-    "section": "work"
+    "summary": "An eight-week driver rotation and a dispatch board that works out coverage when someone calls in.",
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/driver-dispatch-board/"
+      }
+    ]
   },
   {
     "kind": "Paratransit",
     "title": "Paratransit scheduling app",
     "summary": "A trip scheduling app for paratransit service, built with Node.js, Express and SQLite.",
-    "section": "work"
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/paratransit-scheduling-app/"
+      }
+    ]
   },
   {
     "kind": "Open data",
     "title": "Live vehicle positions feed",
     "summary": "A real-time feed of bus locations in GTFS Realtime, the standard format that trip-planning apps read.",
-    "section": "work"
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/live-bus-positions/"
+      }
+    ]
   },
   {
     "kind": "Hardware",
     "status": "In progress",
     "title": "Real-time bus stop display",
-    "summary": "A prototype arrival display for bus stops, running on a CrowPanel ESP32-S3 board.",
-    "section": "work"
+    "summary": "A battery-powered e-paper countdown sign for bus stops, prototyped on a $32 CrowPanel ESP32-S3 board.",
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/bus-stop-display/"
+      }
+    ]
   },
   {
     "kind": "Procurement",
     "title": "Procurement determination tool",
     "summary": "A step-by-step wizard that asks about a purchase and produces the price-reasonableness and small-purchase forms.",
-    "section": "work"
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/procurement-wizard/"
+      }
+    ]
   },
   {
     "kind": "Community",
     "title": "Bus coloring and story app",
-    "summary": "A coloring and story app made for riders as community outreach.",
-    "section": "work"
+    "summary": "A printable coloring page and a story app that makes a kid's own hand-colored bus the hero.",
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/bus-coloring-story-app/"
+      }
+    ]
   },
   {
     "kind": "Game",
     "status": "In progress",
     "title": "LC Transit Simulator",
-    "summary": "A 3D bus-driving game that runs in the browser, set on the real routes.",
-    "section": "work"
+    "summary": "A 3D driving game in the browser, built from real routes, real streets and about 40,000 real building footprints.",
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/transit-simulator/"
+      }
+    ]
   },
   {
     "section": "home",
@@ -56,6 +98,88 @@
       {
         "label": "Read the build notes",
         "href": "/blog/sloth-rocket-grand-prix/"
+      }
+    ]
+  },
+  {
+    "section": "home",
+    "kind": "Game",
+    "title": "River's Rocket Works",
+    "summary": "Design a rocket and fly twelve missions, from a first launch to a wormhole. It reads the missions out loud, so a kid can play it.",
+    "links": [
+      {
+        "label": "Play",
+        "href": "/games/rivers-rocket-works/"
+      },
+      {
+        "label": "Read about it",
+        "href": "/blog/rivers-rocket-works/"
+      }
+    ]
+  },
+  {
+    "section": "home",
+    "kind": "Game",
+    "title": "Hand-tracking sailing simulator",
+    "summary": "Sail a Sunfish, an Optimist or a pirate ship by moving your hands in front of the webcam.",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/sailing-simulator/"
+      }
+    ]
+  },
+  {
+    "section": "home",
+    "kind": "Sailing",
+    "title": "Sunfish racing notes",
+    "summary": "Tuning notes for the Sunfish, the only class-legal vang, and how mixed fleets get scored.",
+    "links": [
+      {
+        "label": "Read the tuning notes",
+        "href": "/blog/sunfish-speed/"
+      },
+      {
+        "label": "How scoring works",
+        "href": "/blog/portsmouth-scoring/"
+      }
+    ]
+  },
+  {
+    "section": "home",
+    "kind": "Sailing",
+    "title": "Learn-to-sail week",
+    "summary": "A free week of sailing lessons on Sunfish that our yacht club runs every June.",
+    "links": [
+      {
+        "label": "Read about the week",
+        "href": "/blog/learn-to-sail-week/"
+      }
+    ]
+  },
+  {
+    "section": "home",
+    "kind": "Garage",
+    "status": "Build plan",
+    "title": "F1 wings for the go-kart",
+    "summary": "A front wing, a two-element rear wing and sidepods for a two-seat Thunder Kart, from plywood and PVC pipe.",
+    "links": [
+      {
+        "label": "Read the build plan",
+        "href": "/blog/f1-wings-for-the-go-kart/"
+      }
+    ]
+  },
+  {
+    "section": "home",
+    "kind": "Books",
+    "status": "In progress",
+    "title": "Comics and books for River",
+    "summary": "Two picture books about our family and a three-part space comic built on real physics.",
+    "links": [
+      {
+        "label": "Read about them",
+        "href": "/blog/comics-and-books-for-river/"
       }
     ]
   }

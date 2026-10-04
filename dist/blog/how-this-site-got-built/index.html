@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How this site got built · R3 AI</title>
+<meta name="description" content="A domain, a free host, no framework and four rounds of me saying &quot;I don't like it yet.&quot; Notes on building r3ai.dev with Claude.">
+<link rel="canonical" href="https://r3ai.dev/blog/how-this-site-got-built/">
+<meta property="og:title" content="How this site got built">
+<meta property="og:description" content="A domain, a free host, no framework and four rounds of me saying &quot;I don't like it yet.&quot; Notes on building r3ai.dev with Claude.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/how-this-site-got-built/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-how-this-site-got-built">How this site got built</h1></header>
+<div class="prose">
+<p>This site exists because I asked a question about a go-kart game.</p>
+<p>I'd asked Claude to build a kart racer for River. Then I asked where I could put it so we could play it on the Xbox. A few questions later I owned a domain.</p>
+<h3>The name</h3>
+<p>R cubed is Robert, Rachelle and River. I wanted something short that said both &quot;family&quot; and &quot;AI&quot;. <code>r3ai.dev</code> was available and cheap, so that was that.</p>
+<h3>How it's put together</h3>
+<ul><li>The domain is registered with Cloudflare, and Cloudflare hosts the site.</li><li>The source lives on GitHub. When a change is pushed there, the live site updates about a minute later.</li><li>There's no framework. A small build script turns plain text files into pages. A post is a text file with a title at the top.</li><li>The games are single HTML files that sit beside the pages.</li></ul>
+<p>I described what I wanted in plain language. Claude wrote the code, tested it and published it.</p>
+<h3>Four rounds of design</h3>
+<p>The first version was plain, and I said so. The second was full glass with every color at once, and I didn't like that either. The third was calm and warm, and then I second-guessed it. The fourth is this one: blues and greens, the colors I keep coming back to, with glass you can see the water through.</p>
+<p>I'm telling you this because it's the real process. You don't need to know what you want up front. You need to know what you don't like when you see it, and be willing to say so.</p>
+<h3>The showing off</h3>
+<p>A few things here are newer than they need to be.</p>
+<ul><li>The background is a small shader that moves like slow water.</li><li>The navigation bar bends what's behind it, like real glass, in browsers that support it.</li><li>The cube on the home page spins when you drag it.</li><li>Page titles slide into place when you move between pages.</li></ul>
+<p>Everything still works without them.</p>
+<h3>The one thing that went wrong</h3>
+<p>The site went live and I couldn't open it. My phone could. My computer couldn't. The culprit was my home router, which had looked for the site before it existed and kept insisting it still didn't. It caught up on its own.</p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

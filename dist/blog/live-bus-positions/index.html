@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Putting our buses on the map, live · R3 AI</title>
+<meta name="description" content="How I turned the GPS units already on our buses into a GTFS Realtime feed, and a live map for the public.">
+<link rel="canonical" href="https://r3ai.dev/blog/live-bus-positions/">
+<meta property="og:title" content="Putting our buses on the map, live">
+<meta property="og:description" content="How I turned the GPS units already on our buses into a GTFS Realtime feed, and a live map for the public.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/live-bus-positions/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At work</span></p><h1 style="view-transition-name:post-live-bus-positions">Putting our buses on the map, live</h1></header>
+<div class="prose">
+<p>Our buses already had GPS units. The locations just weren't going anywhere a rider could see.</p>
+<h3>The format that apps already read</h3>
+<p>Trip-planning apps don't want a custom feed. They want GTFS Realtime, an open standard for vehicle positions and arrival predictions. If you publish in that format, any app that knows the standard can read your buses.</p>
+<p>So the job was translation. Take the GPS data and publish it as GTFS Realtime. I wrote that in Node.js with the standard <code>gtfs-realtime-bindings</code> library, which handles the compact binary format the standard uses.</p>
+<h3>The hard part was not the map</h3>
+<p>Getting a dot on a map was the easy part. The hard part was trip matching.</p>
+<p>The GPS knows where bus 12 is. It doesn't know that bus 12 is currently running the 9:45 trip on a particular route. The standard wants the trip, because that's how an app connects a moving dot to the schedule a rider is looking at. Working out which scheduled trip each bus is on, from only its position and the time, took most of the effort.</p>
+<h3>What the validator taught me</h3>
+<p>I submitted the feed to Google. Their validator is strict, and it sent back errors I had to learn to read. One meant it couldn't fetch the feed at all. Others meant my predictions had a bus arriving or leaving a stop earlier than made sense. Each fix made the feed more honest.</p>
+<h3>The live map</h3>
+<p>The second piece is a public map page. It uses Leaflet with OpenStreetMap tiles and refreshes every 15 seconds. It was approved for the City's website. I styled it in the same blue and green glass look this site uses, because apparently I have a type.</p>
+<h3>If you run a small system</h3>
+<p>You may already own the data. The work is in the translation, and the standard is free.</p>
+</div>
+<p><a class="btn glass" href="/work/">More from at work</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

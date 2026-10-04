@@ -1,23 +1,27 @@
-/* r3ai.dev, calm glass edition.
-   Plan: one warm, quiet palette (ivory, ink, a single clay accent) and a serif headline voice.
-   Content sits directly on a slow, silk-like shader background. Only the floating controls
-   (top capsule, phone tab bar, buttons) are liquid glass, the way iOS keeps glass for navigation.
-   The one showpiece is the clear glass cube of three R's, which you can spin by hand.
+/* r3ai.dev, clear water edition.
+   Plan: blues and greens, the colours of the lake I sail on, over a slow shader that moves like water.
+   Surfaces stay mostly transparent so the water shows through. Blue and green meet in one gradient
+   (the "tide") that is used for the primary button, the nav pill and small marks, and nowhere else.
+   Only the floating controls are liquid glass. The showpiece is the clear cube of three R's.
    Type: Newsreader for headings, Geist for reading. Content is left aligned. */
 @view-transition { navigation: auto; }
 
 :root {
   color-scheme: light dark;
-  --ground: light-dark(#f3f0e8, #1a1917);
-  --ink: light-dark(#1c1b19, #f1ede4);
-  --soft: light-dark(#5d594f, #aaa497);
-  --accent: light-dark(#b9552f, #e08a66);
-  --surface: light-dark(rgb(255 255 255 / .46), rgb(255 255 255 / .045));
-  --surface-strong: light-dark(rgb(255 255 255 / .74), rgb(34 32 29 / .82));
-  --hair: light-dark(rgb(28 27 25 / .1), rgb(255 255 255 / .1));
-  --edge: light-dark(rgb(255 255 255 / .95), rgb(255 255 255 / .2));
-  --glass: light-dark(rgb(255 255 255 / .38), rgb(60 57 52 / .38));
-  --shade: light-dark(rgb(60 45 30 / .22), rgb(0 0 0 / .6));
+  --ground: light-dark(#e9f4f5, #06161f);
+  --ink: light-dark(#0a2230, #e6f3f3);
+  --soft: light-dark(#3f5a66, #9ab5bc);
+  --blue: light-dark(#0b6cc4, #63b8ff);
+  --green: light-dark(#0a7f66, #52d9ad);
+  --accent: var(--blue);
+  --tide: linear-gradient(115deg, var(--blue), var(--green));
+  --on-tide: light-dark(#ffffff, #04202a);
+  --surface: light-dark(rgb(255 255 255 / .3), rgb(150 225 235 / .055));
+  --surface-strong: light-dark(rgb(248 253 254 / .6), rgb(8 32 42 / .58));
+  --hair: light-dark(rgb(10 70 90 / .14), rgb(160 230 240 / .15));
+  --edge: light-dark(rgb(255 255 255 / .9), rgb(190 240 250 / .22));
+  --glass: light-dark(rgb(255 255 255 / .28), rgb(40 95 110 / .28));
+  --shade: light-dark(rgb(10 70 100 / .26), rgb(0 0 0 / .6));
   --display: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --wrap: 68rem;
@@ -41,7 +45,7 @@ body {
 #silk { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; pointer-events: none; }
 
 img { max-width: 100%; height: auto; }
-a { color: inherit; text-decoration-color: color-mix(in oklab, var(--accent) 75%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+a { color: inherit; text-decoration-color: color-mix(in oklab, var(--green) 80%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
 h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -0.02em; font-optical-sizing: auto; }
@@ -59,9 +63,9 @@ p { margin: 0; text-wrap: pretty; }
   border-radius: 999px;
   box-shadow:
     inset 0 1px 0 light-dark(rgb(255 255 255 / .95), rgb(255 255 255 / .22)),
-    inset 0 -1px 1px light-dark(rgb(60 45 30 / .1), rgb(0 0 0 / .4)),
+    inset 0 -1px 1px light-dark(rgb(10 70 100 / .1), rgb(0 0 0 / .4)),
     0 14px 34px -18px var(--shade),
-    0 2px 6px -2px light-dark(rgb(60 45 30 / .12), rgb(0 0 0 / .5));
+    0 2px 6px -2px light-dark(rgb(10 70 100 / .12), rgb(0 0 0 / .5));
 }
 /* a highlight that follows the pointer across the glass */
 .glass::after {
@@ -94,19 +98,19 @@ p { margin: 0; text-wrap: pretty; }
   padding: .32rem .36rem .32rem 1.05rem;
   view-transition-name: bar;
 }
-.bar, .tabs { background: light-dark(rgb(250 248 243 / .74), rgb(40 38 34 / .74)); }
+.bar, .tabs { background: light-dark(rgb(240 250 252 / .62), rgb(9 36 47 / .62)); }
 .mark { font: 600 1.35rem/1 var(--display); text-decoration: none; margin-right: .5rem; letter-spacing: -.02em; }
-.mark sup { font-size: .58em; color: var(--accent); margin-left: .04em; }
+.mark sup { font-size: .58em; color: var(--green); margin-left: .04em; }
 .links, .tabs { position: relative; }
 .links { display: flex; gap: .1rem; }
 .links a, .tabs a { position: relative; z-index: 1; text-decoration: none; font-weight: 500; font-size: .98rem; padding: .48rem .95rem; border-radius: 999px; white-space: nowrap; transition: color .2s; }
 .links a:hover, .tabs a:hover { color: var(--ink); }
-.links a[aria-current="page"], .tabs a[aria-current="page"] { background: var(--ink); color: var(--ground); }
+.links a[aria-current="page"], .tabs a[aria-current="page"] { background: var(--tide); color: var(--on-tide); }
 /* where the browser can do it, the dark pill becomes a lens that slides to whatever you point at */
 @supports (anchor-name: --a) and (position-anchor: --a) {
   .links a[aria-current="page"], .tabs a[aria-current="page"] { background: none; anchor-name: --here; }
   .links:has(a:hover) a[aria-current="page"], .tabs:has(a:hover) a[aria-current="page"] { anchor-name: none; color: var(--ink); }
-  .links a:hover, .tabs a:hover { anchor-name: --here; color: var(--ground); }
+  .links a:hover, .tabs a:hover { anchor-name: --here; color: var(--on-tide); }
   .links::before, .tabs::before {
     content: "";
     position: absolute;
@@ -116,7 +120,7 @@ p { margin: 0; text-wrap: pretty; }
     top: anchor(top);
     bottom: anchor(bottom);
     border-radius: 999px;
-    background: var(--ink);
+    background: var(--tide);
     transition: left .34s cubic-bezier(.3, 1.3, .5, 1), right .34s cubic-bezier(.3, 1.3, .5, 1), top .34s, bottom .34s;
   }
   .links:not(:has(a[aria-current="page"], a:hover))::before, .tabs:not(:has(a[aria-current="page"], a:hover))::before { display: none; }
@@ -173,7 +177,7 @@ main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: cla
   border-radius: 15%;
   border: 1px solid light-dark(rgb(255 255 255 / .95), rgb(255 255 255 / .34));
   background:
-    linear-gradient(135deg, light-dark(rgb(255 255 255 / .62), rgb(255 255 255 / .16)), light-dark(rgb(255 255 255 / .1), rgb(255 255 255 / .02)) 55%, light-dark(rgb(185 85 47 / .16), rgb(224 138 102 / .16)));
+    linear-gradient(135deg, light-dark(rgb(255 255 255 / .55), rgb(255 255 255 / .14)), light-dark(rgb(11 108 196 / .12), rgb(99 184 255 / .1)) 52%, light-dark(rgb(10 127 102 / .26), rgb(82 217 173 / .22)));
   box-shadow: inset 0 0 calc(var(--s) * .2) light-dark(rgb(255 255 255 / .55), rgb(255 255 255 / .1)), inset 0 1.5px 0 light-dark(#fff, rgb(255 255 255 / .4));
   color: var(--ink);
   transform-style: preserve-3d;
@@ -182,19 +186,19 @@ main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: cla
 .face > * { backface-visibility: hidden; }
 .face b { font: 500 calc(var(--s) * .58)/.85 var(--display); letter-spacing: -.04em; }
 .face span { font: 500 calc(var(--s) * .085)/1 var(--body); color: var(--soft); margin-top: .5em; }
-.face sup { font-size: .5em; color: var(--accent); }
+.face sup { font-size: .5em; color: var(--green); }
 .f1 { --t: rotateY(0deg); } .f2 { --t: rotateY(90deg); } .f3 { --t: rotateY(180deg); } .f4 { --t: rotateY(-90deg); }
 .f5 { --t: rotateX(90deg); } .f6 { --t: rotateX(-90deg); }
 
 /* ---------- buttons, chips ---------- */
-.btn { display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; font-weight: 500; padding: .72rem 1.3rem; border-radius: 999px; background: var(--ink); color: var(--ground); border: 1px solid transparent; transition: scale .2s; }
-.btn:hover { color: var(--ground); scale: 1.03; }
+.btn { display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; font-weight: 500; padding: .72rem 1.3rem; border-radius: 999px; background: var(--tide); color: var(--on-tide); border: 1px solid transparent; box-shadow: 0 10px 24px -14px var(--blue); transition: scale .2s; }
+.btn:hover { color: var(--on-tide); scale: 1.03; }
 .btn:active { scale: .98; }
 .btn.glass { background: var(--glass); color: var(--ink); border-color: var(--edge); }
 .btn.glass:hover { color: var(--ink); }
 .chips { display: flex; gap: .4rem; flex-wrap: wrap; }
 .chip { display: inline-block; font-size: .82rem; font-weight: 500; line-height: 1; padding: .36rem .68rem; border-radius: 999px; border: 1px solid var(--hair); color: var(--soft); white-space: nowrap; }
-.chip.live { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 45%, transparent); }
+.chip.live { color: var(--green); border-color: color-mix(in oklab, var(--green) 50%, transparent); }
 
 /* ---------- quiet content surfaces ---------- */
 .sheet {
@@ -252,10 +256,10 @@ a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-stro
 .prose h2 { font-size: 1.7rem; margin-top: 1rem; }
 .prose h3 { font-size: 1.3rem; margin-top: .6rem; }
 .prose ul, .prose ol { margin: 0; padding-left: 1.3rem; display: grid; gap: .45rem; }
-.prose li::marker { color: var(--accent); }
-.prose blockquote { margin: 0; padding-left: 1rem; border-left: 3px solid var(--accent); color: var(--soft); font-family: var(--display); font-size: 1.2em; }
-.prose code { font: .88em ui-monospace, 'SFMono-Regular', Menlo, monospace; background: light-dark(rgb(28 27 25 / .06), rgb(255 255 255 / .09)); padding: .1em .4em; border-radius: 6px; }
-.prose pre { margin: 0; padding: 1rem; border-radius: 14px; background: light-dark(rgb(28 27 25 / .05), rgb(0 0 0 / .3)); overflow-x: auto; }
+.prose li::marker { color: var(--green); }
+.prose blockquote { margin: 0; padding-left: 1rem; border-left: 3px solid; border-image: linear-gradient(var(--blue), var(--green)) 1; color: var(--soft); font-family: var(--display); font-size: 1.2em; }
+.prose code { font: .88em ui-monospace, 'SFMono-Regular', Menlo, monospace; background: light-dark(rgb(10 70 90 / .08), rgb(255 255 255 / .09)); padding: .1em .4em; border-radius: 6px; }
+.prose pre { margin: 0; padding: 1rem; border-radius: 14px; background: light-dark(rgb(10 70 90 / .06), rgb(0 0 0 / .3)); overflow-x: auto; }
 .prose pre code { background: none; padding: 0; }
 .prose hr { border: 0; border-top: 1px solid var(--hair); width: 100%; }
 
