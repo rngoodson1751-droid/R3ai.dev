@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building games for my kid · R3 AI</title>
+<meta name="description" content="I am not a game developer. Here is how one request became a twelve-mission space game with our whole family in it, and what I learned about directing an AI.">
+<link rel="canonical" href="https://r3ai.dev/blog/building-games-for-my-kid/">
+<meta property="og:title" content="Building games for my kid">
+<meta property="og:description" content="I am not a game developer. Here is how one request became a twelve-mission space game with our whole family in it, and what I learned about directing an AI.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/building-games-for-my-kid/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-building-games-for-my-kid">Building games for my kid</h1></header>
+<div class="prose">
+<p>My son River loves rockets. I wanted to make him a game that knew his name.</p>
+<p><a href="/games/rivers-rocket-works/">Play River's Rocket Works</a>, or read <a href="/blog/rivers-rocket-works/">what is in it</a>. This post is about how it got made.</p>
+<h3>River's Rocket Works</h3>
+<p>I asked Claude for a rocket-building game in a browser, with two requirements: it had to call River by name, and it had to tell him he is a great rocket engineer.</p>
+<p>What came back is a 3D game in one file. You pick tanks, engines and boosters, read a flight forecast, and then fly: countdown, staging, orbit, landing, docking. A voice narrates. It works with a controller, a keyboard or a touch screen.</p>
+<p>Then I kept having ideas, and it grew from seven missions to twelve:</p>
+<ul><li>A Moon landing and a Mars rover delivery.</li><li>A rover race on Saturn's rings.</li><li>A storm rally on Jupiter, with a secret golden tornado.</li><li>A wormhole run through an asteroid field.</li><li>A race around the solar system starring the whole family.</li></ul>
+<p>In that last one River rides a star with a rainbow trail. Rachelle rides a unicorn. I drive a Viking ship pulled by two giant goats. Our white Lab, Justice Ruth Bader Ginsburg, competes as herself. I asked for a screen where you can pick any of us, so River does not always have to be River.</p>
+<p>The praise changes each time he finishes a mission: rocket builder, aerospace designer, mission commander.</p>
+<h3>What I learned about how it works</h3>
+<ul><li>I gave specific directions, one round at a time. &quot;Slow the ship to three quarters speed&quot; works better than &quot;make it easier.&quot;</li><li>Claude tested the game by playing it automatically from start to finish. Each time, it told me what it could not test: sound, a real controller and how it looks on a real screen. So I tested those.</li><li>One level I had named after a famous movie. Claude renamed it to avoid borrowing someone else's trademark, and kept my jokes.</li></ul>
+<h3>Sloth Rocket Grand Prix</h3>
+<p>The other game is on this site and you can <a href="/games/sloth-rocket-grand-prix/">play it now</a>. I wrote about it in <a href="/blog/sloth-rocket-grand-prix/">its own post</a>.</p>
+<h3>Where it falls short</h3>
+<p>The graphics are simple shapes, not artist-made models. And a game like this is never finished. There is always one more mission to add.</p>
+<h3>Try it</h3>
+<p>Ask your kid what the game should be. Then type exactly what they said.</p>
+<hr>
+<p><em>Part of the series <a href="/blog/ways-i-use-ai/">27 ways I actually use AI</a>. Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hobbies and volunteering: sailing scores and a club website · R3 AI</title>
+<meta name="description" content="I race small sailboats and help run a yacht club. AI now does the race arithmetic and some of the homework a volunteer board never has time for.">
+<link rel="canonical" href="https://r3ai.dev/blog/hobbies-and-volunteering/">
+<meta property="og:title" content="Hobbies and volunteering: sailing scores and a club website">
+<meta property="og:description" content="I race small sailboats and help run a yacht club. AI now does the race arithmetic and some of the homework a volunteer board never has time for.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/hobbies-and-volunteering/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-hobbies-and-volunteering">Hobbies and volunteering: sailing scores and a club website</h1></header>
+<div class="prose">
+<p>I sail, I teach a <a href="/blog/learn-to-sail-week/">free sailing class</a> every year, and I am the commodore of our local yacht club. Volunteer work is real work with no staff.</p>
+<h3>Scoring a race</h3>
+<p>When different kinds of boats race each other, a fast catamaran and a small single-sail dinghy cannot be compared by the clock alone. Each boat type has a handicap number. You take the elapsed time, multiply by 100 and divide by the boat's number to get a corrected time. I explain the math in <a href="/blog/portsmouth-scoring/">How to score a race when the boats don't match</a>.</p>
+<p>After a club race I gave Claude the elapsed times and boats. It looked up the handicap numbers, did the arithmetic and gave me standings.</p>
+<p>Then I started reading from the paper score sheet and the corrections began:</p>
+<ul><li>One boat had been sailed by one person and not two, which changes its number.</li><li>One boat was a different model from the one I had typed.</li><li>One elapsed time was off by two minutes. That one was mine.</li></ul>
+<p>Each time, Claude recalculated and reissued the standings. One boat was not on the standard list at all, so it worked out a number from a different rating system and said clearly that this was derived, not official.</p>
+<h3>A flyer for sailing lessons</h3>
+<p>Claude redesigned the flyer for my summer sailing class over several rounds. Along the way one line changed that should not have: whether life jackets are provided. That is not a design detail. You bring your own. Proofread the facts, not just the layout.</p>
+<h3>Homework for the club website</h3>
+<p>Our club website is old. Before proposing anything to the board, I asked for research on what similar clubs do. The findings:</p>
+<ul><li>One software platform is used by most of our peer clubs.</li><li>The website and the member portal are one decision, not two.</li><li>Our best benefit is barely mentioned anywhere: members can visit dozens of other clubs.</li></ul>
+<p>When the old site blocked Claude from reading it, it did not ask for a password. It told me how to make my own copy of the site and upload that.</p>
+<h3>Where it falls short</h3>
+<p>It cannot see the score sheet. Every error it fixed was one I had typed. Check the inputs.</p>
+<hr>
+<p><em>Part of the series <a href="/blog/ways-i-use-ai/">27 ways I actually use AI</a>. Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

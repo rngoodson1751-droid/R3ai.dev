@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Standing up a website in a weekend · R3 AI</title>
+<meta name="description" content="This site is brand new. Here is what I did, what the AI did, and why I could not load my own website the day it went live.">
+<link rel="canonical" href="https://r3ai.dev/blog/a-website-in-a-weekend/">
+<meta property="og:title" content="Standing up a website in a weekend">
+<meta property="og:description" content="This site is brand new. Here is what I did, what the AI did, and why I could not load my own website the day it went live.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/a-website-in-a-weekend/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-a-website-in-a-weekend">Standing up a website in a weekend</h1></header>
+<div class="prose">
+<p>You are reading the result of this one. The longer story is in <a href="/blog/how-this-site-got-built/">How this site got built</a>. This is the short version, with the lessons.</p>
+<h3>What I wanted</h3>
+<p>One site with two sides: what I build at work and what I build at home. A blog under both. A place to put my games. A name that had something to do with AI, on a domain that was cheap.</p>
+<h3>Picking the name</h3>
+<p>I liked &quot;R cubed&quot; for Robert, Rachelle and River. Claude checked which versions of the name were available across many domain endings in a batch, with prices. I picked r3ai.dev and registered it myself.</p>
+<h3>Building it</h3>
+<p>Claude built the whole site:</p>
+<ul><li>A home page, the two sections, a blog and an About page.</li><li>A small script that turns plain text files into finished pages, so adding a post means adding one text file.</li><li>A feed and a site map.</li></ul>
+<p>I created the hosting account, connected it and set up the place where the files live. Once those were connected, the site was live.</p>
+<h3>I did not like it</h3>
+<p>The first design was plain. I said so, and asked for something that would look current in 2027: glass effects and modern styling. It took four rounds to get to what you see. Saying &quot;I do not like this&quot; is allowed. It costs one message.</p>
+<h3>My own site would not load</h3>
+<p>Then I could not open the site on my computer at home. My phone could.</p>
+<p>Claude checked from my computer and found the cause. My home router had looked up the address before the site existed, been told &quot;no such site,&quot; and remembered that answer. The site was fine. My router was out of date.</p>
+<p>The fixes were to wait half an hour, check from my phone on cellular data, or unplug the router and plug it back in. I asked Claude to restart the router for me. It declined, because that meant entering the router's access code, and gave me the steps instead. In the end the router caught up on its own.</p>
+<h3>Where it falls short</h3>
+<p>I still had to make the accounts, pay and approve things. That is as it should be. And a site needs something worth reading, which no tool supplies.</p>
+<hr>
+<p><em>Part of the series <a href="/blog/ways-i-use-ai/">27 ways I actually use AI</a>. Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>
