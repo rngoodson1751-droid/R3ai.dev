@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A typo on the front of the bus, and no software to fix it · R3 AI</title>
+<meta name="description" content="One of our route signs had an extra L in it. The editing software was long gone. AI read the sign's raw file, found the two bad spots and swapped the letters without disturbing anything else.">
+<link rel="canonical" href="https://r3ai.dev/blog/a-typo-on-the-front-of-the-bus/">
+<meta property="og:title" content="A typo on the front of the bus, and no software to fix it">
+<meta property="og:description" content="One of our route signs had an extra L in it. The editing software was long gone. AI read the sign's raw file, found the two bad spots and swapped the letters without disturbing anything else.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://r3ai.dev/blog/a-typo-on-the-front-of-the-bus/">
+<meta property="og:site_name" content="R3 AI">
+<meta property="og:image" content="https://r3ai.dev/og/a-typo-on-the-front-of-the-bus.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At work</span><a class="chip" href="/blog/#using-ai">Using AI</a><a class="chip" href="/blog/#transit-tools">Transit tools</a></p><h1 style="view-transition-name:post-a-typo-on-the-front-of-the-bus">A typo on the front of the bus, and no software to fix it</h1></header>
+<div class="prose">
+<p>One of our routes ends at a local college. The lighted sign on the front of the bus spelled the college's name with two L's. It has one.</p>
+<p>It is a small thing. It is also on the front of a bus, in lights, all day.</p>
+<h3>Why it was not a five minute fix</h3>
+<p>The words on those signs live in a file inside a control box by the driver's seat. Someone builds that file with the manufacturer's software and loads it with a thumb drive. We did not have the software. The manufacturer's records showed our file was last updated in 2021.</p>
+<p>I gave Claude the operator's manual and asked how to fix the spelling. It walked me through the menus, then told me what I did not want to hear: the fix had to happen in the file, and the file needed the software.</p>
+<h3>The first answer was no</h3>
+<p>I asked whether Claude could just read and write that kind of file, or build me a small program that could.</p>
+<p>It said no. The manual did not describe how the file was laid out, and it was not willing to guess. Its reasoning was that a guess could produce a file that would not load, or one that loaded and broke the signs on buses that were in service. It told me to ask the manufacturer for the layout, or for a corrected file.</p>
+<p>It was not the answer I was after. It was the right one.</p>
+<h3>What the manufacturer said</h3>
+<p>I wrote to their support desk. The reply cleared up one thing and added another. Our control box did not use the kind of file the manual described. It used a different one. And if I wanted them to make the change, they would need to work up a quote.</p>
+<p>A quote, to remove one letter.</p>
+<h3>Getting the file out</h3>
+<p>Earlier I had asked Claude whether a thumb drive could pull the file off the box. The manual said it could. So I did. I came away with two files: the message file and a settings file.</p>
+<p>Now Claude had the real thing in front of it. That changed its answer.</p>
+<h3>What it found</h3>
+<p>The message file is not text. Open it in a text editor and it is mostly garbage, with route names showing through here and there. Claude read it as raw bytes, which is the only honest way to read a file like that.</p>
+<ul><li>The misspelled name appeared <strong>twice</strong>, and it gave me the exact position of each one.</li><li>It looked at the start and the end of the file for anything that looked like a check value.</li><li>It compared how the other route names were stored. Each name sat between marker bytes. Nothing stored how long the name was.</li></ul>
+<p>That last point decided the method. If the file had kept a length for each name, shortening one would have meant updating the length too, and maybe more. It did not.</p>
+<h3>The fix</h3>
+<p>The wrong spelling had seven letters. The right one has six. Claude did not delete a letter. It replaced the seven letters with the six correct ones <strong>plus a space</strong>.</p>
+<p>That kept every other byte in the file exactly where it had been. The file was 42,453 bytes before and 42,453 bytes after. Two words changed and nothing else did. A space on a sign made of lights is just lights that stay off.</p>
+<p>It handed me the corrected file and an untouched copy of the original, in case I needed to go back.</p>
+<p>I asked about the settings file. Claude read it and said to leave it alone. It held hardware settings like brightness, and no route names at all.</p>
+<h3>Where it falls short</h3>
+<ul><li><strong>It could not test the result.</strong> Claude never touched a bus. It told me to load the file on one bus, look at the sign, and only then do the rest of the fleet. That is the right order for any change like this.</li><li><strong>The manual was wrong for our box</strong>, and Claude's first set of steps came straight from the manual. The file type was wrong and so was the folder name the box looks for on the thumb drive. I knew the folder name only because I had just pulled the files off myself.</li><li><strong>The space is still a character.</strong> It is blank, but it is there. On a sign that centers its text, look and see that the name still sits where it should.</li><li><strong>This trick has limits.</strong> Swapping letters for the same number of letters is about the safest edit there is. Adding a route, or making a name longer, is a different job. That one needs the real software.</li></ul>
+<h3>What I take from this</h3>
+<p>The no and the yes came from the same place. Without the file, Claude would have been guessing, and it said so. With the file, it could look, and it told me what it found and why the change was safe.</p>
+<p>Keep the original. Change as little as possible. Test on one before you do ten.</p>
+<h3>Try it</h3>
+<p>If you are stuck with an old file and no program to open it, start by asking what is in it, not by asking for a fix.</p>
+<aside class="try"><h2>Try this yourself</h2><p class="hint">A prompt like the one I used. Paste it into any AI chat and fill in the brackets.</p><pre class="prompt">I've attached a file from an old piece of equipment. I don't have the software that made it. I need to change [the old text] to [the new text].
+
+Before you change anything, look at the raw bytes and tell me how the file is laid out around that text. Is there a stored length, a checksum or anything else that would break if the text changed?
+
+If it's safe, make the smallest change that works, keep the file exactly the same size and give me an untouched copy of the original. Tell me what you could not check and how I should test it.</pre><button class="btn glass sm" type="button" data-copy>Copy the prompt</button></aside>
+<hr>
+<p><em>Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p class="acts"><a class="btn glass" href="/work/">More from at work</a><a class="btn glass" href="/request/?about=a-typo-on-the-front-of-the-bus">Request a follow-up</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>
