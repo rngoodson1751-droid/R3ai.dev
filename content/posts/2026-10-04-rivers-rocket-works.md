@@ -38,7 +38,7 @@ Finish the missions and there's a certificate at the end.
 
 ## The Rainbow Race
 
-This is the silliest mission. A glowing rainbow track circles the whole solar system and you pick your racer.
+This is the silliest mission. A glowing rainbow track circles the whole solar system and you pick your racer. You don't have to earn it. The title screen has a Rainbow Race button that takes you straight there.
 
 - River, on a shooting star.
 - Mom, on her unicorn.

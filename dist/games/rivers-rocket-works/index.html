@@ -259,6 +259,7 @@ button{font:inherit;color:inherit;cursor:pointer}
         <p class="badge-line">Chief Rocket Engineer: <b>River</b></p>
         <div class="row-btns">
           <button class="btn primary" id="btnStart" data-nav data-autofocus>Start engineering</button>
+          <button class="btn" id="btnTitleRace" data-nav>Rainbow Race</button>
           <button class="btn ghost" id="btnTitleSound" data-nav>Sound on</button>
         </div>
       </div>
@@ -697,7 +698,7 @@ function loadSave(){try{const j=JSON.parse(localStorage.getItem(SAVE_KEY)||'null
 function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}}
 function totalStars(){return MISSIONS.reduce((s,m)=>s+(save.stars[m.id]||0),0)}
 function rankName(){if(save.champ)return 'Champion of the Whole Solar System';const t=totalStars();let r=RANKS[0][1];for(const [n,name] of RANKS)if(t>=n)r=name;return r}
-function missionOpen(m){if(save.champ)return true;if(m.id==='free')return (save.stars.m4||0)>0;if(m.n===1)return true;return (save.stars[MISSIONS[m.n-2].id]||0)>0}
+function missionOpen(m){if(save.champ)return true;if(m.after==='rainbow')return true; /* the Rainbow Race is open from the start */ if(m.id==='free')return (save.stars.m4||0)>0;if(m.n===1)return true;return (save.stars[MISSIONS[m.n-2].id]||0)>0}
 function allDone(){return MISSIONS.every(m=>(save.stars[m.id]||0)>0)}
 function designFor(m){
   const d=Object.assign({paint:1,pattern:0,sticker:0},m.start,save.designs[m.id]||{});d.sticker=clamp(d.sticker|0,0,STICKERS.length-1);
@@ -3787,6 +3788,8 @@ setActiveBody('earth');makeSite();setSky('golden');
 resize();optLabels();show('title');refreshGlyphs();
 $('btnStart').addEventListener('click',()=>{audioInit();SFX.ok();GAME.sel=Math.max(0,MISSIONS.findIndex(m=>!(save.stars[m.id]>0)));if(GAME.sel<0)GAME.sel=0;goMap();
   say(totalStars()?`Welcome back, ${ENGINEER}. Pick a mission.`:`Welcome to Rocket Works, ${ENGINEER}. Mission Control is ready when you are. Pick your first mission.`)});
+// straight to the Rainbow Race from the title screen, with no missions to finish first
+$('btnTitleRace').addEventListener('click',()=>{audioInit();SFX.ok();const i=MISSIONS.findIndex(m=>m.after==='rainbow');GAME.sel=i;goMap();goBuild(MISSIONS[i])});
 window.__rrw={startBlast,pickRacer,openPick,startRun,startRace,setSky,cheap(){for(const k in bodies){const b=bodies[k];b.sphere.material=new THREE.MeshBasicMaterial({color:k.startsWith('moon')?0x888888:k.startsWith('mars')?0xb0522d:0x3a7fb0,depthWrite:false,depthTest:false});if(b.cap)b.cap.material=new THREE.MeshBasicMaterial({color:k.startsWith('moon')?0x777777:k.startsWith('mars')?0xa04a28:0x4d8a48});if(b.clouds)b.clouds.material.visible=false}sky.material.visible=false;QUAL.lock=true},QUAL,scene,camera,bodies,SITE,sky,stars,renderer,resize,setQuality,GAME,save,get FL(){return FL},IN,CAM,keys,goBuild,goMap,startFlight,MISSIONS,FREE,writeSave,finishFlight,helperDesign,startLanding,startDock,startTLI,reachOrbit};
 setupBloom();
 requestAnimationFrame(frame);
