@@ -143,10 +143,10 @@ function projectCards(section) {
   const list = projects.filter(p => p.section === section);
   if (!list.length) return '';
   return '<div class="cards">' + list.map(p => `<article class="card">
-  <p class="eyebrow">${esc(p.kind)}</p>
+  <p class="eyebrow">${esc(p.kind)}${p.status ? ' · ' + esc(p.status) : ''}</p>
   <h3>${esc(p.title)}</h3>
   <p>${esc(p.summary)}</p>
-  <div class="links">${p.links.map((l, i) => `<a${i === 0 ? ' class="btn"' : ''} href="${l.href}">${esc(l.label)}</a>`).join('')}</div>
+  ${(p.links || []).length ? `<div class="links">${p.links.map((l, i) => `<a${i === 0 ? ' class="btn"' : ''} href="${l.href}">${esc(l.label)}</a>`).join('')}</div>` : '<p class="meta">Write-up coming</p>'}
 </article>`).join('\n') + '</div>';
 }
 
@@ -166,7 +166,7 @@ write('index.html', layout({
   <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
 </section>
 <section class="doors" aria-label="Sections">
-  <a class="door work" href="/work/"><p class="eyebrow">Weekdays</p><h2>At work</h2><p>Transit software, process fixes and notes from running a city bus system.</p><span class="go">Go to work &rarr;</span></a>
+  <a class="door work" href="/work/"><p class="eyebrow">Weekdays</p><h2>At work</h2><p>Transit software, process fixes and notes from a City Transit division.</p><span class="go">Go to work &rarr;</span></a>
   <a class="door home" href="/home/"><p class="eyebrow">Evenings and weekends</p><h2>At home</h2><p>Games, experiments and things made for River and the family. Start with the kart racer.</p><span class="go">Go home &rarr;</span></a>
 </section>
 <section class="block"><h2>Latest posts</h2>${postList(posts.slice(0, 5))}<p><a href="/blog/">All posts</a></p></section>
@@ -175,10 +175,11 @@ write('index.html', layout({
 
 const sectionCopy = {
   work: {
-    intro: 'I manage a city transit division, and I build custom software for it when nothing off the shelf fits. This section collects those tools and what I learn building them.',
-    projectsEmpty: 'Project write-ups are on the way. Each one will cover the problem, the tool and what changed.',
+    intro: 'I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. This section collects those tools and what I learn building them.',
+    projectsEmpty: 'Project write-ups are on the way.',
+    projectsNote: 'These are short descriptions for now. Full write-ups will cover the problem, the tool and what changed.',
     projectsTitle: 'Projects',
-    description: 'Transit software and notes from running a city bus system.',
+    description: 'Transit software and notes from a City Transit division.',
   },
   home: {
     intro: 'What I build away from work, mostly for River and the family: games, experiments and whatever we think up next.',
@@ -193,7 +194,7 @@ for (const [key, s] of Object.entries(SECTIONS)) {
     title: s.label, path: s.path, section: key, nav: key, description: c.description,
     body: `<div class="band"><div class="wrap"><p class="eyebrow">Section</p><h1>${s.label}</h1><p>${c.intro}</p></div></div>
 <div class="wrap">
-<section class="block"><h2>${c.projectsTitle}</h2>${cards || `<p class="empty">${c.projectsEmpty}</p>`}</section>
+<section class="block"><h2>${c.projectsTitle}</h2>${cards || `<p class="empty">${c.projectsEmpty}</p>`}${cards && c.projectsNote ? `<p class="note">${c.projectsNote}</p>` : ''}</section>
 <section class="block" id="posts"><h2>Posts</h2>${postList(posts.filter(p => p.section === key), false)}</section>
 ${key === 'work' ? '<p class="note">Everything in this section is my own account of my work. None of it is an official statement from my employer.</p>' : ''}
 </div>`,
@@ -224,11 +225,11 @@ write('about/index.html', layout({
   body: `<div class="band"><div class="wrap"><p class="eyebrow">About</p><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></div></div>
 <div class="wrap"><div class="post"><div class="prose">
 <h2>What this site is</h2>
-<p>I'm a self-taught web developer who manages a city transit division. At work I build the tools the job needs. At home I build things for my family, like a kart racing game with sloths in it.</p>
+<p>I'm a self-taught web developer who manages a City Transit division. At work I build the tools the job needs. At home I build things for my family, like a kart racing game with sloths in it.</p>
 <p>Most of what you'll find here was built with AI doing a large share of the typing. I write about what worked, what didn't and what I'd do differently.</p>
 <h2>How it's split</h2>
 <ul>
-<li><a href="/work/">At work</a> covers transit software and what I learn from running a bus system.</li>
+<li><a href="/work/">At work</a> covers transit software and what I learn from running a City Transit division.</li>
 <li><a href="/home/">At home</a> covers games, experiments and family projects.</li>
 <li>The <a href="/blog/">blog</a> holds posts from both.</li>
 </ul>
@@ -251,7 +252,7 @@ write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${posts.map(p => `<item><title>${esc(p.title)}</title><link>${SITE.url}${p.url}</link><guid>${SITE.url}${p.url}</guid><pubDate>${new Date(p.date + 'T12:00:00Z').toUTCString()}</pubDate><category>${SECTIONS[p.section].label}</category><description>${esc(p.summary)}</description></item>`).join('\n')}
 </channel></rss>
 `);
-const paths = ['/', '/work/', '/home/', '/blog/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => p.links.map(l => l.href)).filter(h => h.startsWith('/games/'))];
+const paths = ['/', '/work/', '/home/', '/blog/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...new Set(paths)].map(p => `<url><loc>${SITE.url}${p}</loc></url>`).join('\n')}

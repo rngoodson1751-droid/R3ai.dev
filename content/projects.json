@@ -1,12 +1,62 @@
 [
   {
+    "kind": "Scheduling",
+    "title": "Driver scheduling system",
+    "summary": "A scheduling system for bus operators, with a dispatch board that runs in the browser.",
+    "section": "work"
+  },
+  {
+    "kind": "Paratransit",
+    "title": "Paratransit scheduling app",
+    "summary": "A trip scheduling app for paratransit service, built with Node.js, Express and SQLite.",
+    "section": "work"
+  },
+  {
+    "kind": "Open data",
+    "title": "Live vehicle positions feed",
+    "summary": "A real-time feed of bus locations in GTFS Realtime, the standard format that trip-planning apps read.",
+    "section": "work"
+  },
+  {
+    "kind": "Hardware",
+    "status": "In progress",
+    "title": "Real-time bus stop display",
+    "summary": "A prototype arrival display for bus stops, running on a CrowPanel ESP32-S3 board.",
+    "section": "work"
+  },
+  {
+    "kind": "Procurement",
+    "title": "Procurement determination tool",
+    "summary": "A step-by-step wizard that asks about a purchase and produces the price-reasonableness and small-purchase forms.",
+    "section": "work"
+  },
+  {
+    "kind": "Community",
+    "title": "Bus coloring and story app",
+    "summary": "A coloring and story app made for riders as community outreach.",
+    "section": "work"
+  },
+  {
+    "kind": "Game",
+    "status": "In progress",
+    "title": "LC Transit Simulator",
+    "summary": "A 3D bus-driving game that runs in the browser, set on the real routes.",
+    "section": "work"
+  },
+  {
     "section": "home",
     "kind": "Game",
     "title": "Sloth Rocket Grand Prix",
     "summary": "A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.",
     "links": [
-      { "label": "Play", "href": "/games/sloth-rocket-grand-prix/" },
-      { "label": "Read the build notes", "href": "/blog/sloth-rocket-grand-prix/" }
+      {
+        "label": "Play",
+        "href": "/games/sloth-rocket-grand-prix/"
+      },
+      {
+        "label": "Read the build notes",
+        "href": "/blog/sloth-rocket-grand-prix/"
+      }
     ]
   }
 ]
