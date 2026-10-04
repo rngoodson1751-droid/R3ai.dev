@@ -104,17 +104,20 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE.url}${path}">
-<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name}" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body${section ? ` data-section="${section}"` : ''}>
+<canvas id="silk" aria-hidden="true"></canvas>
 <header class="glass bar">
   <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
   <nav class="links" aria-label="Main">${links}</nav>
@@ -128,26 +131,22 @@ ${body}
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; ${new Date().getUTCFullYear()} ${SITE.author}. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
-<script>
-document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
-document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
-</script>
 </body>
 </html>
 `;
 }
-const chip = s => `<span class="chip ${s}">${SECTIONS[s].label}</span>`;
+const chip = s => `<span class="chip">${SECTIONS[s].label}</span>`;
 function postList(list, showChip = true) {
-  if (!list.length) return '<div class="glass"><p class="empty">No posts here yet.</p></div>';
-  return '<ul class="glass list">' + list.map(p => `<li><a href="${p.url}">
+  if (!list.length) return '<div class="sheet"><p class="empty">No posts here yet.</p></div>';
+  return '<ul class="sheet list reveal">' + list.map(p => `<li><a href="${p.url}">
   <time datetime="${p.date}">${longDate(p.date)}${showChip ? chip(p.section) : ''}</time>
-  <div><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p></div>
+  <div><h3 style="view-transition-name:post-${p.slug}">${esc(p.title)}</h3><p>${esc(p.summary)}</p></div>
 </a></li>`).join('\n') + '</ul>';
 }
 function projectCards(section) {
   const list = projects.filter(p => p.section === section);
   if (!list.length) return '';
-  return '<div class="cards">' + list.map(p => `<article class="glass card">
+  return '<div class="cards">' + list.map(p => `<article class="sheet card reveal">
   <div class="chips"><span class="chip">${esc(p.kind)}</span>${p.status ? `<span class="chip live">${esc(p.status)}</span>` : ''}</div>
   <h3>${esc(p.title)}</h3>
   <p>${esc(p.summary)}</p>
@@ -162,16 +161,17 @@ rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 if (existsSync('static')) cpSync('static', OUT, { recursive: true });
 writeFileSync(join(OUT, 'styles.css'), readFileSync('src/styles.css'));
+writeFileSync(join(OUT, 'site.js'), readFileSync('src/site.js'));
 
 const featured = projects.find(p => p.section === 'home' && (p.links || []).length);
 write('index.html', layout({
   title: '', path: '/',
   description: 'Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.',
-  body: `<section class="glass hero rise">
+  body: `<section class="hero">
   <div>
-    <h1>R cubed is <span class="grad">Robert, Rachelle and River.</span></h1>
+    <h1>R cubed is Robert, Rachelle and River.</h1>
     <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
-    <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn clear" href="/home/">See the home side</a></div>
+    <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn glass" href="/home/">See the home side</a></div>
   </div>
   <div class="scene" aria-hidden="true"><div class="cube">
     <div class="face f1"><b>R</b><span>Robert</span></div>
@@ -182,23 +182,23 @@ write('index.html', layout({
   </div></div>
 </section>
 <div class="bento">
-  <a class="glass tint tile work rise" style="--i:1" href="/work/">
-    <h2>At work</h2>
+  <a class="sheet tile reveal" href="/work/">
+    <h2 style="view-transition-name:title-work">At work</h2>
     <p>Transit software, process fixes and notes from a City Transit division.</p>
-    <div class="end chips"><span class="chip work">${count(inSection(projects, 'work').length, 'project', 'projects')}</span><span class="chip work">${count(inSection(posts, 'work').length, 'post', 'posts')}</span></div>
+    <div class="end chips"><span class="chip">${count(inSection(projects, 'work').length, 'project', 'projects')}</span><span class="chip">${count(inSection(posts, 'work').length, 'post', 'posts')}</span></div>
   </a>
-  <a class="glass tint tile home rise" style="--i:2" href="/home/">
-    <h2>At home</h2>
+  <a class="sheet tile reveal" href="/home/">
+    <h2 style="view-transition-name:title-home">At home</h2>
     <p>Games, experiments and things made for River and the family.</p>
-    <div class="end chips"><span class="chip home">${count(inSection(projects, 'home').length, 'game', 'games')}</span><span class="chip home">${count(inSection(posts, 'home').length, 'post', 'posts')}</span></div>
+    <div class="end chips"><span class="chip">${count(inSection(projects, 'home').length, 'game', 'games')}</span><span class="chip">${count(inSection(posts, 'home').length, 'post', 'posts')}</span></div>
   </a>
-  ${featured ? `<article class="glass tile home span-2 rise" style="--i:3">
-    <div class="chips"><span class="chip home">Play now</span></div>
+  ${featured ? `<article class="sheet tile span-2 reveal">
+    <div class="chips"><span class="chip live">Play now</span></div>
     <h2>${esc(featured.title)}</h2>
     <p>${esc(featured.summary)}</p>
-    <div class="end">${featured.links.map((l, i) => `<a class="btn${i ? ' clear' : ''}" href="${l.href}">${esc(l.label)}</a>`).join('')}</div>
+    <div class="end">${featured.links.map((l, i) => `<a class="btn${i ? ' glass' : ''}" href="${l.href}">${esc(l.label)}</a>`).join('')}</div>
   </article>` : ''}
-  <section class="tile ${featured ? 'span-4' : 'span-6'} rise" style="--i:4;padding:0" aria-label="Latest posts">
+  <section class="${featured ? 'span-4' : 'span-6'}" style="display:grid" aria-label="Latest posts">
     ${postList(posts.slice(0, 4))}
   </section>
 </div>`,
@@ -223,9 +223,9 @@ for (const [key, s] of Object.entries(SECTIONS)) {
   const c = sectionCopy[key], cards = projectCards(key);
   write(`${key}/index.html`, layout({
     title: s.label, path: s.path, section: key, nav: key, description: c.description,
-    body: `<section class="glass tint head rise"><h1>${s.label}</h1><p>${c.intro}</p></section>
+    body: `<section class="head"><h1 style="view-transition-name:title-${key}">${s.label}</h1><p>${c.intro}</p></section>
 <h2 class="h2">${c.projectsTitle}</h2>
-${cards || `<div class="glass"><p class="empty">${c.projectsEmpty}</p></div>`}
+${cards || `<div class="sheet"><p class="empty">${c.projectsEmpty}</p></div>`}
 ${cards && c.projectsNote ? `<p class="note">${c.projectsNote}</p>` : ''}
 <h2 class="h2" id="posts">Posts</h2>
 ${postList(inSection(posts, key), false)}
@@ -235,27 +235,27 @@ ${key === 'work' ? '<p class="note">Everything in this section is my own account
 
 write('blog/index.html', layout({
   title: 'Blog', path: '/blog/', nav: 'blog', description: 'Every post from both sides of the site, newest first.',
-  body: `<section class="glass head rise"><h1>Blog</h1><p>Every post from both sides of the site, newest first. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
+  body: `<section class="head"><h1>Blog</h1><p>Every post from both sides of the site, newest first. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
 ${postList(posts)}`,
 }));
 
 for (const p of posts) {
   write(`blog/${p.slug}/index.html`, layout({
     title: p.title, path: p.url, section: p.section, nav: 'blog', description: p.summary,
-    body: `<article class="glass strong post rise">
-<header><p class="when"><time datetime="${p.date}">${longDate(p.date)}</time>${chip(p.section)}</p><h1>${esc(p.title)}</h1></header>
+    body: `<article class="sheet strong post">
+<header><p class="when"><time datetime="${p.date}">${longDate(p.date)}</time>${chip(p.section)}</p><h1 style="view-transition-name:post-${p.slug}">${esc(p.title)}</h1></header>
 <div class="prose">
 ${p.html}
 </div>
-<p><a class="btn clear" href="${SECTIONS[p.section].path}">More from ${SECTIONS[p.section].label.toLowerCase()}</a></p>
+<p><a class="btn glass" href="${SECTIONS[p.section].path}">More from ${SECTIONS[p.section].label.toLowerCase()}</a></p>
 </article>`,
   }));
 }
 
 write('about/index.html', layout({
   title: 'About', path: '/about/', nav: 'about', description: 'Who is behind r3ai.dev and what the name means.',
-  body: `<section class="glass head rise"><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></section>
-<div class="glass strong post"><div class="prose">
+  body: `<section class="head"><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></section>
+<div class="sheet strong post"><div class="prose">
 <h2>What this site is</h2>
 <p>I'm a self-taught web developer who manages a City Transit division. At work I build the tools the job needs. At home I build things for my family, like a kart racing game with sloths in it.</p>
 <p>Most of what you'll find here was built with AI doing a large share of the typing. I write about what worked, what didn't and what I'd do differently.</p>
@@ -274,7 +274,7 @@ write('about/index.html', layout({
 
 write('404.html', layout({
   title: 'Page not found', path: '/404.html', description: 'That page does not exist.',
-  body: `<section class="glass head rise"><h1>Wrong stop</h1><p>There's no page at this address. Try the <a href="/">home page</a> or the <a href="/blog/">blog</a>.</p></section>`,
+  body: `<section class="head"><h1>Wrong stop</h1><p>There's no page at this address. Try the <a href="/">home page</a> or the <a href="/blog/">blog</a>.</p></section>`,
 }));
 
 // ---------- feed, sitemap, robots ----------

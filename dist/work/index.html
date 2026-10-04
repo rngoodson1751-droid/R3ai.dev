@@ -10,17 +10,20 @@
 <meta property="og:description" content="Transit software and notes from a City Transit division.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/work/">
-<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
 <header class="glass bar">
   <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
   <nav class="links" aria-label="Main"><a href="/work/" aria-current="page">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
@@ -28,45 +31,45 @@
 </header>
 <nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/" aria-current="page">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
 <main class="wrap">
-<section class="glass tint head rise"><h1>At work</h1><p>I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. This section collects those tools and what I learn building them.</p></section>
+<section class="head"><h1 style="view-transition-name:title-work">At work</h1><p>I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. This section collects those tools and what I learn building them.</p></section>
 <h2 class="h2">Projects</h2>
-<div class="cards"><article class="glass card">
+<div class="cards"><article class="sheet card reveal">
   <div class="chips"><span class="chip">Scheduling</span></div>
   <h3>Driver scheduling system</h3>
   <p>A scheduling system for bus operators, with a dispatch board that runs in the browser.</p>
   <div class="end"><span class="chip">Write-up coming</span></div>
 </article>
-<article class="glass card">
+<article class="sheet card reveal">
   <div class="chips"><span class="chip">Paratransit</span></div>
   <h3>Paratransit scheduling app</h3>
   <p>A trip scheduling app for paratransit service, built with Node.js, Express and SQLite.</p>
   <div class="end"><span class="chip">Write-up coming</span></div>
 </article>
-<article class="glass card">
+<article class="sheet card reveal">
   <div class="chips"><span class="chip">Open data</span></div>
   <h3>Live vehicle positions feed</h3>
   <p>A real-time feed of bus locations in GTFS Realtime, the standard format that trip-planning apps read.</p>
   <div class="end"><span class="chip">Write-up coming</span></div>
 </article>
-<article class="glass card">
+<article class="sheet card reveal">
   <div class="chips"><span class="chip">Hardware</span><span class="chip live">In progress</span></div>
   <h3>Real-time bus stop display</h3>
   <p>A prototype arrival display for bus stops, running on a CrowPanel ESP32-S3 board.</p>
   <div class="end"><span class="chip">Write-up coming</span></div>
 </article>
-<article class="glass card">
+<article class="sheet card reveal">
   <div class="chips"><span class="chip">Procurement</span></div>
   <h3>Procurement determination tool</h3>
   <p>A step-by-step wizard that asks about a purchase and produces the price-reasonableness and small-purchase forms.</p>
   <div class="end"><span class="chip">Write-up coming</span></div>
 </article>
-<article class="glass card">
+<article class="sheet card reveal">
   <div class="chips"><span class="chip">Community</span></div>
   <h3>Bus coloring and story app</h3>
   <p>A coloring and story app made for riders as community outreach.</p>
   <div class="end"><span class="chip">Write-up coming</span></div>
 </article>
-<article class="glass card">
+<article class="sheet card reveal">
   <div class="chips"><span class="chip">Game</span><span class="chip live">In progress</span></div>
   <h3>LC Transit Simulator</h3>
   <p>A 3D bus-driving game that runs in the browser, set on the real routes.</p>
@@ -74,9 +77,9 @@
 </article></div>
 <p class="note">These are short descriptions for now. Full write-ups will cover the problem, the tool and what changed.</p>
 <h2 class="h2" id="posts">Posts</h2>
-<ul class="glass list"><li><a href="/blog/notes-from-the-transit-side/">
+<ul class="sheet list reveal"><li><a href="/blog/notes-from-the-transit-side/">
   <time datetime="2026-10-04">October 4, 2026</time>
-  <div><h3>What goes in the work section</h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
+  <div><h3 style="view-transition-name:post-notes-from-the-transit-side">What goes in the work section</h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
 </a></li></ul>
 <p class="note">Everything in this section is my own account of my work. None of it is an official statement from my employer.</p>
 </main>
@@ -84,9 +87,5 @@
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
-<script>
-document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
-document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
-</script>
 </body>
 </html>

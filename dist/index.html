@@ -10,17 +10,20 @@
 <meta property="og:description" content="Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/">
-<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body>
+<canvas id="silk" aria-hidden="true"></canvas>
 <header class="glass bar">
   <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
   <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
@@ -28,11 +31,11 @@
 </header>
 <nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/about/">About</a></nav>
 <main class="wrap">
-<section class="glass hero rise">
+<section class="hero">
   <div>
-    <h1>R cubed is <span class="grad">Robert, Rachelle and River.</span></h1>
+    <h1>R cubed is Robert, Rachelle and River.</h1>
     <p>I'm Robert. I build software with AI: tools for public transit at work, and games and projects for my family at home. This site keeps both in one place.</p>
-    <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn clear" href="/home/">See the home side</a></div>
+    <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn glass" href="/home/">See the home side</a></div>
   </div>
   <div class="scene" aria-hidden="true"><div class="cube">
     <div class="face f1"><b>R</b><span>Robert</span></div>
@@ -43,30 +46,30 @@
   </div></div>
 </section>
 <div class="bento">
-  <a class="glass tint tile work rise" style="--i:1" href="/work/">
-    <h2>At work</h2>
+  <a class="sheet tile reveal" href="/work/">
+    <h2 style="view-transition-name:title-work">At work</h2>
     <p>Transit software, process fixes and notes from a City Transit division.</p>
-    <div class="end chips"><span class="chip work">7 projects</span><span class="chip work">1 post</span></div>
+    <div class="end chips"><span class="chip">7 projects</span><span class="chip">1 post</span></div>
   </a>
-  <a class="glass tint tile home rise" style="--i:2" href="/home/">
-    <h2>At home</h2>
+  <a class="sheet tile reveal" href="/home/">
+    <h2 style="view-transition-name:title-home">At home</h2>
     <p>Games, experiments and things made for River and the family.</p>
-    <div class="end chips"><span class="chip home">1 game</span><span class="chip home">1 post</span></div>
+    <div class="end chips"><span class="chip">1 game</span><span class="chip">1 post</span></div>
   </a>
-  <article class="glass tile home span-2 rise" style="--i:3">
-    <div class="chips"><span class="chip home">Play now</span></div>
+  <article class="sheet tile span-2 reveal">
+    <div class="chips"><span class="chip live">Play now</span></div>
     <h2>Sloth Rocket Grand Prix</h2>
     <p>A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.</p>
-    <div class="end"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a class="btn clear" href="/blog/sloth-rocket-grand-prix/">Read the build notes</a></div>
+    <div class="end"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a class="btn glass" href="/blog/sloth-rocket-grand-prix/">Read the build notes</a></div>
   </article>
-  <section class="tile span-4 rise" style="--i:4;padding:0" aria-label="Latest posts">
-    <ul class="glass list"><li><a href="/blog/sloth-rocket-grand-prix/">
-  <time datetime="2026-10-04">October 4, 2026<span class="chip home">At home</span></time>
-  <div><h3>Sloth Rocket Grand Prix: a kart racer in one HTML file</h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
+  <section class="span-4" style="display:grid" aria-label="Latest posts">
+    <ul class="sheet list reveal"><li><a href="/blog/sloth-rocket-grand-prix/">
+  <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
+  <div><h3 style="view-transition-name:post-sloth-rocket-grand-prix">Sloth Rocket Grand Prix: a kart racer in one HTML file</h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
 </a></li>
 <li><a href="/blog/notes-from-the-transit-side/">
-  <time datetime="2026-10-04">October 4, 2026<span class="chip work">At work</span></time>
-  <div><h3>What goes in the work section</h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
+  <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
+  <div><h3 style="view-transition-name:post-notes-from-the-transit-side">What goes in the work section</h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
 </a></li></ul>
   </section>
 </div>
@@ -75,9 +78,5 @@
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
-<script>
-document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
-document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
-</script>
 </body>
 </html>

@@ -10,17 +10,20 @@
 <meta property="og:description" content="I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/blog/sloth-rocket-grand-prix/">
-<meta name="theme-color" content="#e8ecf9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#050716" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Unbounded:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
 <header class="glass bar">
   <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
   <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
@@ -28,8 +31,8 @@
 </header>
 <nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
 <main class="wrap">
-<article class="glass strong post rise">
-<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip home">At home</span></p><h1>Sloth Rocket Grand Prix: a kart racer in one HTML file</h1></header>
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-sloth-rocket-grand-prix">Sloth Rocket Grand Prix: a kart racer in one HTML file</h1></header>
 <div class="prose">
 <p>The brief was a go-kart racer in a single HTML file, with five themes that have nothing to do with each other: Formula 1, rockets, pirates, libraries and sloths. I gave that to Claude on a Sunday morning and had a playable game before lunch.</p>
 <p><a href="/games/sloth-rocket-grand-prix/">Play Sloth Rocket Grand Prix</a></p>
@@ -44,16 +47,12 @@
 <h3>What I'd like to add</h3>
 <p>More courses, a time trial mode and River's ideas, once he has had a turn at it.</p>
 </div>
-<p><a class="btn clear" href="/home/">More from at home</a></p>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
 </article>
 </main>
 <footer class="wrap foot">
   <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
-<script>
-document.getElementById('theme').addEventListener('click',function(){var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('r3-theme',n)}catch(e){}});
-document.addEventListener('pointermove',function(e){var g=e.target.closest&&e.target.closest('.glass');if(!g)return;var b=g.getBoundingClientRect();g.style.setProperty('--mx',(e.clientX-b.left)+'px');g.style.setProperty('--my',(e.clientY-b.top)+'px');},{passive:true});
-</script>
 </body>
 </html>
