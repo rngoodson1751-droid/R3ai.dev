@@ -1,0 +1,12 @@
+[
+  {
+    "section": "home",
+    "kind": "Game",
+    "title": "Sloth Rocket Grand Prix",
+    "summary": "A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.",
+    "links": [
+      { "label": "Play", "href": "/games/sloth-rocket-grand-prix/" },
+      { "label": "Read the build notes", "href": "/blog/sloth-rocket-grand-prix/" }
+    ]
+  }
+]

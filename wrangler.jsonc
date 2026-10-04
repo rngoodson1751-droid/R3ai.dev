@@ -1,0 +1,9 @@
+{
+  // Cloudflare settings for r3ai.dev. The site is plain files served from ./dist.
+  "name": "r3ai-dev",
+  "compatibility_date": "2026-09-22",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
