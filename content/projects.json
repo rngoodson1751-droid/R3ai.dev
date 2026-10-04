@@ -34,6 +34,10 @@
     "section": "work",
     "links": [
       {
+        "label": "Try the demo",
+        "href": "/demos/bus-map/"
+      },
+      {
         "label": "Read the write-up",
         "href": "/blog/live-bus-positions/"
       }
@@ -46,6 +50,10 @@
     "summary": "A battery-powered e-paper countdown sign for bus stops, prototyped on a $32 CrowPanel ESP32-S3 board.",
     "section": "work",
     "links": [
+      {
+        "label": "Try the demo",
+        "href": "/demos/stop-sign/"
+      },
       {
         "label": "Read the write-up",
         "href": "/blog/bus-stop-display/"

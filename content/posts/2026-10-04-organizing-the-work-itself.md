@@ -44,6 +44,12 @@ A board only works if two people keep it up. No software fixes that. And its pic
 
 Ask for the agenda, not just the tool.
 
+```prompt
+[My colleague] and I have too many open items and no shared place to track them. We already have [the office software you use].
+
+Don't just name a tool. Give me an agenda for a [90-minute] working session to list everything, rank it and give every item one owner. Then tell me how to keep it current afterward.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

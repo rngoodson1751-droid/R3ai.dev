@@ -45,6 +45,12 @@ Ask the AI to argue against your idea. If it only agrees with you, it is not hel
 
 A savings estimate built from public documents is an outside view. It is a place to start asking questions, not a finding.
 
+```prompt
+Here is an idea I'm developing: [describe it]. Here is my draft pitch and the numbers behind it: [paste].
+
+Argue against it. Go through every claim and tell me which ones the evidence doesn't support, which comparisons are unfair, and what rule or law might stop it. Then tell me the question I have to answer before I take another step.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

@@ -38,6 +38,12 @@ Two things:
 
 A spreadsheet has to be read correctly, and an AI can misread a column. Ask it to show each row it counted and why. If it cannot show its work, do not use the number.
 
+```prompt
+Someone sent me a total of [number] for [what is being counted]. I've attached the written policy that defines how these are counted, and the spreadsheet of records.
+
+Count them according to the policy. Show every row you counted and why, and every row you left out and why, so I can check it myself.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

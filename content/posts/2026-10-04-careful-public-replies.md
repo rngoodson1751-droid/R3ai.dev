@@ -33,6 +33,14 @@ Tell it who is writing to whom, and what each person already knows. That context
 
 It does not know what has been decided and what has not. You do. Read every public-facing sentence as if it will be quoted back to you.
 
+```prompt
+A [resident] wrote to ask whether [a rumor] is true. Here is their message: [paste].
+
+What has been decided: [facts]. What has not been decided: [facts]. I am [role], writing for [agency].
+
+Draft a short, honest, reassuring reply that commits us to nothing that isn't decided. Then list every sentence that could be read as a promise.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

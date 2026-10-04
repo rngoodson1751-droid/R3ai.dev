@@ -35,6 +35,12 @@ It can be wrong, and it sometimes cannot open the document it is citing. I treat
 
 Ask the question the way you would ask a colleague, and add "cite the regulation and tell me what you could not verify."
 
+```prompt
+I manage [type of agency]. Can [funding source] be used for [purpose]?
+
+Cite the regulation or guidance for each point, tell me what you could not verify, and tell me which section I should read myself.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

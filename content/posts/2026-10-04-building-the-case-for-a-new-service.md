@@ -39,6 +39,12 @@ It got a point of state law wrong, with confidence. I caught it. I wrote about t
 
 It also offered me a condensed version of the report when I wanted the full one. You have to say what you want.
 
+```prompt
+I have to report to [leadership] on [a new service we are evaluating]. No decision has been made, so keep it neutral: what we learned and what the options are.
+
+Here is my source material: [paste or attach]. Draft the slide outline first. For every number, tell me which source it came from. Flag any claim about law or policy that I should verify myself.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

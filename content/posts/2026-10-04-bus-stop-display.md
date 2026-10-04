@@ -9,6 +9,8 @@ summary: Commercial e-paper bus stop signs cost thousands of dollars each. I'm b
 
 "When is the bus coming?" is the question every rider has. A sign at the stop that counts down the minutes answers it without a phone.
 
+You can [try an on-screen version of the sign](/demos/stop-sign/) fed by made-up buses.
+
 ## The price of the off-the-shelf answer
 
 The commercial e-paper signs I priced ran roughly $3,500 to $5,000 each, plus a monthly fee of about $50 to $150 per screen. Multiply that by a system's worth of stops and it never gets past a budget meeting.

@@ -35,6 +35,12 @@ It also needs real data. Our safety plan update could not be finished until we h
 
 Start with one finding. Give the AI the finding, the rule and your current document, and ask what is missing.
 
+```prompt
+We received this finding: [paste]. Here is the rule it cites: [paste or attach]. Here is our current procedure: [attach].
+
+What is missing? Before you draft anything, list the facts about how we actually operate that you need from me. Do not invent any.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

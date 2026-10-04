@@ -18,6 +18,8 @@
 <meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,10 +60,17 @@
   <p>Design a rocket and fly twelve missions, from a first launch to a wormhole. It reads the missions out loud, so a kid can play it.</p>
   <div class="end"><a class="btn" href="/games/rivers-rocket-works/">Play</a><a href="/blog/rivers-rocket-works/">Read about it</a></div>
 </article></div>
+<section class="sheet offline" id="offline" hidden>
+  <div><h2>Play without a connection</h2>
+  <p>Save a game to this device and it will run with no internet, which is handy in the car. Saving the site to your home screen makes it open like an app.</p>
+  <p class="hint" id="ios-hint" hidden>On an iPhone or iPad, tap Share, then Add to Home Screen.</p></div>
+  <div class="end"><button class="btn glass sm" type="button" data-save="lc-transit-simulator">Save LC Transit Simulator (15 MB)</button><button class="btn glass sm" type="button" data-save="sloth-rocket-grand-prix">Save Sloth Rocket Grand Prix (under 1 MB)</button><button class="btn glass sm" type="button" data-save="rivers-rocket-works">Save River's Rocket Works (under 1 MB)</button><button class="btn sm" type="button" id="install" hidden>Install the site</button></div>
+  <p class="hint" id="save-msg" role="status"></p>
+</section>
 <p class="note">Not online yet: the <a href="/blog/sailing-simulator/">sailing simulator you steer with your hands</a>.</p>
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>

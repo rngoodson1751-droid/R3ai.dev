@@ -42,6 +42,12 @@ A plan assembled from existing documents is only as current as those documents. 
 
 Gather what you already have, upload it, and ask for one document that tells the whole story with sources.
 
+```prompt
+I've attached [the documents we already have: plans, reports, operating records]. Build one stand-alone [plan] from them that I could hand to an outside consultant.
+
+Use only what is in these documents, and say which document each fact came from. Where the documents don't say something, leave it out and list the gap at the end.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

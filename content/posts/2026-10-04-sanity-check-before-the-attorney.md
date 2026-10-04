@@ -34,6 +34,12 @@ I used to be a paralegal, so I know how much an attorney's time is worth. The AI
 
 It does not know your city's policies unless you give them to it, and it is not your lawyer. Use it to get your question in order. Let counsel make the call.
 
+```prompt
+We've been invited to [describe the request]. Here is the invitation: [paste]. I work for [a public agency].
+
+Before I take this to our attorney, help me understand the question. What are the real legal or ethical risks, which facts matter, and what exactly should I ask counsel? I know you are not my lawyer.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

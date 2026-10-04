@@ -20,6 +20,10 @@ const cards = [
   { name: 'request', title: 'Request a post', label: 'Ask me to write about anything on the site' },
   { name: 'demo-dispatch-board', title: 'Dispatch board', label: 'Try the demo' },
   { name: 'demo-procurement-wizard', title: 'Procurement wizard', label: 'Try the demo' },
+  { name: 'demo-bus-map', title: 'Live bus map', label: 'Try the demo' },
+  { name: 'demo-stop-sign', title: 'Bus stop sign', label: 'Try the demo' },
+  { name: 'demos', title: 'Demos', label: 'Transit tools you can try in your browser' },
+  { name: 'ask', title: 'Ask the site', label: 'A small AI that answers from the posts' },
 ];
 for (const f of readdirSync('content/posts').filter(f => f.endsWith('.md'))) {
   const head = readFileSync(join('content/posts', f), 'utf8').split('\n---')[0];

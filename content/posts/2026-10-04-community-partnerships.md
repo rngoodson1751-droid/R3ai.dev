@@ -31,6 +31,12 @@ People assume AI at work means cutting costs. For me it has mostly meant having 
 
 Enthusiasm in an email has to be real. The AI can match a tone I describe. It cannot supply the feeling. If I had not actually been excited about those shelters, the email would have read as hollow.
 
+```prompt
+[My colleague] and I just met with [person] from [organization] about [the idea]. It's early and nothing is promised.
+
+Write a follow-up email from both of us that shows we're excited without overdoing it, and lists [two or three] specific things we can help with. Tell me anything I should add before I send it.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

@@ -13,3 +13,21 @@ CREATE TABLE IF NOT EXISTS requests (
   ip_hash TEXT                   -- a one-day hash of the sender's address, used only to slow down spam
 );
 CREATE INDEX IF NOT EXISTS requests_created ON requests (created_at);
+
+-- Page views: one row per page per day. Nothing about the visitor is kept.
+CREATE TABLE IF NOT EXISTS hits (
+  day TEXT NOT NULL,
+  path TEXT NOT NULL,
+  n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, path)
+);
+
+-- Questions typed into /ask/, and which posts were used to answer. ip_hash is only for the hourly limit.
+CREATE TABLE IF NOT EXISTS asks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  question TEXT NOT NULL,
+  posts TEXT,
+  ip_hash TEXT
+);
+CREATE INDEX IF NOT EXISTS asks_created ON asks (created_at);

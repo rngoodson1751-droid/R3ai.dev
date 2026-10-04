@@ -40,6 +40,12 @@ Several of these are one HTML file. That is on purpose. A single file can be ema
 
 Start with something small that annoys you every week. Describe it the way you would to a new employee.
 
+```prompt
+I'm not a professional developer. Every week I have to [describe the annoying task the way you'd explain it to a new employee].
+
+Build me a small tool for it that runs in a web browser as a single HTML file, with nothing to install. Ask me questions first if anything is unclear. When you're done, tell me what you tested, what you couldn't test and what isn't finished.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

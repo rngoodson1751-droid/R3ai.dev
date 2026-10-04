@@ -41,6 +41,12 @@ So ask it to find the flaw, not to confirm the idea. And enjoy the learning for 
 
 Pick the subject you always wished you understood. Ask the first question you were too embarrassed to ask in school.
 
+```prompt
+I've always wanted to understand [subject] and I have no background in it. Start from the very beginning and let me ask questions as we go.
+
+When I propose an idea, don't just agree. Tell me where it breaks, and whether it is already a well-known dead end.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

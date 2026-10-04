@@ -39,6 +39,12 @@ Claude offered to extend the wizard to four more forms. I said no. I want to liv
 
 It will write from general rules if that is all it has. Your local policy is the one that counts, so give it the document.
 
+```prompt
+I've attached our written policy for [process]. Use only this document, not general rules.
+
+First, tell me in plain language what it requires at each level. Then build a small web page that asks one question at a time and produces the right completed form at the end.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

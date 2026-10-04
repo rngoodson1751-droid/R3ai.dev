@@ -42,6 +42,12 @@ I want the buildings to look real. My first idea was to use online street-level 
 
 It is still in progress and not posted here yet. The buildings are plain blocks until the filming is done.
 
+```prompt
+Build me a small driving game that runs in a web browser as one HTML file. I drive a [bus] around [a simple grid of streets] and pick up riders at stops. Use keyboard controls.
+
+When it works, tell me what you could not test. Then I'll tell you what to change next.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

@@ -43,6 +43,12 @@ The fixes were to wait half an hour, check from my phone on cellular data, or un
 
 I still had to make the accounts, pay and approve things. That is as it should be. And a site needs something worth reading, which no tool supplies.
 
+```prompt
+I want a personal website with [two sections: work and home] and a blog. Before you build anything, ask me what you need to know.
+
+Then suggest a short name, check which domain endings are available and what they cost, and tell me which steps only I can do, like creating accounts and paying.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

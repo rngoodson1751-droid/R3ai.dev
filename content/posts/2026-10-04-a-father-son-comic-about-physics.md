@@ -42,6 +42,12 @@ AI-made art still has a look, and readers can tell. Getting past that takes more
 
 If your kid has a story, ask an AI how many pages it would be and what a printer needs. Seeing that it is possible is half of it.
 
+```prompt
+My kid wrote a story called [title]. Here it is: [paste the story].
+
+I want to turn it into a printed comic book. How many pages would it be, how would you split it into parts, and what page size and file format should I bring to a local print shop? Keep every word of the story theirs.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

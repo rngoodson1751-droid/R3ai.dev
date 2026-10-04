@@ -31,6 +31,12 @@ It only knows the balances I give it. If my figures are stale, the answer is sta
 
 Put your balances and invoices in a table and ask "what fits where, and what does not fit anywhere?"
 
+```prompt
+Here are my remaining balances by grant and budget line, and the invoices I need to pay: [paste a table].
+
+What fits where, and what does not fit anywhere? Don't force anything in. Ask me whatever you need to know before you answer.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

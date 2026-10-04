@@ -41,6 +41,12 @@ When the old site blocked Claude from reading it, it did not ask for a password.
 
 It cannot see the score sheet. Every error it fixed was one I had typed. Check the inputs.
 
+```prompt
+I'm scoring a club sailboat race with the Portsmouth yardstick. Here are the boats, crew counts and elapsed times: [list].
+
+Look up each boat's handicap number, tell me which number you used and where it came from, and give me corrected times and standings. If a boat isn't on the standard list, say so clearly.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

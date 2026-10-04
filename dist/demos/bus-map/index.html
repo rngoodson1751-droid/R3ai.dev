@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live bus map demo · R3 AI</title>
+<meta name="description" content="Watch made-up buses move along made-up routes, and see the real-time feed behind each one.">
+<link rel="canonical" href="https://r3ai.dev/demos/bus-map/">
+<meta property="og:title" content="Live bus map demo">
+<meta property="og:description" content="Watch made-up buses move along made-up routes, and see the real-time feed behind each one.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/demos/bus-map/">
+<meta property="og:site_name" content="R3 AI">
+<meta property="og:image" content="https://r3ai.dev/og/demo-bus-map.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script src="/demos/sim.js" defer></script>
+<script src="/demos/busmap.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/" aria-current="page">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/" aria-current="page">At work</a><a href="/home/">At home</a><a href="/blog/">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<section class="head"><h1>Live bus map</h1><p>Six buses on five routes in a town that does not exist. Pick a bus to see what the real-time feed says about it, or pick a stop to see when the next bus comes. <a href="/blog/live-bus-positions/">Read the write-up</a>.</p></section>
+<div class="sheet strong demo" id="busmap"><p class="empty">This demo needs JavaScript turned on.</p></div>
+<p class="note">Everything in this demo is made up, and nothing you type is saved or sent anywhere. The town, routes, stops and timetable are invented, and the bus positions come from a clock, not from GPS.</p>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

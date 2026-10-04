@@ -316,30 +316,157 @@
     });
   })();
 
-  // ---------- blog: filter the post list by topic. The address keeps the choice, so /blog/#sailing can be shared ----------
-  (function filters() {
-    var bar = document.getElementById('filters');
+  // ---------- blog: search the posts and filter by topic. The address keeps the topic, so /blog/#sailing can be shared ----------
+  (function blog() {
+    var bar = document.getElementById('filters'), form = document.getElementById('search');
     if (!bar) return;
-    var items = document.querySelectorAll('.list li[data-topics]'), none = document.getElementById('filter-empty');
-    function show(topic) {
-      var btn = bar.querySelector('[data-topic="' + topic.replace(/[^a-z0-9-]/g, '') + '"]');
-      if (!btn) { topic = ''; btn = bar.querySelector('[data-topic=""]'); }
-      var shown = 0;
-      [].forEach.call(items, function (li) {
+    var list = document.querySelector('.list'), items = [].slice.call(list.querySelectorAll('li[data-topics]')), none = document.getElementById('filter-empty');
+    var box = form && form.elements.q, topic = '', index = null, loading = null;
+    items.forEach(function (li, i) { li._order = i; li._url = li.querySelector('a').getAttribute('href'); });
+    function words(text) { return text.toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length > 1; }); }
+    function score(post, terms) { // every word has to appear; titles count most
+      var total = 0, t = post.t.toLowerCase(), s = post.s.toLowerCase(), x = post.x.toLowerCase();
+      for (var i = 0; i < terms.length; i++) {
+        var hit = (t.indexOf(terms[i]) >= 0 ? 6 : 0) + (s.indexOf(terms[i]) >= 0 ? 3 : 0) + (x.indexOf(terms[i]) >= 0 ? 1 : 0);
+        if (!hit) return 0;
+        total += hit;
+      }
+      return total;
+    }
+    function apply() {
+      var terms = box ? words(box.value) : [], shown = 0;
+      if (terms.length && !index) { load(); return; }
+      items.forEach(function (li) {
         var on = !topic || (' ' + li.dataset.topics + ' ').indexOf(' ' + topic + ' ') >= 0;
-        li.hidden = !on; if (on) shown++;
+        li._score = terms.length ? score(index[li._url] || { t: '', s: '', x: '' }, terms) : 1;
+        li.hidden = !(on && li._score); if (!li.hidden) shown++;
       });
-      [].forEach.call(bar.children, function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+      items.slice().sort(function (a, b) { return terms.length ? b._score - a._score || a._order - b._order : a._order - b._order; })
+        .forEach(function (li) { list.appendChild(li); });
+      [].forEach.call(bar.children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.topic === topic)); });
       if (none) none.hidden = shown > 0;
     }
+    function load() {
+      loading = loading || fetch('/search.json').then(function (r) { return r.json(); }).then(function (posts) {
+        index = {}; posts.forEach(function (p) { index[p.u] = p; }); apply();
+      }).catch(function () { loading = null; });
+    }
+    function setTopic(t) { topic = bar.querySelector('[data-topic="' + t.replace(/[^a-z0-9-]/g, '') + '"]') ? t : ''; apply(); }
     bar.addEventListener('click', function (e) {
       var b = e.target.closest('[data-topic]');
       if (!b) return;
-      history.replaceState(null, '', b.dataset.topic ? '#' + b.dataset.topic : location.pathname);
-      show(b.dataset.topic);
+      history.replaceState(null, '', b.dataset.topic ? '#' + b.dataset.topic : location.pathname + location.search);
+      setTopic(b.dataset.topic);
     });
-    addEventListener('hashchange', function () { show(location.hash.slice(1)); });
-    show(location.hash.slice(1));
+    addEventListener('hashchange', function () { setTopic(location.hash.slice(1)); });
+    if (box) {
+      box.value = new URLSearchParams(location.search).get('q') || '';
+      box.addEventListener('focus', load, { once: true });
+      box.addEventListener('input', apply);
+      form.addEventListener('submit', function (e) { e.preventDefault(); apply(); });
+    }
+    setTopic(location.hash.slice(1));
+  })();
+
+  // ---------- copy buttons on the "Try this yourself" prompts ----------
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-copy]');
+    if (!b) return;
+    var text = b.parentNode.querySelector('.prompt').textContent, label = 'Copy the prompt';
+    var done = function (ok) { b.textContent = ok ? 'Copied' : 'Select the text and copy it'; setTimeout(function () { b.textContent = label; }, 2200); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); else done(false);
+  });
+
+  // ---------- ask the site ----------
+  (function ask() {
+    var form = document.getElementById('ask');
+    if (!form) return;
+    var box = form.elements.q, msg = document.getElementById('ask-msg'), out = document.getElementById('ask-out'), btn = form.querySelector('[type=submit]');
+    document.getElementById('ask-ideas').addEventListener('click', function (e) {
+      if (e.target.tagName !== 'BUTTON') return;
+      box.value = e.target.textContent; form.requestSubmit ? form.requestSubmit() : btn.click();
+    });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var q = box.value.trim();
+      if (q.length < 5) { box.focus(); return; }
+      btn.disabled = true; msg.className = 'form-msg'; msg.textContent = 'Reading the posts';
+      fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q: q }) })
+        .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || ''); return d; }); })
+        .then(function (d) {
+          out.textContent = '';
+          String(d.answer).split(/\n{2,}/).forEach(function (para) { var p = document.createElement('p'); p.textContent = para.trim(); if (p.textContent) out.appendChild(p); });
+          if (d.sources && d.sources.length) {
+            var h = document.createElement('h2'), ul = document.createElement('ul');
+            h.textContent = 'Posts it used';
+            d.sources.forEach(function (s) { var li = document.createElement('li'), a = document.createElement('a'); a.href = s.url; a.textContent = s.title; li.appendChild(a); ul.appendChild(li); });
+            out.appendChild(h); out.appendChild(ul);
+          }
+          out.hidden = false; msg.textContent = '';
+        })
+        .catch(function (err) {
+          msg.className = 'form-msg bad';
+          msg.textContent = err.message && !/fetch|JSON|token/i.test(err.message) ? err.message : 'That did not go through. Try again in a minute.';
+        })
+        .then(function () { btn.disabled = false; });
+    });
+  })();
+
+  // ---------- games page: save a game for offline play, and install the site ----------
+  (function offline() {
+    var box = document.getElementById('offline');
+    if (!box || !('caches' in window) || !('serviceWorker' in navigator)) return;
+    var msg = document.getElementById('save-msg'), install = document.getElementById('install'), files = null, prompt = null;
+    box.hidden = false;
+    var saved = function (slug) { try { return localStorage.getItem('r3-saved-' + slug) === '1'; } catch (e) { return false; } };
+    [].forEach.call(box.querySelectorAll('[data-save]'), function (b) {
+      b._label = b.textContent;
+      if (saved(b.dataset.save)) { b.textContent = b._label.replace(/^Save/, 'Saved:').replace(/ \(.*\)$/, ''); b.setAttribute('aria-pressed', 'true'); }
+      b.addEventListener('click', function () {
+        b.disabled = true;
+        (files ? Promise.resolve(files) : fetch('/games/offline.json').then(function (r) { return r.json(); })).then(function (all) {
+          files = all;
+          var list = all[b.dataset.save] || [], done = 0;
+          return caches.open('r3-saved').then(function (cache) {
+            // a few at a time, so a phone on a slow connection is not asked for 100 files at once
+            var queue = list.slice(), workers = [0, 1, 2, 3].map(function next() {
+              var url = queue.shift();
+              if (!url) return Promise.resolve();
+              var outside = /^https:/.test(url);
+              return fetch(url, outside ? { mode: 'no-cors' } : {}).then(function (res) {
+                if (!outside && !res.ok) throw new Error(url);
+                return cache.put(url, res);
+              }).then(function () { msg.textContent = 'Saving ' + (++done) + ' of ' + list.length; return next(); });
+            });
+            return Promise.all(workers);
+          });
+        }).then(function () {
+          try { localStorage.setItem('r3-saved-' + b.dataset.save, '1'); } catch (e) {}
+          b.textContent = b._label.replace(/^Save/, 'Saved:').replace(/ \(.*\)$/, ''); b.setAttribute('aria-pressed', 'true');
+          msg.textContent = 'Saved. It will now open without a connection on this device.';
+        }).catch(function () { msg.textContent = 'That did not finish saving. Check your connection and try again.'; })
+          .then(function () { b.disabled = false; });
+      });
+    });
+    addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); prompt = e; install.hidden = false; });
+    install.addEventListener('click', function () { if (prompt) { prompt.prompt(); prompt = null; install.hidden = true; } });
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone) document.getElementById('ios-hint').hidden = false;
+  })();
+
+  // ---------- the service worker: makes the site installable and keeps visited pages for offline ----------
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('/sw.js').catch(function () {});
+
+  // ---------- count the visit: the page address and nothing else. No cookies, and skipped if the browser asks not to be tracked ----------
+  (function count() {
+    if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl || !navigator.sendBeacon) return;
+    var send = function (path) { try { navigator.sendBeacon('/api/hit', JSON.stringify({ p: path })); } catch (e) {} };
+    var page = function () { send(location.pathname); };
+    if (document.prerendering) document.addEventListener('prerenderingchange', page, { once: true }); else page();
+    // the games are stand-alone pages, so count them when someone presses Play
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="/games/"]');
+      if (a && a.getAttribute('href') !== '/games/') send(a.getAttribute('href'));
+    });
   })();
 
   // ---------- request page: the list of topics readers have asked for ----------

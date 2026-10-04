@@ -40,13 +40,18 @@ function markdown(src) {
     const line = lines[i];
     if (!line.trim()) { i++; continue; }
     if (line.startsWith('```')) {
-      const code = [];
+      const code = [], kind = line.slice(3).trim();
       i++;
       while (i < lines.length && !lines[i].startsWith('```')) code.push(lines[i++]);
       i++;
-      out.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>');
+      // ```prompt makes a "Try this yourself" box with a Copy button
+      if (kind === 'prompt') out.push(`<aside class="try"><h2>Try this yourself</h2><p class="hint">A prompt like the one I used. Paste it into any AI chat and fill in the brackets.</p><pre class="prompt">${esc(code.join('\n'))}</pre><button class="btn glass sm" type="button" data-copy>Copy the prompt</button></aside>`);
+      else out.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>');
       continue;
     }
+    // {{name}} on its own line drops in a small interactive tool from src/demos/name.js
+    const w = line.trim().match(/^\{\{([a-z-]+)\}\}$/);
+    if (w) { out.push(`<div class="widget" id="w-${w[1]}"><p class="note">This calculator needs JavaScript turned on.</p></div>`); i++; continue; }
     const h = line.match(/^(#{1,3})\s+(.*)$/);
     if (h) { const n = h[1].length + 1; out.push(`<h${n}>${inline(h[2])}</h${n}>`); i++; continue; }
     if (/^---+$/.test(line.trim())) { out.push('<hr>'); i++; continue; }
@@ -66,7 +71,7 @@ function markdown(src) {
       continue;
     }
     const para = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,3}\s|```|>|\s*[-*]\s+|\s*\d+\.\s+)/.test(lines[i])) para.push(lines[i++]);
+    while (i < lines.length && lines[i].trim() && !/^(#{1,3}\s|```|>|\{\{|\s*[-*]\s+|\s*\d+\.\s+)/.test(lines[i])) para.push(lines[i++]);
     out.push('<p>' + inline(para.join(' ')) + '</p>');
   }
   return out.join('\n');
@@ -86,7 +91,9 @@ function loadPosts() {
     const slug = f.replace(/\.md$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
     const topics = (meta.topics || '').split(',').map(t => t.trim()).filter(Boolean);
     for (const t of topics) if (!TOPICS.includes(t)) throw new Error(`${f}: unknown topic "${t}". Use one of: ${TOPICS.join(', ')}`);
-    return { ...meta, topics, slug, url: `/blog/${slug}/`, html: markdown(m[2]) };
+    // plain text of the post, for search and for the Ask page
+    const text = m[2].replace(/```[\s\S]*?```/g, ' ').replace(/\{\{[a-z-]+\}\}/g, ' ').replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[#*`>_]/g, '').replace(/\s+/g, ' ').trim();
+    return { ...meta, topics, slug, url: `/blog/${slug}/`, html: markdown(m[2]), text };
   }).filter(p => p.draft !== 'true').sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (Number(a.order) || 50) - (Number(b.order) || 50) || a.title.localeCompare(b.title)));
 }
 const posts = loadPosts();
@@ -119,6 +126,8 @@ function layout({ title, description, path, section = '', nav = '', body, og = '
 <meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name}" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -140,7 +149,7 @@ function layout({ title, description, path, section = '', nav = '', body, og = '
 ${body}
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; ${new Date().getUTCFullYear()} ${SITE.author}. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>
@@ -234,13 +243,18 @@ write('index.html', layout({
   <section class="${featured ? 'span-4' : 'span-6'}" style="display:grid" aria-label="Latest posts">
     ${postList(posts.slice(0, 4))}
   </section>
-  <article class="sheet tile reveal">
+  <article class="sheet tile span-2 reveal">
     <h2>New to AI?</h2>
     <p>Five short posts to read first, picked for people who aren't sure what AI would do for them.</p>
     <div class="end"><a class="btn" href="/start/">Start here</a></div>
   </article>
-  <article class="sheet tile reveal">
-    <h2>Want to read about something?</h2>
+  <article class="sheet tile span-2 reveal">
+    <h2>Ask the site</h2>
+    <p>Type a question and a small AI answers it from my posts, with links to the ones it used.</p>
+    <div class="end"><a class="btn glass" href="/ask/">Ask a question</a></div>
+  </article>
+  <article class="sheet tile span-2 reveal">
+    <h2>Want more?</h2>
     <p>Pick anything on the site, from the work side or the home side, and ask me to write about it.</p>
     <div class="end"><a class="btn glass" href="/request/">Request a post</a></div>
   </article>
@@ -252,7 +266,7 @@ const sectionCopy = {
     intro: 'I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. Each project here has a write-up covering the problem, the tool and what I learned.',
     projectsEmpty: 'Project write-ups are on the way.',
     projectsTitle: 'Projects',
-    projectsNote: 'Two of these run right here with made-up data: the <a href="/demos/dispatch-board/">dispatch board</a> and the <a href="/demos/procurement-wizard/">procurement wizard</a>.',
+    projectsNote: 'Four of these run right here with made-up data. See the <a href="/demos/">demos page</a>.',
     description: 'Transit software and notes from a City Transit division.',
   },
   home: {
@@ -281,17 +295,18 @@ const topicCount = t => posts.filter(p => p.topics.includes(t)).length;
 write('blog/index.html', layout({
   title: 'Blog', path: '/blog/', nav: 'blog', og: 'blog', description: 'Every post from both sides of the site, with filters by topic.',
   body: `<section class="head"><h1>Blog</h1><p>Every post from both sides of the site. New here? <a href="/start/">Start with these five</a>. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
+<form class="search" id="search" role="search" action="/blog/"><label class="sr" for="q">Search the posts</label><input class="input" id="q" name="q" type="search" placeholder="Search all ${posts.length} posts" autocomplete="off"><p class="note"><a href="/ask/">Or ask the site a question</a></p></form>
 <div class="filters" id="filters" role="group" aria-label="Filter posts by topic">
   <button class="chip" type="button" data-topic="" aria-pressed="true">All <span>${posts.length}</span></button>
   ${TOPICS.filter(topicCount).map(t => `<button class="chip" type="button" data-topic="${topicSlug(t)}" aria-pressed="false">${t} <span>${topicCount(t)}</span></button>`).join('\n  ')}
 </div>
 ${postList(posts)}
-<p class="note" id="filter-empty" hidden>No posts on that topic yet.</p>`,
+<p class="note" id="filter-empty" hidden>No posts match. Try fewer words, or <a href="/request/">request a post</a> about it.</p>`,
 }));
 
 for (const p of posts) {
   write(`blog/${p.slug}/index.html`, layout({
-    title: p.title, path: p.url, section: p.section, nav: 'blog', og: p.slug, type: 'article', description: p.summary,
+    title: p.title, path: p.url, section: p.section, nav: 'blog', og: p.slug, type: 'article', description: p.summary, scripts: p.widget ? [`/demos/${p.widget}.js`] : [],
     body: `<article class="sheet strong post">
 <header><p class="when"><time datetime="${p.date}">${longDate(p.date)}</time>${chip(p.section)}${p.topics.map(t => `<a class="chip" href="/blog/#${topicSlug(t)}">${t}</a>`).join('')}</p><h1 style="view-transition-name:post-${p.slug}">${esc(p.title)}</h1></header>
 <div class="prose">
@@ -320,6 +335,7 @@ write('about/index.html', layout({
 <p>The site is plain HTML produced by a small build script, with posts written as text files. It is hosted on Cloudflare and the source lives on <a href="https://github.com/rngoodson1751-droid/R3ai.dev">GitHub</a>.</p>
 <h2>The fine print</h2>
 <p>This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+<p>The site counts how many times each page is opened so I can see what people read. It uses no cookies and keeps nothing about you, and it skips the count if your browser asks not to be tracked.</p>
 </div></div>`,
 }));
 
@@ -344,7 +360,7 @@ ${START.map(([slug, label, why], i) => { const p = bySlug(slug); return `<li><a 
 <h2 class="h2">Then follow what you care about</h2>
 <div class="cards wide">
   <article class="sheet card reveal"><h3>You run an office</h3><p>Email, forms, regulations, grants and hard meetings.</p><div class="end"><a class="btn glass" href="/blog/#office-work">Office work posts</a></div></article>
-  <article class="sheet card reveal"><h3>You'd rather try than read</h3><p>Two of my work tools run right here with made-up data.</p><div class="end"><a class="btn glass" href="/demos/dispatch-board/">Dispatch board</a><a href="/demos/procurement-wizard/">Procurement wizard</a></div></article>
+  <article class="sheet card reveal"><h3>You'd rather try than read</h3><p>Four of my work tools run right here with made-up data, and every post in the series ends with a prompt you can copy.</p><div class="end"><a class="btn glass" href="/demos/">Try the demos</a><a href="/ask/">Ask the site</a></div></article>
   <article class="sheet card reveal"><h3>You have kids</h3><p>Games and comics I built for River, and how.</p><div class="end"><a class="btn glass" href="/games/">Play the games</a><a href="/blog/#family">Family posts</a></div></article>
   <article class="sheet card reveal"><h3>You want all of it</h3><p>The full list: 27 ways I actually use AI, with a post on each.</p><div class="end"><a class="btn glass" href="/blog/ways-i-use-ai/">See the list</a></div></article>
 </div>`,
@@ -352,10 +368,29 @@ ${START.map(([slug, label, why], i) => { const p = bySlug(slug); return `<li><a 
 
 // ---------- games ----------
 const games = projects.filter(p => (p.links || []).some(l => l.href.startsWith('/games/')));
+// every file a game needs, so the games page can save it for offline play
+function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]); }
+const gameFiles = {};
+for (const g of games) {
+  const slug = g.links[0].href.split('/')[2], dir = `static/games/${slug}`;
+  const local = walk(dir).map(f => '/' + f.replace(/^static\//, '').replace(/index\.html$/, ''));
+  const html = readFileSync(`${dir}/index.html`, 'utf8');
+  const outside = [...html.matchAll(/(?:src|href)="(https:\/\/[^"]+\.(?:js|css)[^"]*|https:\/\/fonts\.googleapis\.com\/[^"]+)"/g)].map(m => m[1].replace(/&amp;/g, '&'));
+  gameFiles[slug] = { files: [...new Set([...local, ...outside])], bytes: walk(dir).reduce((n, f) => n + readFileSync(f).length, 0) };
+}
+const gameSize = slug => { const mb = gameFiles[slug].bytes / 1e6; return mb < 1 ? 'under 1 MB' : `${Math.round(mb)} MB`; };
+write('games/offline.json', JSON.stringify(Object.fromEntries(Object.entries(gameFiles).map(([k, v]) => [k, v.files]))));
 write('games/index.html', layout({
   title: 'Games', path: '/games/', og: 'games', description: 'Browser games Robert built with AI: a kart racer, a rocket game for River and a bus simulator on real streets.',
   body: `<section class="head"><h1>Games</h1><p>Everything here runs in your browser, with nothing to install. They are best on a computer with a keyboard or a controller.</p></section>
 ${projectCards('', { list: games, pictures: true })}
+<section class="sheet offline" id="offline" hidden>
+  <div><h2>Play without a connection</h2>
+  <p>Save a game to this device and it will run with no internet, which is handy in the car. Saving the site to your home screen makes it open like an app.</p>
+  <p class="hint" id="ios-hint" hidden>On an iPhone or iPad, tap Share, then Add to Home Screen.</p></div>
+  <div class="end">${games.map(g => { const slug = g.links[0].href.split('/')[2]; return `<button class="btn glass sm" type="button" data-save="${slug}">Save ${esc(g.title)} (${gameSize(slug)})</button>`; }).join('')}<button class="btn sm" type="button" id="install" hidden>Install the site</button></div>
+  <p class="hint" id="save-msg" role="status"></p>
+</section>
 <p class="note">Not online yet: the <a href="/blog/sailing-simulator/">sailing simulator you steer with your hands</a>.</p>`,
 }));
 
@@ -374,6 +409,63 @@ write('demos/procurement-wizard/index.html', layout({
   body: `<section class="head"><h1>Procurement wizard</h1><p>Answer a few plain questions about a purchase and get the right form, filled in, with the checks that are easy to forget. <a href="/blog/procurement-wizard/">Read the write-up</a>.</p></section>
 <div class="sheet strong demo" id="wizard"><p class="empty">This demo needs JavaScript turned on.</p></div>
 <p class="note">${demoNote} The dollar limits are the ones from my write-up and yours will differ. The form it prints is a simplified sample, so treat this as a demonstration and not as procurement advice.</p>`,
+}));
+
+write('demos/bus-map/index.html', layout({
+  title: 'Live bus map demo', path: '/demos/bus-map/', section: 'work', nav: 'work', og: 'demo-bus-map', scripts: ['/demos/sim.js', '/demos/busmap.js'],
+  description: 'Watch made-up buses move along made-up routes, and see the real-time feed behind each one.',
+  body: `<section class="head"><h1>Live bus map</h1><p>Six buses on five routes in a town that does not exist. Pick a bus to see what the real-time feed says about it, or pick a stop to see when the next bus comes. <a href="/blog/live-bus-positions/">Read the write-up</a>.</p></section>
+<div class="sheet strong demo" id="busmap"><p class="empty">This demo needs JavaScript turned on.</p></div>
+<p class="note">${demoNote} The town, routes, stops and timetable are invented, and the bus positions come from a clock, not from GPS.</p>`,
+}));
+write('demos/stop-sign/index.html', layout({
+  title: 'Bus stop sign demo', path: '/demos/stop-sign/', section: 'work', nav: 'work', og: 'demo-stop-sign', scripts: ['/demos/sim.js', '/demos/stopsign.js'],
+  description: 'An on-screen version of the e-paper countdown sign for bus stops.',
+  body: `<section class="head"><h1>Bus stop sign</h1><p>This is what the e-paper countdown sign would show at a stop. It reads the same made-up buses as the <a href="/demos/bus-map/">live map demo</a>. <a href="/blog/bus-stop-display/">Read the write-up</a>.</p></section>
+<div class="sheet strong demo" id="stopsign"><p class="empty">This demo needs JavaScript turned on.</p></div>
+<p class="note">${demoNote} The real sign is still a prototype. This page shows the idea, not the finished hardware.</p>`,
+}));
+const DEMOS = [
+  ['dispatch-board', 'Scheduling', 'Dispatch board', 'Mark a driver as called in and the board works out who covers each route.'],
+  ['procurement-wizard', 'Procurement', 'Procurement wizard', 'Answer plain questions about a purchase and get a completed sample form.'],
+  ['bus-map', 'Open data', 'Live bus map', 'Watch buses move on a map and see the real-time feed behind each one.'],
+  ['stop-sign', 'Hardware', 'Bus stop sign', 'An on-screen version of the e-paper countdown sign for bus stops.'],
+];
+write('demos/index.html', layout({
+  title: 'Demos', path: '/demos/', section: 'work', nav: 'work', og: 'demos', description: 'Working demos of the transit tools Robert built, running in your browser with made-up data.',
+  body: `<section class="head"><h1>Demos</h1><p>Four of the tools I built for work, running here with made-up data. Click around. You can't break anything.</p></section>
+<div class="cards wide">
+${DEMOS.map(([slug, kind, title, text]) => `<article class="sheet card reveal"><div class="chips"><span class="chip">${kind}</span></div><h3>${title}</h3><p>${text}</p><div class="end"><a class="btn" href="/demos/${slug}/">Try it</a></div></article>`).join('\n')}
+</div>
+<p class="note">${demoNote} There is also a <a href="/blog/portsmouth-scoring/">sailboat race scoring calculator</a> inside the scoring post.</p>`,
+}));
+
+// ---------- ask the site ----------
+write('ask/index.html', layout({
+  title: 'Ask the site', path: '/ask/', og: 'ask', description: 'Ask a question and a small AI answers it from the posts on r3ai.dev.',
+  body: `<section class="head"><h1>Ask the site</h1><p>Type a question and a small AI will answer it using only the posts on this site, then show you which posts it used.</p></section>
+<form class="sheet strong form" id="ask">
+  <div class="field">
+    <label for="ask-q">Your question</label>
+    <textarea class="input" id="ask-q" name="q" required minlength="5" maxlength="300" rows="3" placeholder="Example: How do you check whether the AI got a regulation right?"></textarea>
+  </div>
+  <div class="chips" id="ask-ideas">
+    <button class="chip" type="button">What do you use AI for at work?</button>
+    <button class="chip" type="button">When has the AI been wrong?</button>
+    <button class="chip" type="button">How did you build games for River?</button>
+    <button class="chip" type="button">How does Portsmouth scoring work?</button>
+  </div>
+  <div class="acts"><button class="btn" type="submit">Ask</button><p class="form-msg" id="ask-msg" role="status"></p></div>
+  <div class="answer" id="ask-out" aria-live="polite" hidden></div>
+</form>
+<p class="note">This is a bot, not me. It reads my posts and can still get things wrong, so open the posts it lists before you rely on an answer. It can't answer questions about bus service, and nothing it says is a statement from my employer.</p>
+<p class="note">Questions are saved, without your name, so I can see what people want to know. Please don't type anything personal. It answers a limited number of questions each day.</p>
+<noscript><p class="note">This page needs JavaScript turned on.</p></noscript>`,
+}));
+
+write('offline/index.html', layout({
+  title: 'You are offline', path: '/offline/', description: 'This page is not saved on your device.',
+  body: `<section class="head"><h1>No connection</h1><p>This page isn't saved on your device. Pages you have already opened still work, and so do any games you saved on the <a href="/games/">games page</a>.</p></section>`,
 }));
 
 const option = (value, label) => `<option value="${esc(value)}">${esc(label)}</option>`;
@@ -431,12 +523,26 @@ write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${posts.map(p => `<item><title>${esc(p.title)}</title><link>${SITE.url}${p.url}</link><guid>${SITE.url}${p.url}</guid><pubDate>${new Date(p.date + 'T12:00:00Z').toUTCString()}</pubDate><category>${SECTIONS[p.section].label}</category><description>${esc(p.summary)}</description></item>`).join('\n')}
 </channel></rss>
 `);
-const paths = ['/', '/start/', '/work/', '/home/', '/blog/', '/games/', '/demos/dispatch-board/', '/demos/procurement-wizard/', '/request/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
+write('search.json', JSON.stringify(posts.map(p => ({ t: p.title, u: p.url, s: p.summary, c: p.section, x: p.text }))));
+write('manifest.webmanifest', JSON.stringify({
+  name: 'R3 AI: Robert, Rachelle and River', short_name: 'R cubed', description: 'Software, games and family projects built with AI.',
+  start_url: '/', scope: '/', display: 'standalone', background_color: '#e9f4f5', theme_color: '#0b6cc4',
+  icons: [
+    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+  ],
+  shortcuts: [{ name: 'Games', url: '/games/' }, { name: 'Blog', url: '/blog/' }],
+}, null, 1));
+writeFileSync(join(OUT, 'sw.js'), readFileSync('src/sw.js'));
+const paths = ['/', '/start/', '/work/', '/home/', '/blog/', '/games/', '/demos/', ...DEMOS.map(d => `/demos/${d[0]}/`), '/ask/', '/request/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...new Set(paths)].map(p => `<url><loc>${SITE.url}${p}</loc></url>`).join('\n')}
 </urlset>
 `);
+// the pages the visit counter will accept
+write('paths.json', JSON.stringify([...new Set(paths)]));
 write('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE.url}/sitemap.xml\n`);
 
 console.log(`Built ${posts.length} posts and ${projects.length} projects into ${OUT}/`);

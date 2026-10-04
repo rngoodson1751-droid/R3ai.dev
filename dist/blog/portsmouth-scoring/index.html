@@ -18,6 +18,8 @@
 <meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +27,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <link rel="stylesheet" href="/styles.css">
 <script src="/site.js" defer></script>
+<script src="/demos/portsmouth.js" defer></script>
 <script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body data-section="home">
@@ -48,6 +51,10 @@
 <p>Say a Flying Scot carries a number of about 90 and a Sunfish about 100.</p>
 <ul><li>The Scot finishes in 45 minutes. 45 times 100, divided by 90, is 50 minutes.</li><li>The Sunfish finishes in 49 minutes. 49 times 100, divided by 100, is 49 minutes.</li></ul>
 <p>The Sunfish crossed the line four minutes later and won by a minute. The number says a well-sailed Sunfish should take about eleven percent longer than a well-sailed Scot. This Sunfish took less than that, so it sailed the better race.</p>
+<h3>Score your own race</h3>
+<p>Put in each boat's Portsmouth number and elapsed time. The calculator starts with the example above.</p>
+<div class="widget" id="w-portsmouth"><p class="note">This calculator needs JavaScript turned on.</p></div>
+<p>For real scoring, use the current numbers from US Sailing's Portsmouth tables. The two here are round numbers for the example.</p>
 <h3>What it's like in practice</h3>
 <p>I scored one of our club races this way, with some help from Claude. I finished third on corrected time. I mention that only to show the math doesn't play favorites with whoever is running it.</p>
 <h3>What the number can't do</h3>
@@ -59,7 +66,7 @@
 </article>
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>

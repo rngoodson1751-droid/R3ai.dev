@@ -47,6 +47,12 @@ The graphics are simple shapes, not artist-made models. And a game like this is 
 
 Ask your kid what the game should be. Then type exactly what they said.
 
+```prompt
+Make a game for my [age]-year-old, [name], that runs in a web browser as one file. [Name] said it should be about: [type exactly what they said].
+
+It has to call [name] by name and tell them they are a great [rocket engineer]. It should work with a keyboard and a touch screen. When you're done, tell me what you could not test.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

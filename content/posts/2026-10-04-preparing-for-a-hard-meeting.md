@@ -42,6 +42,12 @@ The point of the preparation is not to be more combative. When you have already 
 
 It only knows the documents you show it. It cannot tell you about the history between two offices or what was said in a hallway. And it should never be the one deciding. It helps you think. You go to the meeting.
 
+```prompt
+I have a meeting in [an hour] about how [a written policy] should be read. Here is the text: [paste]. Here is my reading of it: [explain].
+
+Don't tell me whether I'm right. Tell me what the other side will say, strongest argument first, and what I should know cold before I walk in.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

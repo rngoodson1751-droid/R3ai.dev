@@ -46,6 +46,12 @@ You can ask a follow-up. That is the whole difference from a search engine. The 
 
 It guesses when it cannot see. Describe the thing carefully, and correct it when it is wrong.
 
+```prompt
+I've attached [a document I don't understand]. In plain language, what is it, and how can you tell? Point to the lines that told you.
+
+Then tell me who I should ask to confirm it officially.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

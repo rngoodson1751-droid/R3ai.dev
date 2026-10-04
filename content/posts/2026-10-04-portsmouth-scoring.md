@@ -4,6 +4,7 @@ date: 2026-10-04
 section: home
 order: 12
 topics: Sailing
+widget: portsmouth
 summary: Club races put fast boats and slow boats on the same course. The Portsmouth yardstick is the simple math that makes it fair.
 ---
 
@@ -25,6 +26,14 @@ Say a Flying Scot carries a number of about 90 and a Sunfish about 100.
 - The Sunfish finishes in 49 minutes. 49 times 100, divided by 100, is 49 minutes.
 
 The Sunfish crossed the line four minutes later and won by a minute. The number says a well-sailed Sunfish should take about eleven percent longer than a well-sailed Scot. This Sunfish took less than that, so it sailed the better race.
+
+## Score your own race
+
+Put in each boat's Portsmouth number and elapsed time. The calculator starts with the example above.
+
+{{portsmouth}}
+
+For real scoring, use the current numbers from US Sailing's Portsmouth tables. The two here are round numbers for the example.
 
 ## What it's like in practice
 

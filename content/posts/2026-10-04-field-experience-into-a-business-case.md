@@ -37,6 +37,12 @@ It will write the safe version unless you ask for your own voice. I edited the d
 
 Give it the story first, then ask for the rule that supports it.
 
+```prompt
+Here is something my staff and I keep running into: [tell the story of what happens].
+
+I want to buy [the fix], and [Finance] needs a written business need first. Write a justification memo that tells the story in our voice, then cite the rule or requirement that supports it. Tell me anything about the product I should check before I send this.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

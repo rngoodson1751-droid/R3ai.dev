@@ -46,6 +46,14 @@ Documents age, and people do good work with the information they have at the tim
 
 Upload the document and ask: "What is wrong here, and what should be here that is not?"
 
+```prompt
+I've attached [a scope of work] that was written [a few years ago]. I have a meeting about it [tomorrow].
+
+What is wrong in it, and what should be in it that is not? Give me two lists.
+
+Here is what I know about the site that the document doesn't say: [details].
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

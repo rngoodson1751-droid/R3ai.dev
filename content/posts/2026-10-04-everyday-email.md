@@ -37,6 +37,14 @@ An editor who reads for the point first and the polish second is worth having, e
 
 Humor is personal. Its jokes are not always mine, and I delete some. The voice has to stay yours or people can tell.
 
+```prompt
+Here is the email I received: [paste]. Here is my draft reply: [paste].
+
+Before you improve the wording, tell me: did I answer what I was asked? Did I say anything I shouldn't put in writing? Is any fact wrong?
+
+Then make it [funnier / warmer / shorter], and tell me what you changed so I can cut anything that doesn't sound like me.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

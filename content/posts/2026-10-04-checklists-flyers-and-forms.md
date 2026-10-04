@@ -30,6 +30,12 @@ It makes assumptions to fill gaps, such as which rooms are locked or how many re
 
 Upload a document you already like and say "make me another one in this style for a different job."
 
+```prompt
+I've attached a [checklist] I already use and like. Make me another one in the same style for [a different job]: [describe the tasks, how often they happen and who does them].
+
+Keep it to [one page]. At the end, list every assumption you made so I can correct them.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*

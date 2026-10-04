@@ -1,0 +1,38 @@
+{
+ "name": "R3 AI: Robert, Rachelle and River",
+ "short_name": "R cubed",
+ "description": "Software, games and family projects built with AI.",
+ "start_url": "/",
+ "scope": "/",
+ "display": "standalone",
+ "background_color": "#e9f4f5",
+ "theme_color": "#0b6cc4",
+ "icons": [
+  {
+   "src": "/icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "/icons/icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "Games",
+   "url": "/games/"
+  },
+  {
+   "name": "Blog",
+   "url": "/blog/"
+  }
+ ]
+}

@@ -9,6 +9,8 @@ summary: How I turned the GPS units already on our buses into a GTFS Realtime fe
 
 Our buses already had GPS units. The locations just weren't going anywhere a rider could see.
 
+You can [watch a demo of the map](/demos/bus-map/) with made-up buses, and see the feed behind each one.
+
 ## The format that apps already read
 
 Trip-planning apps don't want a custom feed. They want GTFS Realtime, an open standard for vehicle positions and arrival predictions. If you publish in that format, any app that knows the standard can read your buses.

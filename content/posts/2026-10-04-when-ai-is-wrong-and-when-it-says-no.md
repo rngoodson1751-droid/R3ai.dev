@@ -37,6 +37,12 @@ Not every catch was mine. Claude once went back over a report it had written for
 
 Check anything that matters against the source. Tell it when it is wrong. And notice that an assistant that will tell you no is one whose yes means more.
 
+```prompt
+Go back over everything you've told me in this conversation. Which claims are you least sure of?
+
+For each one, tell me what you based it on and how I can check it against the original source.
+```
+
 ---
 
 *Part of the series [27 ways I actually use AI](/blog/ways-i-use-ai/). Claude drafted this post from the record of our work together.*
