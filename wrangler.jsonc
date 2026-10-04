@@ -13,6 +13,8 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "r3ai-requests", "database_id": "d69b294e-84e4-4568-b6da-3ee739dea136" }
   ],
+  // Cloudflare's AI models, used by Ask the site (/ask/). Runs on the free daily allowance.
+  "ai": { "binding": "AI" },
   // Attaches the domain automatically on each deploy.
   "routes": [
     { "pattern": "r3ai.dev", "custom_domain": true }
