@@ -698,7 +698,7 @@ function loadSave(){try{const j=JSON.parse(localStorage.getItem(SAVE_KEY)||'null
 function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}}
 function totalStars(){return MISSIONS.reduce((s,m)=>s+(save.stars[m.id]||0),0)}
 function rankName(){if(save.champ)return 'Champion of the Whole Solar System';const t=totalStars();let r=RANKS[0][1];for(const [n,name] of RANKS)if(t>=n)r=name;return r}
-function missionOpen(m){if(save.champ)return true;if(m.after==='rainbow')return true; /* the Rainbow Race is open from the start */ if(m.id==='free')return (save.stars.m4||0)>0;if(m.n===1)return true;return (save.stars[MISSIONS[m.n-2].id]||0)>0}
+function missionOpen(m){return true} /* every mission, and Free Flight, is open from the start; stars and the certificate are still earned */
 function allDone(){return MISSIONS.every(m=>(save.stars[m.id]||0)>0)}
 function designFor(m){
   const d=Object.assign({paint:1,pattern:0,sticker:0},m.start,save.designs[m.id]||{});d.sticker=clamp(d.sticker|0,0,STICKERS.length-1);
