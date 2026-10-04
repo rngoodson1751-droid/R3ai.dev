@@ -3,6 +3,7 @@ title: A father-son comic book about physics
 date: 2026-10-04
 section: home
 order: 41
+topics: Using AI, Family
 summary: River wrote a space adventure about the biggest unsolved problem in physics. We are turning it into a real printed comic book.
 ---
 

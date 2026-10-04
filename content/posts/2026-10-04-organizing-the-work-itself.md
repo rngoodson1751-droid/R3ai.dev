@@ -3,6 +3,7 @@ title: Organizing the work itself
 date: 2026-10-04
 section: work
 order: 36
+topics: Using AI, Office work
 summary: Before my assistant manager and I sat down to sort out everything on our plates, I asked AI how to run that meeting.
 ---
 

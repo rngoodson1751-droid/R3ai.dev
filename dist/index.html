@@ -10,6 +10,11 @@
 <meta property="og:description" content="Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/">
+<meta property="og:site_name" content="R3 AI">
+<meta property="og:image" content="https://r3ai.dev/og/default.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -61,35 +66,40 @@
     <div class="chips"><span class="chip live">Play now</span></div>
     <h2>Sloth Rocket Grand Prix</h2>
     <p>A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.</p>
-    <div class="end"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a class="btn glass" href="/blog/sloth-rocket-grand-prix/">Read the build notes</a></div>
+    <div class="end"><a class="btn" href="/games/sloth-rocket-grand-prix/">Play</a><a class="btn glass" href="/blog/sloth-rocket-grand-prix/">Read the build notes</a><a href="/games/">All games</a></div>
   </article>
   <section class="span-4" style="display:grid" aria-label="Latest posts">
-    <ul class="sheet list reveal"><li><a href="/blog/rivers-rocket-works/">
+    <ul class="sheet list reveal"><li data-topics="games family"><a href="/blog/rivers-rocket-works/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-rivers-rocket-works">River's Rocket Works</h3><p>A rocket game I built for River. Design a rocket, fly twelve missions from first launch to a wormhole, and race the whole family around the solar system.</p></div>
 </a></li>
-<li><a href="/blog/live-bus-positions/">
+<li data-topics="transit-tools"><a href="/blog/live-bus-positions/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-live-bus-positions">Putting our buses on the map, live</h3><p>How I turned the GPS units already on our buses into a GTFS Realtime feed, and a live map for the public.</p></div>
 </a></li>
-<li><a href="/blog/sunfish-speed/">
+<li data-topics="sailing"><a href="/blog/sunfish-speed/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-sunfish-speed">Making a Sunfish faster without breaking the rules</h3><p>My tuning notes for the Sunfish: the four sail controls, a few ideas I want to test, and the only class-legal way to rig a vang.</p></div>
 </a></li>
-<li><a href="/blog/transit-simulator/">
+<li data-topics="games transit-tools"><a href="/blog/transit-simulator/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-transit-simulator">A driving game set on our real bus routes</h3><p>A 3D driving game in the browser built from real route data, real streets and about 40,000 real building footprints. It started as a trolley simulator and kept growing.</p></div>
 </a></li></ul>
   </section>
-  <article class="sheet tile span-6 ask reveal">
-    <div><h2>Want to read about something?</h2>
-    <p>Pick anything on the site, from the work side or the home side, and ask me to write about it.</p></div>
-    <div class="end"><a class="btn" href="/request/">Request a post</a></div>
+  <article class="sheet tile reveal">
+    <h2>New to AI?</h2>
+    <p>Five short posts to read first, picked for people who aren't sure what AI would do for them.</p>
+    <div class="end"><a class="btn" href="/start/">Start here</a></div>
+  </article>
+  <article class="sheet tile reveal">
+    <h2>Want to read about something?</h2>
+    <p>Pick anything on the site, from the work side or the home side, and ask me to write about it.</p>
+    <div class="end"><a class="btn glass" href="/request/">Request a post</a></div>
   </article>
 </div>
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>

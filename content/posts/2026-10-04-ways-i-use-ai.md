@@ -3,6 +3,7 @@ title: 27 ways I actually use AI
 date: 2026-10-04
 section: work
 order: 20
+topics: Using AI
 summary: A list of every kind of thing I have used AI for, at work and at home, with a short post on each. Start here.
 ---
 

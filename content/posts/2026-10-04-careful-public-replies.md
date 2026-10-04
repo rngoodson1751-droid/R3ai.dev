@@ -3,6 +3,7 @@ title: Writing a careful public reply
 date: 2026-10-04
 section: work
 order: 26
+topics: Using AI, Office work
 summary: When a resident asks whether a rumor is true, the wording matters. Here is how I draft those replies, including the time the AI got ahead of the facts.
 ---
 

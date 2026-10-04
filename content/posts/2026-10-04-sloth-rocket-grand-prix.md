@@ -2,6 +2,7 @@
 title: Sloth Rocket Grand Prix: a kart racer in one HTML file
 date: 2026-10-04
 section: home
+topics: Games
 summary: I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.
 ---
 

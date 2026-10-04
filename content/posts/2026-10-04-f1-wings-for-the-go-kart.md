@@ -3,6 +3,7 @@ title: F1 wings for a two-seat go-kart
 date: 2026-10-04
 section: home
 order: 13
+topics: Family
 summary: River loves Formula 1, so the Thunder Kart I'm rebuilding is getting a front wing, a rear wing and sidepods. Plywood, PVC pipe and about $50.
 ---
 

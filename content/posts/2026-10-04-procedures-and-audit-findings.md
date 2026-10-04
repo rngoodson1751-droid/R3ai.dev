@@ -3,6 +3,7 @@ title: Building a procedure library and closing audit findings
 date: 2026-10-04
 section: work
 order: 28
+topics: Using AI, Office work
 summary: A federal review left us with findings and a deadline. Here is how AI helped turn scattered old documents into procedures we can actually follow.
 ---
 

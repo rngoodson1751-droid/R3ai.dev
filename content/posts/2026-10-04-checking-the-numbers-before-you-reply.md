@@ -3,6 +3,7 @@ title: Checking the numbers before you reply
 date: 2026-10-04
 section: work
 order: 34
+topics: Using AI, Office work
 summary: Someone sent me a total. Before I agreed or disagreed, I had AI read the rulebook and recount.
 ---
 

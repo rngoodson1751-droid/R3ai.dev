@@ -3,6 +3,7 @@ title: Color a bus, then watch it save the day
 date: 2026-10-04
 section: work
 order: 10
+topics: Transit tools
 summary: A printable coloring page and a small story app that puts a kid's own hand-colored bus into an adventure, ending with a certificate.
 ---
 

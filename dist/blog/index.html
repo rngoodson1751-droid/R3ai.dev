@@ -4,12 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Blog · R3 AI</title>
-<meta name="description" content="Every post from both sides of the site, newest first.">
+<meta name="description" content="Every post from both sides of the site, with filters by topic.">
 <link rel="canonical" href="https://r3ai.dev/blog/">
 <meta property="og:title" content="Blog">
-<meta property="og:description" content="Every post from both sides of the site, newest first.">
+<meta property="og:description" content="Every post from both sides of the site, with filters by topic.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r3ai.dev/blog/">
+<meta property="og:site_name" content="R3 AI">
+<meta property="og:image" content="https://r3ai.dev/og/blog.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -31,194 +36,205 @@
 </header>
 <nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
 <main class="wrap">
-<section class="head"><h1>Blog</h1><p>Every post from both sides of the site, newest first. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
-<ul class="sheet list reveal"><li><a href="/blog/rivers-rocket-works/">
+<section class="head"><h1>Blog</h1><p>Every post from both sides of the site. New here? <a href="/start/">Start with these five</a>. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
+<div class="filters" id="filters" role="group" aria-label="Filter posts by topic">
+  <button class="chip" type="button" data-topic="" aria-pressed="true">All <span>46</span></button>
+  <button class="chip" type="button" data-topic="using-ai" aria-pressed="false">Using AI <span>28</span></button>
+  <button class="chip" type="button" data-topic="office-work" aria-pressed="false">Office work <span>15</span></button>
+  <button class="chip" type="button" data-topic="transit-tools" aria-pressed="false">Transit tools <span>9</span></button>
+  <button class="chip" type="button" data-topic="games" aria-pressed="false">Games <span>7</span></button>
+  <button class="chip" type="button" data-topic="sailing" aria-pressed="false">Sailing <span>5</span></button>
+  <button class="chip" type="button" data-topic="family" aria-pressed="false">Family <span>7</span></button>
+  <button class="chip" type="button" data-topic="this-site" aria-pressed="false">This site <span>3</span></button>
+</div>
+<ul class="sheet list reveal"><li data-topics="games family"><a href="/blog/rivers-rocket-works/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-rivers-rocket-works">River's Rocket Works</h3><p>A rocket game I built for River. Design a rocket, fly twelve missions from first launch to a wormhole, and race the whole family around the solar system.</p></div>
 </a></li>
-<li><a href="/blog/live-bus-positions/">
+<li data-topics="transit-tools"><a href="/blog/live-bus-positions/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-live-bus-positions">Putting our buses on the map, live</h3><p>How I turned the GPS units already on our buses into a GTFS Realtime feed, and a live map for the public.</p></div>
 </a></li>
-<li><a href="/blog/sunfish-speed/">
+<li data-topics="sailing"><a href="/blog/sunfish-speed/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-sunfish-speed">Making a Sunfish faster without breaking the rules</h3><p>My tuning notes for the Sunfish: the four sail controls, a few ideas I want to test, and the only class-legal way to rig a vang.</p></div>
 </a></li>
-<li><a href="/blog/transit-simulator/">
+<li data-topics="games transit-tools"><a href="/blog/transit-simulator/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-transit-simulator">A driving game set on our real bus routes</h3><p>A 3D driving game in the browser built from real route data, real streets and about 40,000 real building footprints. It started as a trolley simulator and kept growing.</p></div>
 </a></li>
-<li><a href="/blog/sailing-simulator/">
+<li data-topics="games sailing"><a href="/blog/sailing-simulator/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-sailing-simulator">A sailing simulator you steer with your hands</h3><p>A browser sailing game that watches your hands through the webcam. Pick a Sunfish, an Optimist or a pirate ship.</p></div>
 </a></li>
-<li><a href="/blog/driver-dispatch-board/">
+<li data-topics="transit-tools"><a href="/blog/driver-dispatch-board/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-driver-dispatch-board">A dispatch board for when a driver calls in</h3><p>An eight-week driver rotation in a spreadsheet, plus a one-page board that works out who covers which route when someone calls in.</p></div>
 </a></li>
-<li><a href="/blog/paratransit-scheduling-app/">
+<li data-topics="transit-tools"><a href="/blog/paratransit-scheduling-app/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-paratransit-scheduling-app">Replacing the paratransit spreadsheets</h3><p>A small web app for booking paratransit rides, assigning drivers and producing the reports, built with Node.js, Express and SQLite.</p></div>
 </a></li>
-<li><a href="/blog/bus-stop-display/">
+<li data-topics="transit-tools"><a href="/blog/bus-stop-display/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-bus-stop-display">A countdown sign for bus stops, built from a $32 board</h3><p>Commercial e-paper bus stop signs cost thousands of dollars each. I'm building a single-stop prototype around a $32 e-paper board and a long-range radio.</p></div>
 </a></li>
-<li><a href="/blog/procurement-wizard/">
+<li data-topics="transit-tools"><a href="/blog/procurement-wizard/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-procurement-wizard">A wizard that fills out the procurement forms</h3><p>A single-page tool that asks plain questions about a purchase and produces the right determination form, with the checks that are easy to forget.</p></div>
 </a></li>
-<li><a href="/blog/bus-coloring-story-app/">
+<li data-topics="transit-tools"><a href="/blog/bus-coloring-story-app/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-bus-coloring-story-app">Color a bus, then watch it save the day</h3><p>A printable coloring page and a small story app that puts a kid's own hand-colored bus into an adventure, ending with a certificate.</p></div>
 </a></li>
-<li><a href="/blog/learn-to-sail-week/">
+<li data-topics="sailing"><a href="/blog/learn-to-sail-week/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-learn-to-sail-week">A free week of sailing lessons every June</h3><p>I'm the commodore of our local yacht club, and every June we teach people to sail for free. Here's what the week is and why we do it.</p></div>
 </a></li>
-<li><a href="/blog/portsmouth-scoring/">
+<li data-topics="sailing"><a href="/blog/portsmouth-scoring/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-portsmouth-scoring">How to score a race when the boats don't match</h3><p>Club races put fast boats and slow boats on the same course. The Portsmouth yardstick is the simple math that makes it fair.</p></div>
 </a></li>
-<li><a href="/blog/f1-wings-for-the-go-kart/">
+<li data-topics="family"><a href="/blog/f1-wings-for-the-go-kart/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-f1-wings-for-the-go-kart">F1 wings for a two-seat go-kart</h3><p>River loves Formula 1, so the Thunder Kart I'm rebuilding is getting a front wing, a rear wing and sidepods. Plywood, PVC pipe and about $50.</p></div>
 </a></li>
-<li><a href="/blog/f1-everywhere/">
+<li data-topics="games family"><a href="/blog/f1-everywhere/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-f1-everywhere">Formula 1 keeps showing up in everything I build</h3><p>A kart racer, a go-kart with wings and a Grand Prix hidden inside a bus simulator. A short tour of how one kid's favorite sport took over my projects.</p></div>
 </a></li>
-<li><a href="/blog/comics-and-books-for-river/">
+<li data-topics="family"><a href="/blog/comics-and-books-for-river/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-comics-and-books-for-river">Comics and picture books starring River</h3><p>Two picture books about our family and a three-part space comic that sneaks in relativity and quantum mechanics.</p></div>
 </a></li>
-<li><a href="/blog/how-this-site-got-built/">
+<li data-topics="this-site"><a href="/blog/how-this-site-got-built/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-how-this-site-got-built">How this site got built</h3><p>A domain, a free host, no framework and four rounds of me saying &quot;I don't like it yet.&quot; Notes on building r3ai.dev with Claude.</p></div>
 </a></li>
-<li><a href="/blog/ways-i-use-ai/">
+<li data-topics="using-ai"><a href="/blog/ways-i-use-ai/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-ways-i-use-ai">27 ways I actually use AI</h3><p>A list of every kind of thing I have used AI for, at work and at home, with a short post on each. Start here.</p></div>
 </a></li>
-<li><a href="/blog/straight-answers-on-regulations/">
+<li data-topics="using-ai office-work"><a href="/blog/straight-answers-on-regulations/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-straight-answers-on-regulations">Getting a straight answer on a regulation</h3><p>Four small federal funding and accessibility questions that can each eat an afternoon, and how I ask them now.</p></div>
 </a></li>
-<li><a href="/blog/sanity-check-before-the-attorney/">
+<li data-topics="using-ai office-work"><a href="/blog/sanity-check-before-the-attorney/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-sanity-check-before-the-attorney">A sanity check before you call the attorney</h3><p>A church invited us to bring a bus to a community event. I used AI to understand the question before I took it to legal.</p></div>
 </a></li>
-<li><a href="/blog/field-experience-into-a-business-case/">
+<li data-topics="using-ai office-work"><a href="/blog/field-experience-into-a-business-case/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-field-experience-into-a-business-case">Turning what you see in the field into a business case</h3><p>We keep meeting riders we cannot talk to. Here is how a real problem at the bus door became a funding memo Finance could approve.</p></div>
 </a></li>
-<li><a href="/blog/asking-what-a-document-is-missing/">
+<li data-topics="using-ai office-work"><a href="/blog/asking-what-a-document-is-missing/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-asking-what-a-document-is-missing">Asking AI what a document is missing</h3><p>I had a morning meeting about an old scope of work for a backup generator. I asked one question: what is wrong with this, and what is not in it?</p></div>
 </a></li>
-<li><a href="/blog/everyday-email/">
+<li data-topics="using-ai office-work"><a href="/blog/everyday-email/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-everyday-email">Everyday email: tone, humor and the question you forgot to answer</h3><p>I asked AI to make two emails funnier. It did, and it also noticed that one of them never answered the question I was asked.</p></div>
 </a></li>
-<li><a href="/blog/careful-public-replies/">
+<li data-topics="using-ai office-work"><a href="/blog/careful-public-replies/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-careful-public-replies">Writing a careful public reply</h3><p>When a resident asks whether a rumor is true, the wording matters. Here is how I draft those replies, including the time the AI got ahead of the facts.</p></div>
 </a></li>
-<li><a href="/blog/checklists-flyers-and-forms/">
+<li data-topics="using-ai office-work"><a href="/blog/checklists-flyers-and-forms/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-checklists-flyers-and-forms">Checklists, flyers and forms in an afternoon</h3><p>Cleaning checklists, a fare flyer, a staff reference sheet, a fillable form and an anonymous suggestion box. None of it is glamorous. All of it used to wait.</p></div>
 </a></li>
-<li><a href="/blog/procedures-and-audit-findings/">
+<li data-topics="using-ai office-work"><a href="/blog/procedures-and-audit-findings/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-procedures-and-audit-findings">Building a procedure library and closing audit findings</h3><p>A federal review left us with findings and a deadline. Here is how AI helped turn scattered old documents into procedures we can actually follow.</p></div>
 </a></li>
-<li><a href="/blog/untangling-grant-money/">
+<li data-topics="using-ai office-work"><a href="/blog/untangling-grant-money/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-untangling-grant-money">Untangling grant money before a deadline</h3><p>Several older grants, a handful of invoices and a date after which the money goes away. AI did the matching and found the invoices that did not fit.</p></div>
 </a></li>
-<li><a href="/blog/turning-a-policy-into-a-tool/">
+<li data-topics="using-ai office-work"><a href="/blog/turning-a-policy-into-a-tool/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-turning-a-policy-into-a-tool">Turning a policy into a tool</h3><p>I wanted to save our purchasing staff some work on small purchases. That turned into a memo, then a form, then a wizard that writes the paperwork.</p></div>
 </a></li>
-<li><a href="/blog/a-plan-from-documents-on-hand/">
+<li data-topics="using-ai office-work"><a href="/blog/a-plan-from-documents-on-hand/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-a-plan-from-documents-on-hand">A consultant-grade plan from documents already on hand</h3><p>A consultant asked for our transit plan. We did not have a stand-alone one. Here is how the documents we did have became a 14-page plan.</p></div>
 </a></li>
-<li><a href="/blog/building-the-case-for-a-new-service/">
+<li data-topics="using-ai office-work"><a href="/blog/building-the-case-for-a-new-service/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-building-the-case-for-a-new-service">Building the case for a new service, then rebuilding it</h3><p>I spent weeks on a presentation about on-demand transit. Then one of my assumptions turned out to be wrong, and the whole thing had to be rebuilt as something else.</p></div>
 </a></li>
-<li><a href="/blog/preparing-for-a-hard-meeting/">
+<li data-topics="using-ai office-work"><a href="/blog/preparing-for-a-hard-meeting/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-preparing-for-a-hard-meeting">Preparing for a hard meeting in an hour</h3><p>I had a disagreement over how a written policy should be read, and a meeting in sixty minutes. I asked AI to argue the other side.</p></div>
 </a></li>
-<li><a href="/blog/checking-the-numbers-before-you-reply/">
+<li data-topics="using-ai office-work"><a href="/blog/checking-the-numbers-before-you-reply/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-checking-the-numbers-before-you-reply">Checking the numbers before you reply</h3><p>Someone sent me a total. Before I agreed or disagreed, I had AI read the rulebook and recount.</p></div>
 </a></li>
-<li><a href="/blog/custom-software-without-being-a-developer/">
+<li data-topics="using-ai transit-tools"><a href="/blog/custom-software-without-being-a-developer/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-custom-software-without-being-a-developer">Building custom software without being a professional developer</h3><p>I taught myself to build web pages. With AI doing a large share of the typing, I now build the tools my division needs when nothing off the shelf fits.</p></div>
 </a></li>
-<li><a href="/blog/organizing-the-work-itself/">
+<li data-topics="using-ai office-work"><a href="/blog/organizing-the-work-itself/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-organizing-the-work-itself">Organizing the work itself</h3><p>Before my assistant manager and I sat down to sort out everything on our plates, I asked AI how to run that meeting.</p></div>
 </a></li>
-<li><a href="/blog/community-partnerships/">
+<li data-topics="using-ai transit-tools"><a href="/blog/community-partnerships/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-community-partnerships">Community partnerships and a coloring app</h3><p>Transit is a public service, and the public should like it. Two small examples of using AI for the community side of the job.</p></div>
 </a></li>
-<li><a href="/blog/when-ai-is-wrong-and-when-it-says-no/">
+<li data-topics="using-ai"><a href="/blog/when-ai-is-wrong-and-when-it-says-no/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-when-ai-is-wrong-and-when-it-says-no">When the AI is wrong, and when it says no</h3><p>The most useful post in this series. The mistakes I caught, the ones I nearly did not, and the requests the AI turned down.</p></div>
 </a></li>
-<li><a href="/blog/building-games-for-my-kid/">
+<li data-topics="using-ai games family"><a href="/blog/building-games-for-my-kid/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-building-games-for-my-kid">Building games for my kid</h3><p>I am not a game developer. Here is how one request became a twelve-mission space game with our whole family in it, and what I learned about directing an AI.</p></div>
 </a></li>
-<li><a href="/blog/a-hometown-bus-simulator/">
+<li data-topics="using-ai games"><a href="/blog/a-hometown-bus-simulator/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-a-hometown-bus-simulator">A hometown bus simulator from real map data</h3><p>It started as a toy trolley on a made-up grid. It became a driving game on our real streets, with real routes and tens of thousands of real buildings.</p></div>
 </a></li>
-<li><a href="/blog/a-father-son-comic-about-physics/">
+<li data-topics="using-ai family"><a href="/blog/a-father-son-comic-about-physics/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-a-father-son-comic-about-physics">A father-son comic book about physics</h3><p>River wrote a space adventure about the biggest unsolved problem in physics. We are turning it into a real printed comic book.</p></div>
 </a></li>
-<li><a href="/blog/a-website-in-a-weekend/">
+<li data-topics="using-ai this-site"><a href="/blog/a-website-in-a-weekend/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-a-website-in-a-weekend">Standing up a website in a weekend</h3><p>This site is brand new. Here is what I did, what the AI did, and why I could not load my own website the day it went live.</p></div>
 </a></li>
-<li><a href="/blog/pure-fun/">
+<li data-topics="using-ai family"><a href="/blog/pure-fun/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-pure-fun">Pure fun: a goat racer trailer and texts to my dad</h3><p>Not everything has to be useful. A 30-second movie trailer made from one photo, and a running joke about my dad's car.</p></div>
 </a></li>
-<li><a href="/blog/small-life-questions/">
+<li data-topics="using-ai"><a href="/blog/small-life-questions/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-small-life-questions">Small life questions</h3><p>A benefits document, a scraped bumper and a strange name on a restaurant. Three everyday questions and what I learned from asking them.</p></div>
 </a></li>
-<li><a href="/blog/hobbies-and-volunteering/">
+<li data-topics="using-ai sailing"><a href="/blog/hobbies-and-volunteering/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-hobbies-and-volunteering">Hobbies and volunteering: sailing scores and a club website</h3><p>I race small sailboats and help run a yacht club. AI now does the race arithmetic and some of the homework a volunteer board never has time for.</p></div>
 </a></li>
-<li><a href="/blog/chasing-a-big-idea/">
+<li data-topics="using-ai"><a href="/blog/chasing-a-big-idea/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-chasing-a-big-idea">Chasing a big idea, and letting AI poke holes in it</h3><p>I have a concept for helping local governments modernize. The most valuable thing AI did was make my own numbers smaller.</p></div>
 </a></li>
-<li><a href="/blog/following-curiosity/">
+<li data-topics="using-ai"><a href="/blog/following-curiosity/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-following-curiosity">Following curiosity into hard math</h3><p>I am not a mathematician. I spent many hours with an AI on one of the most famous unsolved problems anyway.</p></div>
 </a></li>
-<li><a href="/blog/sloth-rocket-grand-prix/">
+<li data-topics="games"><a href="/blog/sloth-rocket-grand-prix/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At home</span></time>
   <div><h3 style="view-transition-name:post-sloth-rocket-grand-prix">Sloth Rocket Grand Prix: a kart racer in one HTML file</h3><p>I asked an AI for a kart racer themed on Formula 1, rockets, pirates, libraries and sloths. Here is what came back, how to play it and where it falls short.</p></div>
 </a></li>
-<li><a href="/blog/notes-from-the-transit-side/">
+<li data-topics="this-site"><a href="/blog/notes-from-the-transit-side/">
   <time datetime="2026-10-04">October 4, 2026<span class="chip">At work</span></time>
   <div><h3 style="view-transition-name:post-notes-from-the-transit-side">What goes in the work section</h3><p>A short note on what I plan to write about from the transit side, and what I'll leave out.</p></div>
 </a></li></ul>
+<p class="note" id="filter-empty" hidden>No posts on that topic yet.</p>
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>

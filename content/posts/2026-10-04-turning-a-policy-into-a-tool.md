@@ -3,6 +3,7 @@ title: Turning a policy into a tool
 date: 2026-10-04
 section: work
 order: 30
+topics: Using AI, Office work
 summary: I wanted to save our purchasing staff some work on small purchases. That turned into a memo, then a form, then a wizard that writes the paperwork.
 ---
 

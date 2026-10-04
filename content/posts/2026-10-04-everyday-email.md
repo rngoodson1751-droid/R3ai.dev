@@ -3,6 +3,7 @@ title: Everyday email: tone, humor and the question you forgot to answer
 date: 2026-10-04
 section: work
 order: 25
+topics: Using AI, Office work
 summary: I asked AI to make two emails funnier. It did, and it also noticed that one of them never answered the question I was asked.
 ---
 

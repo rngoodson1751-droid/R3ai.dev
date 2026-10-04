@@ -3,6 +3,7 @@ title: Replacing the paratransit spreadsheets
 date: 2026-10-04
 section: work
 order: 7
+topics: Transit tools
 summary: A small web app for booking paratransit rides, assigning drivers and producing the reports, built with Node.js, Express and SQLite.
 ---
 

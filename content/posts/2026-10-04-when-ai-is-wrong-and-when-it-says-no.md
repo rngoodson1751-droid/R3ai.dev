@@ -3,6 +3,7 @@ title: When the AI is wrong, and when it says no
 date: 2026-10-04
 section: work
 order: 38
+topics: Using AI
 summary: The most useful post in this series. The mistakes I caught, the ones I nearly did not, and the requests the AI turned down.
 ---
 

@@ -3,6 +3,7 @@ title: A sanity check before you call the attorney
 date: 2026-10-04
 section: work
 order: 22
+topics: Using AI, Office work
 summary: A church invited us to bring a bus to a community event. I used AI to understand the question before I took it to legal.
 ---
 

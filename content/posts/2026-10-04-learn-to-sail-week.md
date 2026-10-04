@@ -3,6 +3,7 @@ title: A free week of sailing lessons every June
 date: 2026-10-04
 section: home
 order: 11
+topics: Sailing
 summary: I'm the commodore of our local yacht club, and every June we teach people to sail for free. Here's what the week is and why we do it.
 ---
 

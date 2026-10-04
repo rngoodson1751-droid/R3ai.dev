@@ -3,6 +3,7 @@ title: Following curiosity into hard math
 date: 2026-10-04
 section: home
 order: 47
+topics: Using AI
 summary: I am not a mathematician. I spent many hours with an AI on one of the most famous unsolved problems anyway.
 ---
 

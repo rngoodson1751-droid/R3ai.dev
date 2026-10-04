@@ -8,12 +8,28 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api/requests') {
-      if (request.method !== 'POST') return json({ error: 'Use the form at /request/ to send a request.' }, 405, { Allow: 'POST' });
+      if (request.method === 'GET') return asked(env);
+      if (request.method !== 'POST') return json({ error: 'Use the form at /request/ to send a request.' }, 405, { Allow: 'GET, POST' });
       return submit(request, env, url);
     }
     return env.ASSETS.fetch(request);
   },
 };
+
+// The public list on /request/. Only requests Robert has approved appear, and only the short title
+// he wrote for them. The visitor's own words, name and email never leave the database.
+async function asked(env) {
+  try {
+    const { results } = await env.DB.prepare(
+      `SELECT public_title AS title, side, status, post_url AS url FROM requests
+       WHERE status IN ('asked', 'writing', 'posted') AND public_title IS NOT NULL AND public_title != ''
+       ORDER BY id DESC LIMIT 50`).all();
+    return json({ requests: results }, 200, { 'cache-control': 'public, max-age=300' });
+  } catch (e) {
+    console.error('list not read', e);
+    return json({ requests: [] });
+  }
+}
 
 async function submit(request, env, url) {
   const isJson = (request.headers.get('content-type') || '').includes('application/json');

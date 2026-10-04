@@ -3,6 +3,7 @@ title: Untangling grant money before a deadline
 date: 2026-10-04
 section: work
 order: 29
+topics: Using AI, Office work
 summary: Several older grants, a handful of invoices and a date after which the money goes away. AI did the matching and found the invoices that did not fit.
 ---
 

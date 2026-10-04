@@ -3,10 +3,13 @@ title: A dispatch board for when a driver calls in
 date: 2026-10-04
 section: work
 order: 6
+topics: Transit tools
 summary: An eight-week driver rotation in a spreadsheet, plus a one-page board that works out who covers which route when someone calls in.
 ---
 
 The hardest part of scheduling a small bus system isn't the schedule. It's the early morning phone call when someone is out and every route still has to leave on time.
+
+You can [try a demo of the board](/demos/dispatch-board/) with made-up drivers and routes.
 
 ## The problem
 

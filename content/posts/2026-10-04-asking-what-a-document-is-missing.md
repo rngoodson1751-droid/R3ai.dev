@@ -3,6 +3,7 @@ title: Asking AI what a document is missing
 date: 2026-10-04
 section: work
 order: 24
+topics: Using AI, Office work
 summary: I had a morning meeting about an old scope of work for a backup generator. I asked one question: what is wrong with this, and what is not in it?
 ---
 

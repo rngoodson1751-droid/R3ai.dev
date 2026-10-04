@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>https://r3ai.dev/</loc></url>
+<url><loc>https://r3ai.dev/start/</loc></url>
 <url><loc>https://r3ai.dev/work/</loc></url>
 <url><loc>https://r3ai.dev/home/</loc></url>
 <url><loc>https://r3ai.dev/blog/</loc></url>
+<url><loc>https://r3ai.dev/games/</loc></url>
+<url><loc>https://r3ai.dev/demos/dispatch-board/</loc></url>
+<url><loc>https://r3ai.dev/demos/procurement-wizard/</loc></url>
 <url><loc>https://r3ai.dev/request/</loc></url>
 <url><loc>https://r3ai.dev/about/</loc></url>
 <url><loc>https://r3ai.dev/blog/rivers-rocket-works/</loc></url>

@@ -2,6 +2,7 @@
 title: What goes in the work section
 date: 2026-10-04
 section: work
+topics: This site
 summary: A short note on what I plan to write about from the transit side, and what I'll leave out.
 ---
 

@@ -3,6 +3,7 @@ title: Turning what you see in the field into a business case
 date: 2026-10-04
 section: work
 order: 23
+topics: Using AI, Office work
 summary: We keep meeting riders we cannot talk to. Here is how a real problem at the bus door became a funding memo Finance could approve.
 ---
 

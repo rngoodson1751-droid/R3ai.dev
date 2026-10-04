@@ -3,6 +3,7 @@ title: Formula 1 keeps showing up in everything I build
 date: 2026-10-04
 section: home
 order: 14
+topics: Games, Family
 summary: A kart racer, a go-kart with wings and a Grand Prix hidden inside a bus simulator. A short tour of how one kid's favorite sport took over my projects.
 ---
 

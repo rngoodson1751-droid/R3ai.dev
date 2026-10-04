@@ -3,6 +3,7 @@ title: Getting a straight answer on a regulation
 date: 2026-10-04
 section: work
 order: 21
+topics: Using AI, Office work
 summary: Four small federal funding and accessibility questions that can each eat an afternoon, and how I ask them now.
 ---
 

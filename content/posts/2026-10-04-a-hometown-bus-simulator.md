@@ -3,6 +3,7 @@ title: A hometown bus simulator from real map data
 date: 2026-10-04
 section: home
 order: 40
+topics: Using AI, Games
 summary: It started as a toy trolley on a made-up grid. It became a driving game on our real streets, with real routes and tens of thousands of real buildings.
 ---
 

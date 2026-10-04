@@ -9,6 +9,13 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - No dependencies and no framework. Keep it that way unless Robert asks otherwise.
 - To test with the request form working, run `npx wrangler dev --local` after `npx wrangler d1 execute r3ai-requests --local --file worker/schema.sql`.
 
+## Things Robert may ask for
+
+- "Any new post requests?" Query the D1 database `r3ai-requests` (table `requests`, `status = 'new'`) through the Cloudflare connector.
+- "Approve request N" or "mark it posted". Update `status`, `public_title` and `post_url` as described in `README.md`. Write `public_title` yourself as a short neutral topic. Never copy the visitor's wording, name or email into it.
+- A new post. Add `topics` to its header, and after building run `node tools/og.mjs <slug>` so it gets a link preview picture.
+- Photos for project cards. `projectCards()` in `build.mjs` already supports an `image` on each project. Pictures are only switched on for the games page (`pictures: true`); turn them on for the section pages once every card there has one.
+
 ## Design rules
 
 - The look is iOS-style glass over a slow water shader, mostly transparent, in blues and greens only. Robert has approved the current layout and colours, so change them only when he asks.

@@ -3,6 +3,7 @@ title: A countdown sign for bus stops, built from a $32 board
 date: 2026-10-04
 section: work
 order: 8
+topics: Transit tools
 summary: Commercial e-paper bus stop signs cost thousands of dollars each. I'm building a single-stop prototype around a $32 e-paper board and a long-range radio.
 ---
 

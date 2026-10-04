@@ -3,6 +3,7 @@ title: Preparing for a hard meeting in an hour
 date: 2026-10-04
 section: work
 order: 33
+topics: Using AI, Office work
 summary: I had a disagreement over how a written policy should be read, and a meeting in sixty minutes. I asked AI to argue the other side.
 ---
 

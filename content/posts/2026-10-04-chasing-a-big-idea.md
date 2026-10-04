@@ -3,6 +3,7 @@ title: Chasing a big idea, and letting AI poke holes in it
 date: 2026-10-04
 section: home
 order: 46
+topics: Using AI
 summary: I have a concept for helping local governments modernize. The most valuable thing AI did was make my own numbers smaller.
 ---
 

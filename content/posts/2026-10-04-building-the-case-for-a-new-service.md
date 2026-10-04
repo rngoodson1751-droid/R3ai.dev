@@ -3,6 +3,7 @@ title: Building the case for a new service, then rebuilding it
 date: 2026-10-04
 section: work
 order: 32
+topics: Using AI, Office work
 summary: I spent weeks on a presentation about on-demand transit. Then one of my assumptions turned out to be wrong, and the whole thing had to be rebuilt as something else.
 ---
 

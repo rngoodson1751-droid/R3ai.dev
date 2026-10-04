@@ -3,10 +3,13 @@ title: A wizard that fills out the procurement forms
 date: 2026-10-04
 section: work
 order: 9
+topics: Transit tools
 summary: A single-page tool that asks plain questions about a purchase and produces the right determination form, with the checks that are easy to forget.
 ---
 
 Buying things with public money comes with paperwork, and it should. The trouble is that the right form depends on the dollar amount, and each form has checks that are easy to miss when you only do one every few months.
+
+You can [try a demo of the wizard](/demos/procurement-wizard/). It produces a simplified sample form, and nothing you type leaves your browser.
 
 ## What it does
 

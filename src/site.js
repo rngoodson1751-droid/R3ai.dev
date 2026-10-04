@@ -316,6 +316,53 @@
     });
   })();
 
+  // ---------- blog: filter the post list by topic. The address keeps the choice, so /blog/#sailing can be shared ----------
+  (function filters() {
+    var bar = document.getElementById('filters');
+    if (!bar) return;
+    var items = document.querySelectorAll('.list li[data-topics]'), none = document.getElementById('filter-empty');
+    function show(topic) {
+      var btn = bar.querySelector('[data-topic="' + topic.replace(/[^a-z0-9-]/g, '') + '"]');
+      if (!btn) { topic = ''; btn = bar.querySelector('[data-topic=""]'); }
+      var shown = 0;
+      [].forEach.call(items, function (li) {
+        var on = !topic || (' ' + li.dataset.topics + ' ').indexOf(' ' + topic + ' ') >= 0;
+        li.hidden = !on; if (on) shown++;
+      });
+      [].forEach.call(bar.children, function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+      if (none) none.hidden = shown > 0;
+    }
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-topic]');
+      if (!b) return;
+      history.replaceState(null, '', b.dataset.topic ? '#' + b.dataset.topic : location.pathname);
+      show(b.dataset.topic);
+    });
+    addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+    show(location.hash.slice(1));
+  })();
+
+  // ---------- request page: the list of topics readers have asked for ----------
+  (function asked() {
+    var box = document.getElementById('asked'), list = document.getElementById('asked-list');
+    if (!box) return;
+    var LABEL = { asked: 'On the list', writing: 'Being written', posted: 'Posted' }, SIDE = { work: 'At work', home: 'At home' };
+    fetch('/api/requests').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.requests || !d.requests.length) return;
+      d.requests.forEach(function (q) {
+        var li = document.createElement('li'), row = document.createElement(q.status === 'posted' && /^\/blog\//.test(q.url || '') ? 'a' : 'div');
+        if (row.tagName === 'A') row.href = q.url;
+        var chips = document.createElement('div'), state = document.createElement('span'), h = document.createElement('h3');
+        chips.className = 'chips'; state.className = 'chip' + (q.status === 'posted' ? ' live' : ''); state.textContent = LABEL[q.status] || '';
+        chips.appendChild(state);
+        if (SIDE[q.side]) { var side = document.createElement('span'); side.className = 'chip'; side.textContent = SIDE[q.side]; chips.appendChild(side); }
+        h.textContent = q.title;
+        row.appendChild(chips); row.appendChild(h); li.appendChild(row); list.appendChild(li);
+      });
+      box.hidden = false;
+    }).catch(function () {});
+  })();
+
   // ---------- true refraction on the floating bars (Chromium only; others keep the frosted look) ----------
   (function lens() {
     if (!navigator.userAgentData || !window.ResizeObserver) return;

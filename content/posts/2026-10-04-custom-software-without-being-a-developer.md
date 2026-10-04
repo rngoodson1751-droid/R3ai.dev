@@ -3,6 +3,7 @@ title: Building custom software without being a professional developer
 date: 2026-10-04
 section: work
 order: 35
+topics: Using AI, Transit tools
 summary: I taught myself to build web pages. With AI doing a large share of the typing, I now build the tools my division needs when nothing off the shelf fits.
 ---
 

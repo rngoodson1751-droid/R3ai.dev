@@ -3,6 +3,7 @@ title: Checklists, flyers and forms in an afternoon
 date: 2026-10-04
 section: work
 order: 27
+topics: Using AI, Office work
 summary: Cleaning checklists, a fare flyer, a staff reference sheet, a fillable form and an anonymous suggestion box. None of it is glamorous. All of it used to wait.
 ---
 

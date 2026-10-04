@@ -3,6 +3,7 @@ title: River's Rocket Works
 date: 2026-10-04
 section: home
 order: 1
+topics: Games, Family
 summary: A rocket game I built for River. Design a rocket, fly twelve missions from first launch to a wormhole, and race the whole family around the solar system.
 ---
 

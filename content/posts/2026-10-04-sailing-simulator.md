@@ -3,6 +3,7 @@ title: A sailing simulator you steer with your hands
 date: 2026-10-04
 section: home
 order: 5
+topics: Games, Sailing
 summary: A browser sailing game that watches your hands through the webcam. Pick a Sunfish, an Optimist or a pirate ship.
 ---
 

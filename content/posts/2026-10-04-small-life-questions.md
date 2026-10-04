@@ -3,6 +3,7 @@ title: Small life questions
 date: 2026-10-04
 section: home
 order: 44
+topics: Using AI
 summary: A benefits document, a scraped bumper and a strange name on a restaurant. Three everyday questions and what I learned from asking them.
 ---
 

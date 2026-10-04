@@ -3,6 +3,7 @@ title: Community partnerships and a coloring app
 date: 2026-10-04
 section: work
 order: 37
+topics: Using AI, Transit tools
 summary: Transit is a public service, and the public should like it. Two small examples of using AI for the community side of the job.
 ---
 

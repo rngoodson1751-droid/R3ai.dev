@@ -3,6 +3,7 @@ title: A driving game set on our real bus routes
 date: 2026-10-04
 section: work
 order: 4
+topics: Games, Transit tools
 summary: A 3D driving game in the browser built from real route data, real streets and about 40,000 real building footprints. It started as a trolley simulator and kept growing.
 ---
 

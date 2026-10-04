@@ -3,6 +3,7 @@ title: How to score a race when the boats don't match
 date: 2026-10-04
 section: home
 order: 12
+topics: Sailing
 summary: Club races put fast boats and slow boats on the same course. The Portsmouth yardstick is the simple math that makes it fair.
 ---
 

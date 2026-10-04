@@ -3,6 +3,7 @@ title: Making a Sunfish faster without breaking the rules
 date: 2026-10-04
 section: home
 order: 3
+topics: Sailing
 summary: My tuning notes for the Sunfish: the four sail controls, a few ideas I want to test, and the only class-legal way to rig a vang.
 ---
 

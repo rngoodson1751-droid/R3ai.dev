@@ -3,6 +3,7 @@ title: Hobbies and volunteering: sailing scores and a club website
 date: 2026-10-04
 section: home
 order: 45
+topics: Using AI, Sailing
 summary: I race small sailboats and help run a yacht club. AI now does the race arithmetic and some of the homework a volunteer board never has time for.
 ---
 

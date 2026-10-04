@@ -3,6 +3,7 @@ title: How this site got built
 date: 2026-10-04
 section: home
 order: 16
+topics: This site
 summary: A domain, a free host, no framework and four rounds of me saying "I don't like it yet." Notes on building r3ai.dev with Claude.
 ---
 

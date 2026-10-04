@@ -9,6 +9,9 @@ const SECTIONS = {
   work: { label: 'At work', path: '/work/' },
   home: { label: 'At home', path: '/home/' },
 };
+// Topics a post can carry in its header (topics: Sailing, Games). The blog page filters by these.
+const TOPICS = ['Using AI', 'Office work', 'Transit tools', 'Games', 'Sailing', 'Family', 'This site'];
+const topicSlug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const OUT = 'dist';
 
 // ---------- helpers ----------
@@ -81,7 +84,9 @@ function loadPosts() {
     for (const need of ['title', 'date', 'section', 'summary']) if (!meta[need]) throw new Error(`${f}: front matter needs "${need}"`);
     if (!SECTIONS[meta.section]) throw new Error(`${f}: section must be "work" or "home"`);
     const slug = f.replace(/\.md$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
-    return { ...meta, slug, url: `/blog/${slug}/`, html: markdown(m[2]) };
+    const topics = (meta.topics || '').split(',').map(t => t.trim()).filter(Boolean);
+    for (const t of topics) if (!TOPICS.includes(t)) throw new Error(`${f}: unknown topic "${t}". Use one of: ${TOPICS.join(', ')}`);
+    return { ...meta, topics, slug, url: `/blog/${slug}/`, html: markdown(m[2]) };
   }).filter(p => p.draft !== 'true').sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (Number(a.order) || 50) - (Number(b.order) || 50) || a.title.localeCompare(b.title)));
 }
 const posts = loadPosts();
@@ -89,7 +94,9 @@ const projects = JSON.parse(readFileSync('content/projects.json', 'utf8'));
 
 // ---------- templates ----------
 const NAV = [['/work/', 'At work', 'work'], ['/home/', 'At home', 'home'], ['/blog/', 'Blog', 'blog'], ['/request/', 'Request', 'request'], ['/about/', 'About', 'about']];
-function layout({ title, description, path, section = '', nav = '', body }) {
+// Link previews: static/og/<name>.jpg if tools/og.mjs has made one, else the default card.
+const ogImage = name => `${SITE.url}/og/${name && existsSync(`static/og/${name}.jpg`) ? name : 'default'}.jpg`;
+function layout({ title, description, path, section = '', nav = '', body, og = '', type = 'website', scripts = [] }) {
   const full = title ? `${title} · ${SITE.name}` : `${SITE.name} · Robert, Rachelle and River`;
   const links = NAV.map(([href, label, key]) => `<a href="${href}"${nav === key ? ' aria-current="page"' : ''}>${label}</a>`).join('');
   return `<!DOCTYPE html>
@@ -102,8 +109,13 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 <link rel="canonical" href="${SITE.url}${path}">
 <meta property="og:title" content="${esc(title || SITE.name)}">
 <meta property="og:description" content="${esc(description)}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="${type}">
 <meta property="og:url" content="${SITE.url}${path}">
+<meta property="og:site_name" content="${SITE.name}">
+<meta property="og:image" content="${ogImage(og)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -113,7 +125,7 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <link rel="stylesheet" href="/styles.css">
-<script src="/site.js" defer></script>
+<script src="/site.js" defer></script>${scripts.map(src => `\n<script src="${src}" defer></script>`).join('')}
 <script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body${section ? ` data-section="${section}"` : ''}>
@@ -128,7 +140,7 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 ${body}
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; ${new Date().getUTCFullYear()} ${SITE.author}. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>
@@ -138,19 +150,19 @@ ${body}
 const chip = s => `<span class="chip">${SECTIONS[s].label}</span>`;
 function postList(list, showChip = true) {
   if (!list.length) return '<div class="sheet"><p class="empty">No posts here yet.</p></div>';
-  return '<ul class="sheet list reveal">' + list.map(p => `<li><a href="${p.url}">
+  return '<ul class="sheet list reveal">' + list.map(p => `<li data-topics="${p.topics.map(topicSlug).join(' ')}"><a href="${p.url}">
   <time datetime="${p.date}">${longDate(p.date)}${showChip ? chip(p.section) : ''}</time>
   <div><h3 style="view-transition-name:post-${p.slug}">${esc(p.title)}</h3><p>${esc(p.summary)}</p></div>
 </a></li>`).join('\n') + '</ul>';
 }
-function projectCards(section) {
-  const list = projects.filter(p => p.section === section);
+function projectCards(section, { list = projects.filter(p => p.section === section), pictures = false } = {}) {
   if (!list.length) return '';
-  return '<div class="cards">' + list.map(p => `<article class="sheet card reveal">
+  return `<div class="cards${pictures ? ' wide' : ''}">` + list.map(p => `<article class="sheet card reveal">
+  ${pictures && p.image ? `<a class="shot" href="${p.links[0].href}" tabindex="-1" aria-hidden="true"><img src="${p.image}" alt="" width="1280" height="720" loading="lazy"></a>` : ''}
   <div class="chips"><span class="chip">${esc(p.kind)}</span>${p.status ? `<span class="chip live">${esc(p.status)}</span>` : ''}</div>
   <h3>${esc(p.title)}</h3>
   <p>${esc(p.summary)}</p>
-  <div class="end">${(p.links || []).length ? p.links.map((l, i) => `<a${i === 0 ? ` class="btn${l.href.startsWith('/games/') ? '' : ' glass'}"` : ''} href="${l.href}">${esc(l.label)}</a>`).join('') : '<span class="chip">Write-up coming</span>'}</div>
+  <div class="end">${(p.links || []).length ? p.links.map((l, i) => `<a${i === 0 ? ` class="btn${/^\/(games|demos)\//.test(l.href) ? '' : ' glass'}"` : ''} href="${l.href}">${esc(l.label)}</a>`).join('') : '<span class="chip">Write-up coming</span>'}</div>
 </article>`).join('\n') + '</div>';
 }
 // The cube: 26 small cubes, each with six sides. Outside sides carry a coloured tile (data-k),
@@ -181,10 +193,11 @@ mkdirSync(OUT, { recursive: true });
 if (existsSync('static')) cpSync('static', OUT, { recursive: true });
 writeFileSync(join(OUT, 'styles.css'), readFileSync('src/styles.css'));
 writeFileSync(join(OUT, 'site.js'), readFileSync('src/site.js'));
+cpSync('src/demos', join(OUT, 'demos'), { recursive: true });
 
 const featured = projects.find(p => p.section === 'home' && (p.links || []).length);
 write('index.html', layout({
-  title: '', path: '/',
+  title: '', path: '/', og: 'default',
   description: 'Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.',
   body: `<section class="hero">
   <div>
@@ -216,15 +229,20 @@ write('index.html', layout({
     <div class="chips"><span class="chip live">Play now</span></div>
     <h2>${esc(featured.title)}</h2>
     <p>${esc(featured.summary)}</p>
-    <div class="end">${featured.links.map((l, i) => `<a class="btn${i ? ' glass' : ''}" href="${l.href}">${esc(l.label)}</a>`).join('')}</div>
+    <div class="end">${featured.links.map((l, i) => `<a class="btn${i ? ' glass' : ''}" href="${l.href}">${esc(l.label)}</a>`).join('')}<a href="/games/">All games</a></div>
   </article>` : ''}
   <section class="${featured ? 'span-4' : 'span-6'}" style="display:grid" aria-label="Latest posts">
     ${postList(posts.slice(0, 4))}
   </section>
-  <article class="sheet tile span-6 ask reveal">
-    <div><h2>Want to read about something?</h2>
-    <p>Pick anything on the site, from the work side or the home side, and ask me to write about it.</p></div>
-    <div class="end"><a class="btn" href="/request/">Request a post</a></div>
+  <article class="sheet tile reveal">
+    <h2>New to AI?</h2>
+    <p>Five short posts to read first, picked for people who aren't sure what AI would do for them.</p>
+    <div class="end"><a class="btn" href="/start/">Start here</a></div>
+  </article>
+  <article class="sheet tile reveal">
+    <h2>Want to read about something?</h2>
+    <p>Pick anything on the site, from the work side or the home side, and ask me to write about it.</p>
+    <div class="end"><a class="btn glass" href="/request/">Request a post</a></div>
   </article>
 </div>`,
 }));
@@ -234,19 +252,21 @@ const sectionCopy = {
     intro: 'I manage a City Transit division, and I build custom software for it when nothing off the shelf fits. Each project here has a write-up covering the problem, the tool and what I learned.',
     projectsEmpty: 'Project write-ups are on the way.',
     projectsTitle: 'Projects',
+    projectsNote: 'Two of these run right here with made-up data: the <a href="/demos/dispatch-board/">dispatch board</a> and the <a href="/demos/procurement-wizard/">procurement wizard</a>.',
     description: 'Transit software and notes from a City Transit division.',
   },
   home: {
     intro: 'What I do away from work: games for River, sailboat racing, a go-kart that thinks it is a Formula 1 car and whatever we think up next.',
     projectsEmpty: 'Nothing here yet.',
     projectsTitle: 'Games and projects',
+    projectsNote: 'Every game you can play in the browser is on the <a href="/games/">games page</a>.',
     description: 'Games, sailing, go-karts and family projects built with AI.',
   },
 };
 for (const [key, s] of Object.entries(SECTIONS)) {
   const c = sectionCopy[key], cards = projectCards(key);
   write(`${key}/index.html`, layout({
-    title: s.label, path: s.path, section: key, nav: key, description: c.description,
+    title: s.label, path: s.path, section: key, nav: key, og: key, description: c.description,
     body: `<section class="head"><h1 style="view-transition-name:title-${key}">${s.label}</h1><p>${c.intro}</p></section>
 <h2 class="h2">${c.projectsTitle}</h2>
 ${cards || `<div class="sheet"><p class="empty">${c.projectsEmpty}</p></div>`}
@@ -257,17 +277,23 @@ ${key === 'work' ? '<p class="note">Everything in this section is my own account
   }));
 }
 
+const topicCount = t => posts.filter(p => p.topics.includes(t)).length;
 write('blog/index.html', layout({
-  title: 'Blog', path: '/blog/', nav: 'blog', description: 'Every post from both sides of the site, newest first.',
-  body: `<section class="head"><h1>Blog</h1><p>Every post from both sides of the site, newest first. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
-${postList(posts)}`,
+  title: 'Blog', path: '/blog/', nav: 'blog', og: 'blog', description: 'Every post from both sides of the site, with filters by topic.',
+  body: `<section class="head"><h1>Blog</h1><p>Every post from both sides of the site. New here? <a href="/start/">Start with these five</a>. Only want one side? See <a href="/work/#posts">At work</a> or <a href="/home/#posts">At home</a>.</p></section>
+<div class="filters" id="filters" role="group" aria-label="Filter posts by topic">
+  <button class="chip" type="button" data-topic="" aria-pressed="true">All <span>${posts.length}</span></button>
+  ${TOPICS.filter(topicCount).map(t => `<button class="chip" type="button" data-topic="${topicSlug(t)}" aria-pressed="false">${t} <span>${topicCount(t)}</span></button>`).join('\n  ')}
+</div>
+${postList(posts)}
+<p class="note" id="filter-empty" hidden>No posts on that topic yet.</p>`,
 }));
 
 for (const p of posts) {
   write(`blog/${p.slug}/index.html`, layout({
-    title: p.title, path: p.url, section: p.section, nav: 'blog', description: p.summary,
+    title: p.title, path: p.url, section: p.section, nav: 'blog', og: p.slug, type: 'article', description: p.summary,
     body: `<article class="sheet strong post">
-<header><p class="when"><time datetime="${p.date}">${longDate(p.date)}</time>${chip(p.section)}</p><h1 style="view-transition-name:post-${p.slug}">${esc(p.title)}</h1></header>
+<header><p class="when"><time datetime="${p.date}">${longDate(p.date)}</time>${chip(p.section)}${p.topics.map(t => `<a class="chip" href="/blog/#${topicSlug(t)}">${t}</a>`).join('')}</p><h1 style="view-transition-name:post-${p.slug}">${esc(p.title)}</h1></header>
 <div class="prose">
 ${p.html}
 </div>
@@ -297,12 +323,65 @@ write('about/index.html', layout({
 </div></div>`,
 }));
 
+// ---------- start here ----------
+const START = [
+  ['when-ai-is-wrong-and-when-it-says-no', 'Read this one first', 'Know the limits before anything else. This is the post I would hand to a skeptic.'],
+  ['everyday-email', 'The smallest place to begin', 'You already write email. This is the lowest-risk way to try AI on something real.'],
+  ['small-life-questions', 'It works at home too', 'Nothing here needs a job title. Three ordinary questions and how they went.'],
+  ['checklists-flyers-and-forms', 'The work that used to wait', 'The dull, useful documents every office needs and never gets around to.'],
+  ['custom-software-without-being-a-developer', 'Where it can lead', 'Once the small things work, you start asking for tools. This is how that went for me.'],
+];
+const bySlug = slug => { const p = posts.find(x => x.slug === slug); if (!p) throw new Error(`Start here: no post "${slug}"`); return p; };
+write('start/index.html', layout({
+  title: 'Start here', path: '/start/', og: 'start', description: 'Five short posts to read first if you are not sure what AI would do for you.',
+  body: `<section class="head"><h1>Start here</h1><p>Not sure what AI would actually do for you? Read these five, in order. Each one is a real example from my own work or home, and each one says where the AI fell short.</p></section>
+<ol class="sheet path reveal">
+${START.map(([slug, label, why], i) => { const p = bySlug(slug); return `<li><a href="${p.url}">
+  <span class="step">${i + 1}</span>
+  <div><p class="why">${label}</p><h3>${esc(p.title)}</h3><p>${why}</p></div>
+</a></li>`; }).join('\n')}
+</ol>
+<h2 class="h2">Then follow what you care about</h2>
+<div class="cards wide">
+  <article class="sheet card reveal"><h3>You run an office</h3><p>Email, forms, regulations, grants and hard meetings.</p><div class="end"><a class="btn glass" href="/blog/#office-work">Office work posts</a></div></article>
+  <article class="sheet card reveal"><h3>You'd rather try than read</h3><p>Two of my work tools run right here with made-up data.</p><div class="end"><a class="btn glass" href="/demos/dispatch-board/">Dispatch board</a><a href="/demos/procurement-wizard/">Procurement wizard</a></div></article>
+  <article class="sheet card reveal"><h3>You have kids</h3><p>Games and comics I built for River, and how.</p><div class="end"><a class="btn glass" href="/games/">Play the games</a><a href="/blog/#family">Family posts</a></div></article>
+  <article class="sheet card reveal"><h3>You want all of it</h3><p>The full list: 27 ways I actually use AI, with a post on each.</p><div class="end"><a class="btn glass" href="/blog/ways-i-use-ai/">See the list</a></div></article>
+</div>`,
+}));
+
+// ---------- games ----------
+const games = projects.filter(p => (p.links || []).some(l => l.href.startsWith('/games/')));
+write('games/index.html', layout({
+  title: 'Games', path: '/games/', og: 'games', description: 'Browser games Robert built with AI: a kart racer, a rocket game for River and a bus simulator on real streets.',
+  body: `<section class="head"><h1>Games</h1><p>Everything here runs in your browser, with nothing to install. They are best on a computer with a keyboard or a controller.</p></section>
+${projectCards('', { list: games, pictures: true })}
+<p class="note">Not online yet: the <a href="/blog/sailing-simulator/">sailing simulator you steer with your hands</a>.</p>`,
+}));
+
+// ---------- try-it demos ----------
+const demoNote = 'Everything in this demo is made up, and nothing you type is saved or sent anywhere.';
+write('demos/dispatch-board/index.html', layout({
+  title: 'Dispatch board demo', path: '/demos/dispatch-board/', section: 'work', nav: 'work', og: 'demo-dispatch-board', scripts: ['/demos/dispatch.js'],
+  description: 'Try the driver dispatch board: mark a driver as called in and watch the board work out coverage.',
+  body: `<section class="head"><h1>Dispatch board</h1><p>Someone calls in at 5 a.m. and five routes still have to leave on time. Tap <strong>Called in</strong> next to a driver and the board works out who covers. <a href="/blog/driver-dispatch-board/">Read the write-up</a>.</p></section>
+<div class="sheet strong demo" id="dispatch"><p class="empty">This demo needs JavaScript turned on.</p></div>
+<p class="note">${demoNote} The drivers, routes and rotation are invented for this page.</p>`,
+}));
+write('demos/procurement-wizard/index.html', layout({
+  title: 'Procurement wizard demo', path: '/demos/procurement-wizard/', section: 'work', nav: 'work', og: 'demo-procurement-wizard', scripts: ['/demos/procurement.js'],
+  description: 'Try the procurement wizard: answer plain questions about a purchase and get a completed sample form.',
+  body: `<section class="head"><h1>Procurement wizard</h1><p>Answer a few plain questions about a purchase and get the right form, filled in, with the checks that are easy to forget. <a href="/blog/procurement-wizard/">Read the write-up</a>.</p></section>
+<div class="sheet strong demo" id="wizard"><p class="empty">This demo needs JavaScript turned on.</p></div>
+<p class="note">${demoNote} The dollar limits are the ones from my write-up and yours will differ. The form it prints is a simplified sample, so treat this as a demonstration and not as procurement advice.</p>`,
+}));
+
 const option = (value, label) => `<option value="${esc(value)}">${esc(label)}</option>`;
 const aboutOptions = Object.entries(SECTIONS).map(([key, sec]) =>
   `<optgroup label="${sec.label} projects">${inSection(projects, key).map(p => option(p.title, p.title)).join('')}</optgroup>`).join('')
   + `<optgroup label="Posts">${posts.map(p => `<option value="${esc(p.title)}" data-slug="${p.slug}" data-side="${p.section}">${esc(p.title)}</option>`).join('')}</optgroup>`;
 write('request/index.html', layout({
-  title: 'Request a post', path: '/request/', nav: 'request', description: 'Ask Robert to write about anything on r3ai.dev, from the work side or the home side.',
+  title: 'Request a post', path: '/request/', nav: 'request', og: 'request', description: 'Ask Robert to write about anything on r3ai.dev, from the work side or the home side.',
   body: `<section class="head"><h1>Request a post</h1><p>Saw something here you want to know more about? Tell me and I'll add it to the list. Anything on the site is fair game, from the work side or the home side.</p></section>
 <form class="sheet strong form" id="request" method="post" action="/api/requests">
   <div class="field">
@@ -328,7 +407,11 @@ write('request/index.html', layout({
   <p class="hp" aria-hidden="true"><label>Leave this box empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
   <div class="acts"><button class="btn" type="submit">Send request</button><p class="form-msg" id="rq-msg" role="status"></p></div>
 </form>
-<p class="note">Requests come to me and are not published. I don't share your name or email with anyone.</p>
+<p class="note">Requests come to me first. If I take one on, I may list the topic below in my own words. I never publish what you wrote, your name or your email.</p>
+<section id="asked" hidden>
+  <h2 class="h2">What readers have asked for</h2>
+  <ul class="sheet list asked" id="asked-list"></ul>
+</section>
 <p class="note">This form is for blog post ideas only. It is not a way to reach my employer. For a question or complaint about bus service, contact your transit agency directly.</p>`,
 }));
 write('request/thanks/index.html', layout({
@@ -348,7 +431,7 @@ write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${posts.map(p => `<item><title>${esc(p.title)}</title><link>${SITE.url}${p.url}</link><guid>${SITE.url}${p.url}</guid><pubDate>${new Date(p.date + 'T12:00:00Z').toUTCString()}</pubDate><category>${SECTIONS[p.section].label}</category><description>${esc(p.summary)}</description></item>`).join('\n')}
 </channel></rss>
 `);
-const paths = ['/', '/work/', '/home/', '/blog/', '/request/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
+const paths = ['/', '/start/', '/work/', '/home/', '/blog/', '/games/', '/demos/dispatch-board/', '/demos/procurement-wizard/', '/request/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...new Set(paths)].map(p => `<url><loc>${SITE.url}${p}</loc></url>`).join('\n')}

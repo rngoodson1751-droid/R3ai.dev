@@ -3,6 +3,7 @@ title: Building games for my kid
 date: 2026-10-04
 section: home
 order: 39
+topics: Using AI, Games, Family
 summary: I am not a game developer. Here is how one request became a twelve-mission space game with our whole family in it, and what I learned about directing an AI.
 ---
 

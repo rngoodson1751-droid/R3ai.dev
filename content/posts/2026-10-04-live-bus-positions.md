@@ -3,6 +3,7 @@ title: Putting our buses on the map, live
 date: 2026-10-04
 section: work
 order: 2
+topics: Transit tools
 summary: How I turned the GPS units already on our buses into a GTFS Realtime feed, and a live map for the public.
 ---
 

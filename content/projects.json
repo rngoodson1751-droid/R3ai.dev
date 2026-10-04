@@ -6,6 +6,10 @@
     "section": "work",
     "links": [
       {
+        "label": "Try the demo",
+        "href": "/demos/dispatch-board/"
+      },
+      {
         "label": "Read the write-up",
         "href": "/blog/driver-dispatch-board/"
       }
@@ -55,6 +59,10 @@
     "section": "work",
     "links": [
       {
+        "label": "Try the demo",
+        "href": "/demos/procurement-wizard/"
+      },
+      {
         "label": "Read the write-up",
         "href": "/blog/procurement-wizard/"
       }
@@ -87,7 +95,8 @@
         "label": "Read the write-up",
         "href": "/blog/transit-simulator/"
       }
-    ]
+    ],
+    "image": "/shots/lc-transit-simulator.jpg"
   },
   {
     "section": "home",
@@ -103,7 +112,8 @@
         "label": "Read the build notes",
         "href": "/blog/sloth-rocket-grand-prix/"
       }
-    ]
+    ],
+    "image": "/shots/sloth-rocket-grand-prix.jpg"
   },
   {
     "section": "home",
@@ -119,7 +129,8 @@
         "label": "Read about it",
         "href": "/blog/rivers-rocket-works/"
       }
-    ]
+    ],
+    "image": "/shots/rivers-rocket-works.jpg"
   },
   {
     "section": "home",

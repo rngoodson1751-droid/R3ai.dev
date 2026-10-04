@@ -3,6 +3,7 @@ title: Standing up a website in a weekend
 date: 2026-10-04
 section: home
 order: 42
+topics: Using AI, This site
 summary: This site is brand new. Here is what I did, what the AI did, and why I could not load my own website the day it went live.
 ---
 

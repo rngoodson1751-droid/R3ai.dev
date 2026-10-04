@@ -3,6 +3,7 @@ title: Comics and picture books starring River
 date: 2026-10-04
 section: home
 order: 15
+topics: Family
 summary: Two picture books about our family and a three-part space comic that sneaks in relativity and quantum mechanics.
 ---
 

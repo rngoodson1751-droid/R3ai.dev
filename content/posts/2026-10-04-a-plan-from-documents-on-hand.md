@@ -3,6 +3,7 @@ title: A consultant-grade plan from documents already on hand
 date: 2026-10-04
 section: work
 order: 31
+topics: Using AI, Office work
 summary: A consultant asked for our transit plan. We did not have a stand-alone one. Here is how the documents we did have became a 14-page plan.
 ---
 
