@@ -1,11 +1,18 @@
 {
   // Cloudflare settings for r3ai.dev. The site is plain files served from ./dist.
+  // The one piece of server code, worker/index.js, saves post requests from /request/.
   "name": "r3ai-dev",
   "compatibility_date": "2026-09-22",
+  "main": "worker/index.js",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
   },
+  // Where post requests are stored.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "r3ai-requests", "database_id": "d69b294e-84e4-4568-b6da-3ee739dea136" }
+  ],
   // Attaches the domain automatically on each deploy.
   "routes": [
     { "pattern": "r3ai.dev", "custom_domain": true }

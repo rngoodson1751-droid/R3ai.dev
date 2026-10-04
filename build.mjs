@@ -88,7 +88,7 @@ const posts = loadPosts();
 const projects = JSON.parse(readFileSync('content/projects.json', 'utf8'));
 
 // ---------- templates ----------
-const NAV = [['/work/', 'At work', 'work'], ['/home/', 'At home', 'home'], ['/blog/', 'Blog', 'blog'], ['/about/', 'About', 'about']];
+const NAV = [['/work/', 'At work', 'work'], ['/home/', 'At home', 'home'], ['/blog/', 'Blog', 'blog'], ['/request/', 'Request', 'request'], ['/about/', 'About', 'about']];
 function layout({ title, description, path, section = '', nav = '', body }) {
   const full = title ? `${title} · ${SITE.name}` : `${SITE.name} · Robert, Rachelle and River`;
   const links = NAV.map(([href, label, key]) => `<a href="${href}"${nav === key ? ' aria-current="page"' : ''}>${label}</a>`).join('');
@@ -128,7 +128,7 @@ function layout({ title, description, path, section = '', nav = '', body }) {
 ${body}
 </main>
 <footer class="wrap foot">
-  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
   <p>&copy; ${new Date().getUTCFullYear()} ${SITE.author}. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
 </footer>
 </body>
@@ -153,6 +153,25 @@ function projectCards(section) {
   <div class="end">${(p.links || []).length ? p.links.map((l, i) => `<a${i === 0 ? ` class="btn${l.href.startsWith('/games/') ? '' : ' glass'}"` : ''} href="${l.href}">${esc(l.label)}</a>`).join('') : '<span class="chip">Write-up coming</span>'}</div>
 </article>`).join('\n') + '</div>';
 }
+// The cube: 26 small cubes, each with six sides. Outside sides carry a coloured tile (data-k),
+// and the middle tile of each face carries an R. src/site.js picks these up and makes them turn.
+const SIDES = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]; // right, left, bottom, top, front, back
+const CENTRES = { 4: 'Robert', 0: 'Rachelle', 3: 'River' };
+function cubeHtml() {
+  let out = '';
+  for (const x of [-1, 0, 1]) for (const y of [-1, 0, 1]) for (const z of [-1, 0, 1]) {
+    const p = [x, y, z];
+    if (!x && !y && !z) continue;
+    const centre = p.filter(Boolean).length === 1;
+    const sides = SIDES.map((n, k) => {
+      const outside = n.some((v, a) => v && p[a] === v);
+      const label = outside && centre ? (CENTRES[k] ? `<b>R</b><span>${CENTRES[k]}</span>` : '<b>R<sup>3</sup></b>') : '';
+      return `<i class="fc n${k}"${outside ? ` data-k="${k}"` : ''}>${label}</i>`;
+    }).join('');
+    out += `<div class="qb" data-p="${p}" style="transform:translate3d(calc(var(--c)*${x}),calc(var(--c)*${y}),calc(var(--c)*${z}))">${sides}</div>`;
+  }
+  return out;
+}
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const inSection = (list, s) => list.filter(x => x.section === s);
 
@@ -173,13 +192,14 @@ write('index.html', layout({
     <p>I'm Robert. I build software with AI: tools for public transit at work, and games, boats and go-karts for my family at home. This site keeps both in one place.</p>
     <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn glass" href="/home/">See the home side</a></div>
   </div>
-  <div class="scene" aria-hidden="true"><div class="cube">
-    <div class="face f1"><b>R</b><span>Robert</span></div>
-    <div class="face f2"><b>R</b><span>Rachelle</span></div>
-    <div class="face f3"><b>R</b><span>River</span></div>
-    <div class="face f4"><b>R<sup>3</sup></b></div>
-    <div class="face f5"></div><div class="face f6"></div>
-  </div></div>
+  <div class="stage">
+    <div class="scene"><div class="cube" id="cube" role="group" aria-label="A puzzle cube with an R for Robert, Rachelle and River. Drag a tile to turn a row.">${cubeHtml()}</div></div>
+    <div class="cube-ui">
+      <button class="btn glass sm" type="button" data-cube="scramble">Scramble</button>
+      <button class="btn glass sm" type="button" data-cube="reset">Reset</button>
+      <p class="cube-say" role="status">Drag a tile to turn a row. Drag beside the cube to spin it.</p>
+    </div>
+  </div>
 </section>
 <div class="bento">
   <a class="sheet tile reveal" href="/work/">
@@ -201,6 +221,11 @@ write('index.html', layout({
   <section class="${featured ? 'span-4' : 'span-6'}" style="display:grid" aria-label="Latest posts">
     ${postList(posts.slice(0, 4))}
   </section>
+  <article class="sheet tile span-6 ask reveal">
+    <div><h2>Want to read about something?</h2>
+    <p>Pick anything on the site, from the work side or the home side, and ask me to write about it.</p></div>
+    <div class="end"><a class="btn" href="/request/">Request a post</a></div>
+  </article>
 </div>`,
 }));
 
@@ -246,7 +271,7 @@ for (const p of posts) {
 <div class="prose">
 ${p.html}
 </div>
-<p><a class="btn glass" href="${SECTIONS[p.section].path}">More from ${SECTIONS[p.section].label.toLowerCase()}</a></p>
+<p class="acts"><a class="btn glass" href="${SECTIONS[p.section].path}">More from ${SECTIONS[p.section].label.toLowerCase()}</a><a class="btn glass" href="/request/?about=${p.slug}">Request a follow-up</a></p>
 </article>`,
   }));
 }
@@ -272,6 +297,45 @@ write('about/index.html', layout({
 </div></div>`,
 }));
 
+const option = (value, label) => `<option value="${esc(value)}">${esc(label)}</option>`;
+const aboutOptions = Object.entries(SECTIONS).map(([key, sec]) =>
+  `<optgroup label="${sec.label} projects">${inSection(projects, key).map(p => option(p.title, p.title)).join('')}</optgroup>`).join('')
+  + `<optgroup label="Posts">${posts.map(p => `<option value="${esc(p.title)}" data-slug="${p.slug}" data-side="${p.section}">${esc(p.title)}</option>`).join('')}</optgroup>`;
+write('request/index.html', layout({
+  title: 'Request a post', path: '/request/', nav: 'request', description: 'Ask Robert to write about anything on r3ai.dev, from the work side or the home side.',
+  body: `<section class="head"><h1>Request a post</h1><p>Saw something here you want to know more about? Tell me and I'll add it to the list. Anything on the site is fair game, from the work side or the home side.</p></section>
+<form class="sheet strong form" id="request" method="post" action="/api/requests">
+  <div class="field">
+    <label for="rq-message">What should I write about?</label>
+    <small id="rq-message-hint">A question, a project you want more detail on, or something you'd like me to try.</small>
+    <textarea class="input" id="rq-message" name="message" required minlength="10" maxlength="2000" aria-describedby="rq-message-hint"></textarea>
+  </div>
+  <fieldset class="field pick">
+    <legend>Which side is it?</legend>
+    <label><input type="radio" name="side" value="work">At work</label>
+    <label><input type="radio" name="side" value="home">At home</label>
+    <label><input type="radio" name="side" value="either" checked>Not sure</label>
+  </fieldset>
+  <div class="field">
+    <label for="rq-about">Is it about something already on the site?</label>
+    <select class="input" id="rq-about" name="about"><option value="">No, it's something new</option>${aboutOptions}</select>
+  </div>
+  <div class="two">
+    <div class="field"><label for="rq-name">Your name <span class="opt">optional</span></label><input class="input" id="rq-name" name="name" maxlength="80" autocomplete="name"></div>
+    <div class="field"><label for="rq-email">Email <span class="opt">optional</span></label><input class="input" id="rq-email" name="email" type="email" maxlength="120" autocomplete="email" aria-describedby="rq-email-hint"></div>
+  </div>
+  <small id="rq-email-hint">Leave an email only if you want to hear back when the post is up.</small>
+  <p class="hp" aria-hidden="true"><label>Leave this box empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
+  <div class="acts"><button class="btn" type="submit">Send request</button><p class="form-msg" id="rq-msg" role="status"></p></div>
+</form>
+<p class="note">Requests come to me and are not published. I don't share your name or email with anyone.</p>
+<p class="note">This form is for blog post ideas only. It is not a way to reach my employer. For a question or complaint about bus service, contact your transit agency directly.</p>`,
+}));
+write('request/thanks/index.html', layout({
+  title: 'Request sent', path: '/request/thanks/', nav: 'request', description: 'Your post request was sent.',
+  body: `<section class="head"><h1>Got it</h1><p>Your request is on my list. Thanks for asking. Head back to the <a href="/blog/">blog</a> or <a href="/request/">send another</a>.</p></section>`,
+}));
+
 write('404.html', layout({
   title: 'Page not found', path: '/404.html', description: 'That page does not exist.',
   body: `<section class="head"><h1>Wrong stop</h1><p>There's no page at this address. Try the <a href="/">home page</a> or the <a href="/blog/">blog</a>.</p></section>`,
@@ -284,7 +348,7 @@ write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${posts.map(p => `<item><title>${esc(p.title)}</title><link>${SITE.url}${p.url}</link><guid>${SITE.url}${p.url}</guid><pubDate>${new Date(p.date + 'T12:00:00Z').toUTCString()}</pubDate><category>${SECTIONS[p.section].label}</category><description>${esc(p.summary)}</description></item>`).join('\n')}
 </channel></rss>
 `);
-const paths = ['/', '/work/', '/home/', '/blog/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
+const paths = ['/', '/work/', '/home/', '/blog/', '/request/', '/about/', ...posts.map(p => p.url), ...projects.flatMap(p => (p.links || []).map(l => l.href)).filter(h => h.startsWith('/games/'))];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...new Set(paths)].map(p => `<url><loc>${SITE.url}${p}</loc></url>`).join('\n')}
