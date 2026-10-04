@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Turning a policy into a tool · R3 AI</title>
+<meta name="description" content="I wanted to save our purchasing staff some work on small purchases. That turned into a memo, then a form, then a wizard that writes the paperwork.">
+<link rel="canonical" href="https://r3ai.dev/blog/turning-a-policy-into-a-tool/">
+<meta property="og:title" content="Turning a policy into a tool">
+<meta property="og:description" content="I wanted to save our purchasing staff some work on small purchases. That turned into a memo, then a form, then a wizard that writes the paperwork.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/turning-a-policy-into-a-tool/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At work</span></p><h1 style="view-transition-name:post-turning-a-policy-into-a-tool">Turning a policy into a tool</h1></header>
+<div class="prose">
+<p>Small purchases create a surprising amount of paperwork. Federal rules let agencies like ours buy low-cost items without competitive quotes, as long as the price is reasonable and documented. But each request still adds work for our purchasing staff.</p>
+<p>I wanted to give them one clear document showing the authority for these purchases, so they would have less to review.</p>
+<h3>Step one: the memo</h3>
+<p>I asked Claude for a memo laying out the federal and local authority for small purchases, including from online retailers.</p>
+<h3>Step two: stop and read the real policy</h3>
+<p>Before it revised anything, I told it to wait until I could upload the City's actual procurement procedures. I am glad I did. The first draft was built from federal rules, and the local policy differs in ways that matter:</p>
+<ul><li>Our ceiling for the next tier of purchases is much lower than the federal one.</li><li>Three quotes are always required at that tier.</li><li>A check against the federal list of barred vendors is required at every dollar amount, even the smallest.</li></ul>
+<p>On that last point Claude had told me earlier that the check only applied above a certain amount. When it read our policy, it said it had been wrong and corrected the memo.</p>
+<h3>Step three: the form, then the tool</h3>
+<p>Next came a price determination form that matches the one in our procedures. Then came the part I like most: a small web page that asks questions about a purchase, one at a time, and produces the right completed form at the end.</p>
+<p>That is the jump worth noticing. A policy is something people have to read. A tool is something people can just use. I describe the tool itself in <a href="/blog/procurement-wizard/">A wizard that fills out the procurement forms</a>.</p>
+<h3>Knowing when to stop</h3>
+<p>Claude offered to extend the wizard to four more forms. I said no. I want to live with the first two before building more.</p>
+<h3>Where it falls short</h3>
+<p>It will write from general rules if that is all it has. Your local policy is the one that counts, so give it the document.</p>
+<hr>
+<p><em>Part of the series <a href="/blog/ways-i-use-ai/">27 ways I actually use AI</a>. Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p><a class="btn glass" href="/work/">More from at work</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

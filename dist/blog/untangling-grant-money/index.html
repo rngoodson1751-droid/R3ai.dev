@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Untangling grant money before a deadline · R3 AI</title>
+<meta name="description" content="Several older grants, a handful of invoices and a date after which the money goes away. AI did the matching and found the invoices that did not fit.">
+<link rel="canonical" href="https://r3ai.dev/blog/untangling-grant-money/">
+<meta property="og:title" content="Untangling grant money before a deadline">
+<meta property="og:description" content="Several older grants, a handful of invoices and a date after which the money goes away. AI did the matching and found the invoices that did not fit.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/untangling-grant-money/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At work</span></p><h1 style="view-transition-name:post-untangling-grant-money">Untangling grant money before a deadline</h1></header>
+<div class="prose">
+<p>Federal grants come with a period of performance. When it ends, what you have not drawn down is gone. I had several older grants closing on the same date and a few vendor invoices to match against them.</p>
+<h3>The puzzle</h3>
+<p>Each grant is divided into budget lines by category: bus stops and stations, support equipment and so on. An invoice can only be charged where the category matches and there is room left. So the question is never just &quot;do we have the money.&quot; It is &quot;do we have the money in the right line of the right grant.&quot;</p>
+<h3>What I asked</h3>
+<p>I gave Claude the remaining balance on each line of each grant, and the invoices, and asked what could be drawn from where.</p>
+<h3>What came back</h3>
+<p>A walk through each grant and each line. The useful part was what did not fit. One invoice was larger than the room left in its category across all of the grants. Two others were far too large for theirs. Claude did not force them in. It said they probably belonged to a different grant, pointed to which one, and asked a question I should have asked first: is it the full invoice that gets drawn, or only the federal share?</p>
+<p>That did not solve my problem. It told me exactly what my problem was, before I submitted a draw that would have been rejected.</p>
+<h3>Where it falls short</h3>
+<p>It only knows the balances I give it. If my figures are stale, the answer is stale. It is not looking at the federal system. I am. I would also never let it submit anything. It does the arithmetic and the matching, and I check the result against the live system and make the draw myself.</p>
+<h3>Try it</h3>
+<p>Put your balances and invoices in a table and ask &quot;what fits where, and what does not fit anywhere?&quot;</p>
+<hr>
+<p><em>Part of the series <a href="/blog/ways-i-use-ai/">27 ways I actually use AI</a>. Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p><a class="btn glass" href="/work/">More from at work</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

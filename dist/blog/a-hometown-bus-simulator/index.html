@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A hometown bus simulator from real map data · R3 AI</title>
+<meta name="description" content="It started as a toy trolley on a made-up grid. It became a driving game on our real streets, with real routes and tens of thousands of real buildings.">
+<link rel="canonical" href="https://r3ai.dev/blog/a-hometown-bus-simulator/">
+<meta property="og:title" content="A hometown bus simulator from real map data">
+<meta property="og:description" content="It started as a toy trolley on a made-up grid. It became a driving game on our real streets, with real routes and tens of thousands of real buildings.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r3ai.dev/blog/a-hometown-bus-simulator/">
+<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="home">
+<canvas id="silk" aria-hidden="true"></canvas>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-04">October 4, 2026</time><span class="chip">At home</span></p><h1 style="view-transition-name:post-a-hometown-bus-simulator">A hometown bus simulator from real map data</h1></header>
+<div class="prose">
+<p>This one sits between work and home. I wanted a small driving game where you pilot a trolley around downtown and pick up riders. It did not stay small. What is in the game is covered in <a href="/blog/transit-simulator/">A driving game set on our real bus routes</a>. This post is about how it grew.</p>
+<h3>How it grew</h3>
+<p><strong>Version one</strong> was a first-person trolley on a made-up grid of streets.</p>
+<p><strong>Then I asked for our real routes.</strong> Claude read the published transit schedule data, the same feed trip-planning apps use, and rebuilt the game around the five actual routes with their real names, colors and stops.</p>
+<p><strong>Then I asked for the real city.</strong> I supplied public map data: streets, addresses, parcels and the city limits. Claude rebuilt the world at true scale with real street names and more than forty thousand building footprints, later filled in with public building datasets.</p>
+<p><strong>Then we added the fun parts:</strong></p>
+<ul><li>A second vehicle, a 35-foot bus, modeled from a photo of the placard and the operator's manual.</li><li>Controller support and two-player split screen.</li><li>A radio with original music.</li><li>A free-drive mode with item crates. The items are local: hot sauce rockets, blue crabs, a crawfish that slows you down and Mardi Gras beads as a shield.</li><li>A five-lap grand prix on a real street circuit, with a five-light start and a podium.</li><li>Driving physics based on the real weight and power of the vehicles.</li></ul>
+<p>People who have tried it like it. Somewhere along the way it stopped being a weekend toy and got a proper name: LC Transit Simulator.</p>
+<h3>The data problems were the real work</h3>
+<ul><li>The first street file only had roads ending in Street, Drive, Road and Lane. No avenues, no boulevards, no highways. We needed a different file.</li><li>The big map files were too large to upload in chat. Claude read them straight from my computer instead.</li><li>Bus stops first appeared in the middle of the road and had to be moved to the curb.</li></ul>
+<h3>Making it look like home</h3>
+<p>I want the buildings to look real. My first idea was to use online street-level imagery. Claude explained that the terms of service for those services rule that out. The better plan is to film the routes myself with a 360 camera that records GPS. I picked a camera and have filming notes: where to mount it, what time of day and how fast to drive. I have not filmed yet.</p>
+<h3>Where it falls short</h3>
+<p>It is still in progress and not posted here yet. The buildings are plain blocks until the filming is done.</p>
+<hr>
+<p><em>Part of the series <a href="/blog/ways-i-use-ai/">27 ways I actually use AI</a>. Claude drafted this post from the record of our work together.</em></p>
+</div>
+<p><a class="btn glass" href="/home/">More from at home</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/blog/">Blog</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>
