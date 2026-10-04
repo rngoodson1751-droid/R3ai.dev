@@ -76,9 +76,13 @@
     "kind": "Game",
     "status": "In progress",
     "title": "LC Transit Simulator",
-    "summary": "A 3D driving game in the browser, built from real routes, real streets and about 40,000 real building footprints.",
+    "summary": "Drive the trolley or a 35 foot bus on the real routes, in a 3D city built from real streets and about 40,000 real building footprints.",
     "section": "work",
     "links": [
+      {
+        "label": "Play",
+        "href": "/games/lc-transit-simulator/"
+      },
       {
         "label": "Read the write-up",
         "href": "/blog/transit-simulator/"

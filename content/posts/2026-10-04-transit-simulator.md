@@ -8,6 +8,10 @@ summary: A 3D driving game in the browser built from real route data, real stree
 
 This started as a trolley simulator and got out of hand in the best way.
 
+[Play the transit simulator](/games/lc-transit-simulator/)
+
+It is a big download, so give it a minute to build the city. It runs best on a computer with a keyboard or an Xbox controller.
+
 ## Real data, not a made-up town
 
 The routes and stops come from the same schedule data we publish for trip-planning apps. The streets and about 40,000 building footprints come from the City's GIS data and from public building datasets. So when you drive the game, the turns are the real turns and the stops are where the stops are.
@@ -31,4 +35,4 @@ Partly because it's fun. Partly because a game is the most approachable version 
 
 ## What's next
 
-I plan to film the real routes with a 360 degree camera as reference for the next round of work. It's still in progress, and I'll post it here when it's ready for other people to drive.
+I plan to film the real routes with a 360 degree camera as reference for the next round of work. It's still in progress, so expect rough edges. The game is my own project and not an official City product.
