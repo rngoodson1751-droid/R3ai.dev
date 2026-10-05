@@ -22,7 +22,7 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     const st = states[r.id];
     // The tracker stamps times to the minute, so two positions can carry the same time. A changed position is news.
     if (st && r.t <= st.seen && metres(net, r, st) >= TUNE.MOVE_M) r = { ...r, t: Math.max(st.seen + 1000, nowMs) };
-    states[r.id] = step(net, st, r, overrides[r.id]);
+    states[r.id] = step(net, st, r, overrides[r.id] ?? overrides[r.id.split('-').pop()]); // dispatch may name a bus the short way: 47 for 0609-47
     online.push(r);
   }
   settle(net, states, online.map(r => r.id));

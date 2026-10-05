@@ -116,6 +116,7 @@ The lobby display is a live bus tracker. Its page is `worker/private/lobby-displ
 
 - `network.json` is the routes, stops, route lines and timetable, made from the GTFS feed. When the feed changes, unzip it and run `node tools/gtfs.mjs path/to/folder`, then commit.
 - `live.js` answers `<page address>/live` every ten seconds with the buses in service, alerts and weather. Positions come from Zonar once three Worker secrets exist (`ZONAR_CUSTOMER`, `ZONAR_USERNAME`, `ZONAR_PASSWORD`, set in the Cloudflare dashboard under the Worker's Settings, Variables and Secrets). Until then `sim.js` supplies made-up buses 901 to 905 and the page shows a "Simulated data" label. Never put the Zonar login in this repository.
+- Buses are named the way staff name them: Zonar's fleet number `0609-47` shows everywhere as Bus 47 (`busNo` in the page).
 - `matcher.js` works out which route each bus is on. Zonar reports a bus number and a position, never a route, so the matcher follows each bus's recent trail along the route lines; `fleet.js` drops buses that are off, silent or parked at the facility. The settings are at the top of each file. `node tools/transit-test.mjs` checks the matcher against simulated days and should print "All scenarios passed".
 - `<page address>/live?debug=1` shows what Zonar sent back (without the login), for when its format needs checking.
 
@@ -129,10 +130,10 @@ VALUES ('alert', 'Route 3 detour on Mill Street', 'Mill Street is closed at Bank
 DELETE FROM transit_alerts WHERE id = 1;
 ```
 
-If the matcher has a bus on the wrong route, or cannot tell, dispatch can say so for the day (`day` is YYYYMMDD, `bus` is the number as Zonar writes it):
+If the matcher has a bus on the wrong route, or cannot tell, dispatch can say so for the day (`day` is YYYYMMDD; `bus` is the bus number, either the short form staff use, `47`, or Zonar's full `0609-47`):
 
 ```
-INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('0609-37', '20261005', '2');
+INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('47', '20261005', '2');
 ```
 
 To make a new link (and switch the old one off), pick a new key and put its hash in `UNLISTED`:
