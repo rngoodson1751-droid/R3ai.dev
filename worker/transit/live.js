@@ -7,7 +7,7 @@
 // unit does not take a bus off the map. With neither, the simulator in sim.js, and the page says so.
 import raw from './network.json';
 import { prepare, localTime, tripsOn, metres } from './geo.js';
-import { update, mergeReports, LIVE } from './fleet.js';
+import { update, mergeReports, heard, LIVE } from './fleet.js';
 import { simReports, SIM } from './sim.js';
 
 export const networkForPage = JSON.stringify(raw).replace(/</g, '\\u003c'); // what the page draws from, taken before prepare() adds its working data
@@ -218,7 +218,7 @@ async function trackerDebug(env) {
     return {
       bus: r.id, ...(zonarOn(env) ? { zonar: say(by[r.id].zonar) } : {}), ...(geotabOn(env) ? { geotab: say(by[r.id].geotab) } : {}), using: r.src, lastReportMinutesAgo: mins(r),
       lat: r.lat, lon: r.lon, mph: r.s == null ? null : Math.round(r.s * 2.237), metresFromFacility: far,
-      status: r.power === false ? 'power off' : now - r.t > LIVE.STALE ? `no report for ${mins(r)} min` : far <= LIVE.YARD_M ? 'at the transit facility' : 'in service',
+      status: r.power === false ? 'power off' : !heard(r, now) ? `no report for ${mins(r)} min` : far <= LIVE.YARD_M ? 'at the transit facility' : now - r.t > LIVE.STALE ? 'in service, standing still' : 'in service',
     };
   }).sort((x, y) => x.lastReportMinutesAgo - y.lastReportMinutesAgo);
   return { ok: lists.length > 0, trackers, units, ...(geo ? { geotab: { vehiclesThisLoginCanSee: geo.seen, matchedToBuses: geo.matched, notMatched: geo.unmatched ?? 'not listed: this login sees more than 30 vehicles, so only names carrying the fleet number are trusted. Limit the login to the Transit group, or set GEOTAB_BUSES.' } } : {}) };

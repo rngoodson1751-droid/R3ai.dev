@@ -4,7 +4,9 @@ import { step, settle, TUNE } from './matcher.js';
 import { pointAt, tripFor, localTime, metres } from './geo.js';
 
 export const LIVE = {
-  STALE: 300e3,              // a bus not heard from for this long is treated as offline
+  STALE: 300e3,              // a moving bus not heard from for this long is treated as offline
+  DWELL: 30 * 60e3,          // a bus that last reported standing still, power on, is taken to be standing there this long:
+                             // the trackers go quiet while a bus waits at the terminal, and it should not vanish on its layover
   IDLE_HIDE: 5 * 60e3,       // an unmatched bus standing this long is not in service
   YARD: [30.2300, -93.1543], // the transit facility, where buses park: anything within YARD_M of it is not in service
   YARD_M: 300,
@@ -19,12 +21,18 @@ export function mergeReports(lists) {
   return Object.values(best);
 }
 
+// Is this report recent enough to act on?
+export function heard(r, nowMs) {
+  const age = nowMs - r.t;
+  return r.power !== false && Number.isFinite(r.lat) && Number.isFinite(r.lon) && age > -120e3 && (age <= LIVE.STALE || (age <= LIVE.DWELL && !(r.s > 1)));
+}
+
 // reports: [{id, t, lat, lon, h, s, power, src}]. states: {bus id: matcher state}, changed in place.
 export function update(net, states, reports, nowMs, overrides = {}) {
   const yard = { lat: LIVE.YARD[0], lon: LIVE.YARD[1] };
   const online = [];
   for (let r of reports) {
-    if (r.power === false || !Number.isFinite(r.lat) || !Number.isFinite(r.lon) || nowMs - r.t > LIVE.STALE || nowMs - r.t < -120e3) continue;
+    if (!heard(r, nowMs)) continue;
     if (metres(net, r, yard) <= LIVE.YARD_M) { delete states[r.id]; continue; } // parked or warming up at the facility
     const st = states[r.id];
     // The tracker stamps times to the minute, so two positions can carry the same time. A changed position is news.

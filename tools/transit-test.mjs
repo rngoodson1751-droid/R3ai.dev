@@ -68,6 +68,14 @@ run('Two trackers, one dead unit on each', {
   ]),
   expect: r => r.wrong === 0 && r.ghost === 0 && all5(r),
 });
+// Zonar goes quiet while a bus stands still: no new report until it moves again. Buses waiting out their
+// layover at the terminal must stay on the map, so nearly every sample should still show all five.
+const lastSaid = {};
+run('Tracker silent while a bus stands at the terminal', {
+  from: at(5, 20), to: at(11, 0),
+  mutate: reports => reports.map(r => { const was = lastSaid[r.id]; if (was && r.power && was.power && r.lat === was.lat && r.lon === was.lon) return was; if (was && r.power && was.power && !(r.s > 0.5) && !(was.s > 0.5)) return was; lastSaid[r.id] = r; return r; }),
+  expect: r => r.wrong === 0 && all5(r) && r.shown >= 9200,
+});
 // Saturday: nothing in the timetable, so nothing should be shown.
 run('Saturday, no service', { from: at(8, 0) + 5 * 86400e3, to: at(9, 0) + 5 * 86400e3, expect: r => r.shown === 0 && r.wrong === 0 && r.ghost === 0 });
 
