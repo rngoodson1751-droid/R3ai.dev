@@ -37,6 +37,7 @@ summary: One or two sentences shown in the post lists.
 ## Extras you can put in a post
 
 - A "Try this yourself" box with a copy button: put the prompt in a fenced block that starts with three backticks and the word `prompt`.
+- A page of its own shown inside the post, such as the fire escape plan in `static/fire-plan/`: add a line that says `{{embed /fire-plan/ A short title for the frame}}`. It also adds an "Open it full screen" link.
 - The scoring calculator, or any other small tool: add `widget: portsmouth` to the header and a line that says `{{portsmouth}}` where it should appear. The code is `src/demos/portsmouth.js`.
 
 ## Add a game or page

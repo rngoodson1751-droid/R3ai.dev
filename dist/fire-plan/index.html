@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le plan d'évacuation de River · R3 AI</title>
+<meta name="description" content="River's family fire escape plan, in French, as a short animation.">
+<link rel="canonical" href="https://r3ai.dev/fire-plan/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="patrick-hand.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* River's fire escape plan. One page, no libraries. The drawing is the SVG below;
+   the script at the bottom moves River through it. Without JavaScript the full plan still shows. */
+@font-face { font-family: 'Patrick Hand'; src: url('patrick-hand.woff2') format('woff2'); font-display: swap; }
+:root { --paper: #fbf6ea; --ink: #23303a; --blue: #1f5fbf; --green: #17964a; --red: #dc2a2a; --purple: #7a3fc4; color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { display: flex; flex-direction: column; height: 100dvh; background: var(--paper); color: var(--ink); font: 18px/1.3 'Patrick Hand', 'Comic Sans MS', 'Chalkboard SE', 'Segoe Print', cursive; }
+svg#plan { flex: 1 1 auto; min-height: 0; width: 100%; display: block; }
+svg text { font-family: inherit; }
+.lbl { font-size: 27px; fill: #1d3f8f; text-anchor: middle; }
+.step { font-size: 28px; }
+.tag { font-size: 25px; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: 7px; stroke-linejoin: round; fill: #b3201c; }
+.dyn { opacity: 0; }
+.arrow { transition: opacity .35s; }
+.anim .arrow { opacity: .22; }
+.anim .arrow.on { opacity: 1; }
+.anim .panel { opacity: .45; transition: opacity .4s; }
+.anim .panel.on { opacity: 1; }
+.panel .glow { opacity: 0; transition: opacity .4s; }
+.anim .panel.on .glow { opacity: .16; }
+
+.bar { flex: none; display: none; gap: .35rem; padding: .5rem .7rem calc(.55rem + env(safe-area-inset-bottom)); border-top: 2px dashed #c9bfa6; background: #fffdf6; }
+.js .bar { display: grid; }
+.cap { min-height: 3.9em; display: grid; align-content: center; gap: .1rem; text-align: center; }
+.cap b { font-weight: 400; font-size: 1.2rem; color: #14306e; text-wrap: balance; }
+.cap span { font: .82rem/1.3 system-ui, sans-serif; color: #5a6670; text-wrap: balance; }
+.row { display: flex; flex-wrap: wrap; gap: .35rem; justify-content: center; align-items: center; }
+button { font: inherit; font-size: 1rem; color: #14306e; background: #e7f1fb; border: 2px solid #1f5fbf; border-radius: 999px; padding: .12rem .75rem; min-height: 2.3rem; cursor: pointer; }
+button:hover { background: #d5e7fa; }
+button[aria-pressed="true"], button.cur { background: #17964a; border-color: #0f6b34; color: #fff; }
+button:focus-visible, input:focus-visible { outline: 3px solid #f2a900; outline-offset: 2px; }
+input[type=range] { width: 100%; accent-color: #17964a; margin: 0; }
+noscript p { margin: 0; padding: .5rem .8rem; text-align: center; background: #fffdf6; border-top: 2px dashed #c9bfa6; }
+</style>
+</head>
+<body>
+<svg id="plan" viewBox="0 0 1060 1640" role="img" aria-labelledby="t d">
+<title id="t">Notre plan d'évacuation en cas d'incendie</title>
+<desc id="d">A floor plan of the house with the escape routes marked, in French. River wakes to the smoke detector, crawls low under the smoke down the hall, leaves through the garage and meets his family at the black mailbox in the front yard.</desc>
+<defs>
+  <filter id="wob" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+  <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .3  0 0 0 -.9 .62"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
+  <marker id="mg" markerUnits="userSpaceOnUse" markerWidth="30" markerHeight="30" refX="9" refY="15" orient="auto"><path d="M2 2 L28 15 L2 28 Z" fill="#17964a"/></marker>
+  <marker id="mr" markerUnits="userSpaceOnUse" markerWidth="30" markerHeight="30" refX="9" refY="15" orient="auto"><path d="M2 2 L28 15 L2 28 Z" fill="#dc2a2a"/></marker>
+  <pattern id="wood" width="26" height="14" patternUnits="userSpaceOnUse"><rect width="26" height="14" fill="#f6cf9a"/><path d="M0 14H26M13 0V14" stroke="#e7b77a" stroke-width="1.2"/></pattern>
+  <pattern id="tile" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="#f6efdf"/><path d="M0 20H20V0" fill="none" stroke="#e0d5bb" stroke-width="1.4"/></pattern>
+  <pattern id="door" width="20" height="16" patternUnits="userSpaceOnUse"><rect width="20" height="16" fill="#eeeeea"/><path d="M0 15.5H20" stroke="#8d8d88" stroke-width="2"/></pattern>
+
+  <!-- River: blond hair, orange shirt, navy shorts. Origin is the ground under him. -->
+  <g id="r-head"><circle r="12" fill="#f3cdb4" stroke="#7a4a2a" stroke-width="1.5"/><path d="M-12.5 -1 C-14 -17 12 -19 13 -3 C8 -9 2 -8 -3 -10 C-6 -6 -10 -5 -12.5 -1Z" fill="#f6cf4a" stroke="#b88a14" stroke-width="1.3"/><circle cx="-3" cy="1" r="1.6" fill="#23303a"/><circle cx="6" cy="1" r="1.6" fill="#23303a"/><path d="M-2 6 Q2 9.5 6 6" fill="none" stroke="#7a2a1a" stroke-width="1.6" stroke-linecap="round"/></g>
+  <g id="r-crawl">
+    <path d="M-17 -11 L-15 -1 L-29 -1" fill="none" stroke="#f3cdb4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-29 -1 h-5" stroke="#2f6fd0" stroke-width="7" stroke-linecap="round"/>
+    <rect x="-25" y="-23" width="15" height="14" rx="5" fill="#1f2f5c"/>
+    <rect x="-14" y="-25" width="26" height="15" rx="7" fill="#f28c28" stroke="#b85f10" stroke-width="1.3"/>
+    <path d="M7 -13 L10 -1 M0 -12 L-3 -1" stroke="#f3cdb4" stroke-width="5.5" stroke-linecap="round"/>
+    <use href="#r-head" x="19" y="-26"/>
+  </g>
+  <g id="mailbox"><rect x="-5" y="0" width="10" height="46" fill="#8a5a2b" stroke="#5a3a18" stroke-width="1.5"/><path d="M-30 4 V-14 A16 16 0 0 1 -14 -30 H26 A8 8 0 0 1 34 -22 V4 Z" fill="#2c2f33" stroke="#111" stroke-width="2"/><path d="M-14 -30 A16 16 0 0 1 2 -14 V4" fill="none" stroke="#555" stroke-width="2"/><path d="M14 -30 V-48 H26 V-40 H17" fill="#dc2a2a" stroke="#8f1616" stroke-width="1.5"/></g>
+  <g id="flame"><path d="M0 0 C-22 -4 -20 -28 -8 -40 C-8 -30 -2 -28 0 -52 C10 -36 22 -26 16 -8 C13 -2 6 0 0 0Z" fill="#f2711c" stroke="#d6400f" stroke-width="2"/><path d="M0 -2 C-10 -4 -9 -17 -3 -24 C-2 -18 3 -18 3 -28 C9 -20 12 -12 8 -5 C6 -2 3 -2 0 -2Z" fill="#ffd23f"/></g>
+  <g id="cloud"><circle cx="-22" cy="4" r="16"/><circle cx="-4" cy="-8" r="20"/><circle cx="18" cy="-2" r="17"/><circle cx="34" cy="8" r="12"/><circle cx="4" cy="10" r="16"/></g>
+  <g id="plant"><path d="M0 0 q-22 -10 -24 -26 q16 2 24 26z M0 0 q-8 -24 2 -36 q10 14 -2 36z M0 0 q20 -12 24 -28 q-18 2 -24 28z M0 0 q-26 6 -30 -4 q14 -8 30 4z M0 0 q26 4 30 -6 q-14 -6 -30 6z"/></g>
+</defs>
+
+<rect width="1060" height="1640" fill="#fbf6ea"/>
+
+<!-- ============ the drawing that never moves ============ -->
+<g filter="url(#wob)">
+  <!-- yard, drive and street -->
+  <path d="M0 1375 Q380 1340 1060 1368 V1548 H0Z" fill="#cfe8b4" opacity=".7"/>
+  <rect x="0" y="1546" width="1060" height="94" fill="#8f9498"/>
+  <path d="M20 1593 H1040" stroke="#f4e9a8" stroke-width="5" stroke-dasharray="34 26"/>
+  <path d="M430 1255 H690 L704 1548 H424Z" fill="#d7d7d2" stroke="#9a9a95" stroke-width="2"/>
+  <g fill="#3f9a3f" stroke="#2a6f2a" stroke-width="2"><circle cx="70" cy="1150" r="32"/><circle cx="118" cy="1178" r="30"/><circle cx="178" cy="1160" r="34"/><circle cx="226" cy="1196" r="24"/><circle cx="352" cy="1272" r="26"/><circle cx="382" cy="1240" r="18"/></g>
+  <g fill="#e2493f"><circle cx="76" cy="1146" r="4"/><circle cx="120" cy="1186" r="4"/><circle cx="186" cy="1152" r="4"/><circle cx="168" cy="1176" r="4"/><circle cx="352" cy="1268" r="4"/></g>
+  <!-- floors -->
+  <rect x="40" y="375" width="260" height="165" fill="#dcdcd8" stroke="#8d8d88" stroke-width="3"/>
+  <rect x="250" y="1110" width="145" height="140" fill="#dcdcd8" stroke="#8d8d88" stroke-width="3"/>
+  <rect x="400" y="905" width="315" height="350" fill="#d9d9d5"/>
+  <path d="M290 215H482V445H290Z M300 445H482V540H300Z M482 300H535V905H476V540H482Z M535 410H715V585H535Z M535 745H715V905H535Z M55 540H476V800H400V1110H250V1085H55Z" fill="url(#wood)"/>
+  <path d="M482 215H715V410H535V300H482Z M535 585H715V745H535Z M400 800H476V905H400Z" fill="url(#tile)"/>
+  <rect x="430" y="1247" width="260" height="16" fill="url(#door)" stroke="#555" stroke-width="2"/>
+
+  <!-- furniture -->
+  <g stroke="#6b4a2a" stroke-width="2">
+    <!-- main bedroom -->
+    <rect x="335" y="232" width="92" height="118" rx="6" fill="#fff"/><rect x="335" y="266" width="92" height="84" rx="6" fill="#4f8fe0"/><rect x="342" y="238" width="36" height="22" rx="6" fill="#fff"/><rect x="384" y="238" width="36" height="22" rx="6" fill="#fff"/>
+    <rect x="306" y="240" width="22" height="22" fill="#b98548"/><rect x="434" y="240" width="22" height="22" fill="#b98548"/>
+    <!-- main bath -->
+    <rect x="492" y="222" width="112" height="30" fill="#e9e4d8"/><ellipse cx="520" cy="237" rx="13" ry="9" fill="#bfe0f5"/><ellipse cx="574" cy="237" rx="13" ry="9" fill="#bfe0f5"/>
+    <rect x="612" y="222" width="96" height="70" fill="#fff"/><rect x="648" y="298" width="60" height="68" rx="14" fill="#fff"/><ellipse cx="678" cy="332" rx="19" ry="25" fill="#bfe0f5"/>
+    <rect x="676" y="376" width="30" height="12" fill="#fff"/><ellipse cx="691" cy="396" rx="12" ry="10" fill="#fff"/>
+    <rect x="542" y="364" width="58" height="40" fill="#bfe0f5"/><path d="M542 364L600 404M600 364L542 404" stroke="#7fb4d6"/>
+    <!-- bedroom 2: the rocket room -->
+    <rect x="556" y="424" width="96" height="62" rx="6" fill="#fff"/><rect x="588" y="424" width="64" height="62" rx="6" fill="#3f7fe0"/><rect x="561" y="436" width="22" height="38" rx="6" fill="#fff"/>
+    <rect x="668" y="436" width="22" height="22" fill="#b98548"/>
+    <!-- bath 2 and closets -->
+    <rect x="620" y="594" width="88" height="62" fill="#fff"/><rect x="620" y="664" width="88" height="74" fill="#fff"/>
+    <rect x="572" y="596" width="30" height="34" rx="5" fill="#fff"/><ellipse cx="587" cy="614" rx="10" ry="11" fill="#bfe0f5"/>
+    <rect x="574" y="648" width="26" height="10" fill="#fff"/><ellipse cx="587" cy="668" rx="11" ry="10" fill="#fff"/>
+    <rect x="544" y="696" width="70" height="42" rx="12" fill="#fff"/><ellipse cx="579" cy="717" rx="27" ry="14" fill="#bfe0f5"/>
+    <!-- bedroom 3: the dinosaur room -->
+    <rect x="548" y="832" width="96" height="62" rx="6" fill="#fff"/><rect x="580" y="832" width="64" height="62" rx="6" fill="#f6d23a"/><rect x="553" y="844" width="22" height="38" rx="6" fill="#fff"/>
+    <!-- laundry -->
+    <rect x="406" y="824" width="34" height="32" fill="#fff"/><rect x="406" y="862" width="34" height="32" fill="#fff"/>
+    <!-- nook cabinet, kitchen, dining -->
+    <rect x="345" y="488" width="68" height="24" fill="#bfe0f5"/>
+    <rect x="430" y="548" width="40" height="182" fill="#e9e4d8"/><rect x="434" y="640" width="32" height="44" fill="#f4f4f0"/>
+    <rect x="304" y="620" width="66" height="104" fill="#f1ece0"/><rect x="340" y="640" width="26" height="62" fill="#bfe0f5"/>
+    <rect x="304" y="546" width="110" height="34" fill="#e9e4d8"/>
+    <g fill="#9a6a3a"><rect x="126" y="584" width="18" height="18"/><rect x="176" y="584" width="18" height="18"/><rect x="126" y="686" width="18" height="18"/><rect x="176" y="686" width="18" height="18"/><rect x="88" y="634" width="18" height="18"/><rect x="226" y="634" width="18" height="18"/></g>
+    <rect x="108" y="604" width="118" height="80" fill="#c99556"/>
+    <!-- living room -->
+    <rect x="142" y="776" width="210" height="270" fill="#ecebe6" stroke="#bdbcb6"/>
+    <rect x="165" y="790" width="176" height="62" rx="12" fill="#84868c"/><rect x="165" y="978" width="176" height="62" rx="12" fill="#84868c"/>
+    <g fill="#f4c62c" stroke="#b88a14"><rect x="182" y="806" width="30" height="30" transform="rotate(45 197 821)"/><rect x="292" y="806" width="30" height="30" transform="rotate(45 307 821)"/><rect x="182" y="994" width="30" height="30" transform="rotate(45 197 1009)"/><rect x="292" y="994" width="30" height="30" transform="rotate(45 307 1009)"/></g>
+    <ellipse cx="254" cy="916" rx="42" ry="30" fill="#b98548"/>
+    <rect x="60" y="830" width="52" height="160" fill="#5f6166"/><rect x="72" y="868" width="30" height="84" fill="#2b2b2b"/><path d="M78 946 q8 -34 16 0z M80 918 q6 -26 14 0z" fill="#f2711c" stroke="none"/>
+    <!-- covered patio -->
+    <circle cx="200" cy="490" r="36" fill="#b98548"/><g fill="#9a6a3a"><rect x="150" y="474" width="18" height="30"/><rect x="232" y="474" width="18" height="30"/><rect x="186" y="440" width="28" height="16"/><rect x="186" y="522" width="28" height="16"/></g>
+    <circle cx="92" cy="476" r="20" fill="#2b2b2b"/><path d="M78 496 l-8 26 M106 496 l8 26" stroke="#2b2b2b" stroke-width="4"/>
+    <!-- car -->
+    <rect x="490" y="1004" width="142" height="230" rx="40" fill="#2f6fd0" stroke="#173f86" stroke-width="3"/><rect x="508" y="1056" width="106" height="52" rx="14" fill="#9cc4f2" stroke="#173f86"/><rect x="512" y="1176" width="98" height="30" rx="10" fill="#9cc4f2" stroke="#173f86"/>
+  </g>
+  <!-- toys and plants -->
+  <g stroke="#23303a" stroke-width="1.5">
+    <path d="M614 556 l22 -22 q12 -4 16 -16 q-12 4 -16 16z" fill="#f4f4f0"/><path d="M614 556 l-4 12 l12 -4z" fill="#dc2a2a"/><circle cx="640" cy="528" r="3.5" fill="#3f7fe0"/>
+    <g fill="#b98548"><circle cx="676" cy="556" r="13"/><circle cx="676" cy="537" r="10"/><circle cx="667" cy="529" r="4.5"/><circle cx="685" cy="529" r="4.5"/></g>
+    <path d="M652 874 q2 -26 14 -28 q10 -1 8 8 l-7 1 q5 12 0 22 l16 14 l-14 -6 l-2 8 l-6 -9 l-8 5z" fill="#3fae4f"/>
+  </g>
+  <g fill="#3fae4f" stroke="#2a6f2a" stroke-width="1.5">
+    <use href="#plant" x="322" y="424"/><use href="#plant" x="96" y="790"/><use href="#plant" x="112" y="1050"/><use href="#plant" x="80" y="430"/>
+  </g>
+
+  <!-- walls -->
+  <g fill="none" stroke="#2b2b2b" stroke-width="7" stroke-linecap="square">
+    <path d="M290 215H715V1255H690 M430 1255H400V800H476 M290 215V445H482 M300 445V468 M300 512V540 M55 540H476 M55 540V1085H250V1110H300 M350 1110H400"/>
+    <path d="M482 215V315 M482 355V445 M482 300H535V330 M535 365V540 M535 578V600 M535 635V760 M535 798V905 M535 410H715 M535 585H715 M535 745H715"/>
+    <path d="M476 540V735 M476 800V905 M400 905H488 M528 905H715"/>
+  </g>
+  <!-- doors -->
+  <g fill="#f3ddb0" stroke="#6b4a2a" stroke-width="2">
+    <path d="M482 315 v40 a40 40 0 0 1 -40 -40z"/><path d="M535 330 v35 a35 35 0 0 0 35 -35z"/>
+    <path d="M535 540 v38 a38 38 0 0 0 38 -38z"/><path d="M535 600 v35 a35 35 0 0 0 35 -35z"/><path d="M535 760 v38 a38 38 0 0 0 38 -38z"/>
+    <path d="M300 468 v44 a44 44 0 0 1 -44 -44z"/><path d="M300 1110 h50 a50 50 0 0 0 -50 -50z"/><path d="M488 905 h40 a40 40 0 0 1 -40 40z"/>
+  </g>
+  <!-- windows -->
+  <g fill="#9cd0f5" stroke="#1f5fbf" stroke-width="2.5">
+    <rect x="352" y="208" width="46" height="14"/><rect x="548" y="208" width="46" height="14"/><rect x="283" y="308" width="14" height="46"/>
+    <rect x="708" y="298" width="14" height="46"/><rect x="708" y="494" width="14" height="46"/><rect x="708" y="686" width="14" height="46"/><rect x="708" y="816" width="14" height="46"/>
+    <rect x="48" y="604" width="14" height="46"/><rect x="48" y="980" width="14" height="46"/><rect x="118" y="1078" width="64" height="14"/><rect x="128" y="533" width="54" height="14"/>
+  </g>
+  <!-- frames: title, steps, legend -->
+  <rect x="26" y="18" width="1008" height="94" rx="8" fill="#fff5f3" stroke="#dc2a2a" stroke-width="4"/>
+  <path d="M170 170 Q520 180 890 168" fill="none" stroke="#f4c62c" stroke-width="6" stroke-linecap="round"/>
+  <rect x="20" y="1300" width="392" height="232" rx="10" fill="#fffdf2" stroke="#f4c62c" stroke-width="4"/>
+  <use href="#mailbox" transform="translate(1012 1404) scale(1.2)"/>
+  <g fill="#e2493f"><circle cx="760" cy="1420" r="5"/><circle cx="1040" cy="1474" r="5"/></g><g fill="#3f7fe0"><circle cx="742" cy="1440" r="5"/><circle cx="984" cy="1466" r="5"/></g>
+</g>
+
+<!-- labels -->
+<text x="530" y="86" text-anchor="middle" font-size="60" fill="#dc2a2a">Notre plan d'évacuation en cas d'incendie</text>
+<text x="530" y="156" text-anchor="middle" font-size="42" fill="#1f5fbf">Sortez. Restez dehors. Retrouvez-vous !</text>
+<g class="lbl">
+  <text x="396" y="386">Chambre</text><text x="396" y="414">principale</text>
+  <text x="170" y="404">Terrasse</text><text x="170" y="430">couverte</text>
+  <text x="622" y="518">Chambre 2</text><text x="626" y="810">Chambre 3</text>
+  <text x="168" y="640">Salle</text><text x="168" y="666">à manger</text>
+  <text x="372" y="760">Cuisine</text><text x="254" y="964">Salon</text>
+  <text x="640" y="978">Garage</text><text x="322" y="1190">Porche</text><text x="322" y="1218">avant</text>
+  <text x="423" y="848" font-size="20">L</text><text x="423" y="886" font-size="20">S</text>
+</g>
+
+<!-- legend -->
+<g font-size="25" fill="#1d3f8f">
+  <text x="40" y="1338" font-size="31" text-decoration="underline">Légende :</text>
+  <path d="M46 1370 H102" stroke="#dc2a2a" stroke-width="9" marker-end="url(#mr)"/><text x="146" y="1378">Itinéraire à l'intérieur</text>
+  <path d="M46 1408 H102" stroke="#17964a" stroke-width="9" marker-end="url(#mg)"/><text x="146" y="1416">Sortie (porte ou fenêtre)</text>
+  <rect x="50" y="1436" width="64" height="16" fill="#9cd0f5" stroke="#1f5fbf" stroke-width="2.5"/><text x="146" y="1454">Sortie par la fenêtre</text>
+  <path d="M66 1494 v-34 a34 34 0 0 1 34 34z" fill="#f3ddb0" stroke="#6b4a2a" stroke-width="2"/><text x="146" y="1490">Sortie par la porte</text>
+  <rect x="50" y="1504" width="64" height="18" fill="url(#door)" stroke="#555" stroke-width="2"/><text x="146" y="1522">Sortie par le garage</text>
+</g>
+
+<!-- the four steps -->
+<g class="panel" id="p1">
+  <rect class="glow" x="795" y="212" width="250" height="262" rx="10" fill="#dc2a2a"/>
+  <rect x="795" y="212" width="250" height="262" rx="10" fill="none" stroke="#dc2a2a" stroke-width="4" stroke-dasharray="14 5"/>
+  <circle cx="830" cy="248" r="24" fill="#dc2a2a"/><text x="830" y="262" text-anchor="middle" font-size="40" fill="#fff">1</text>
+  <g class="step" fill="#1d3f8f"><text x="866" y="244">Si tu vois du</text><text x="866" y="274">feu ou de la</text><text x="866" y="304">fumée...</text></g>
+  <text x="920" y="346" text-anchor="middle" font-size="35" fill="#dc2a2a">SORS TOUT</text><text x="920" y="380" text-anchor="middle" font-size="35" fill="#dc2a2a">DE SUITE !</text>
+  <use href="#flame" x="872" y="462" transform="translate(872 462) scale(1.25) translate(-872 -462)"/><use href="#cloud" x="972" y="436" fill="#8f9498" opacity=".85" transform="translate(972 436) scale(.9) translate(-972 -436)"/>
+</g>
+<g class="panel" id="p2">
+  <rect class="glow" x="795" y="492" width="250" height="270" rx="10" fill="#1f5fbf"/>
+  <rect x="795" y="492" width="250" height="270" rx="10" fill="none" stroke="#1f5fbf" stroke-width="4" stroke-dasharray="14 5"/>
+  <circle cx="830" cy="530" r="24" fill="#1f5fbf"/><text x="830" y="544" text-anchor="middle" font-size="40" fill="#fff">2</text>
+  <g class="step" fill="#1d3f8f"><text x="866" y="524">Reste au ras</text><text x="866" y="554">du sol sous</text><text x="866" y="584">la fumée.</text></g>
+  <use href="#cloud" fill="#8f9498" opacity=".8" transform="translate(906 628) scale(1.7 1)"/>
+  <path d="M812 742 H1030" stroke="#b9b3a2" stroke-width="3"/>
+  <use href="#r-crawl" transform="translate(900 742) scale(2.2)"/>
+  <text x="1000" y="730" text-anchor="middle" font-size="26" fill="#f2711c">River</text>
+</g>
+<g class="panel" id="p3">
+  <rect class="glow" x="795" y="780" width="250" height="196" rx="10" fill="#17964a"/>
+  <rect x="795" y="780" width="250" height="196" rx="10" fill="none" stroke="#17964a" stroke-width="4" stroke-dasharray="14 5"/>
+  <circle cx="830" cy="818" r="24" fill="#17964a"/><text x="830" y="832" text-anchor="middle" font-size="40" fill="#fff">3</text>
+  <g class="step" fill="#1d3f8f"><text x="866" y="812">Suis les flèches</text><text x="866" y="842">vertes pour</text><text x="866" y="872">sortir.</text></g>
+  <path d="M826 904 h130 v-24 l66 42 l-66 42 v-24 h-130z" fill="#2fae5f" stroke="#17964a" stroke-width="3"/>
+</g>
+<g class="panel" id="p4">
+  <rect class="glow" x="795" y="992" width="250" height="330" rx="10" fill="#7a3fc4"/>
+  <rect x="795" y="992" width="250" height="330" rx="10" fill="none" stroke="#7a3fc4" stroke-width="4" stroke-dasharray="14 5"/>
+  <circle cx="830" cy="1030" r="24" fill="#7a3fc4"/><text x="830" y="1044" text-anchor="middle" font-size="40" fill="#fff">4</text>
+  <g class="step" fill="#1d3f8f"><text x="866" y="1022">Retrouve-toi</text><text x="866" y="1052">à notre point de</text><text x="866" y="1082">rassemblement.</text></g>
+  <path d="M836 1240 q84 -22 170 0 v10 h-170z" fill="#6fc063"/><use href="#mailbox" transform="translate(920 1180) scale(1.45)"/>
+  <g class="step" fill="#1d3f8f" text-anchor="middle" font-size="25"><text x="920" y="1276">Boîte aux lettres noire</text><text x="920" y="1304">dans la cour avant !</text></g>
+</g>
+
+<!-- smoke detector in the hall -->
+<g id="det"><circle cx="508" cy="470" r="11" fill="#fff" stroke="#555" stroke-width="2.5"/><circle id="detled" cx="508" cy="470" r="3.5" fill="#17964a"/>
+  <g class="dyn" id="rings" fill="none" stroke="#dc2a2a" stroke-width="3"><circle cx="508" cy="470" r="18"/><circle cx="508" cy="470" r="27"/></g></g>
+
+<!-- things that only show while the story plays -->
+<g class="dyn" id="fire"><use href="#flame" x="450" y="668"/></g>
+<g id="smoke" fill="#7f858a" filter="url(#soft)"></g>
+
+<!-- escape arrows -->
+<g fill="none" stroke-width="9" stroke-linecap="round">
+  <g stroke="#dc2a2a" marker-end="url(#mr)">
+    <path class="arrow" data-a="99" d="M508 352V392" marker-end="url(#mr)"/><path class="arrow" data-a="13" d="M508 496V536" marker-end="url(#mr)"/>
+    <path class="arrow" data-a="14.4" d="M508 606V668" marker-end="url(#mr)"/><path class="arrow" data-a="16" d="M508 786V846" marker-end="url(#mr)"/>
+    <path class="arrow" data-a="99" d="M464 768H424" marker-end="url(#mr)"/>
+    <path class="arrow" data-a="27" d="M565 1332 Q612 1462 800 1470" stroke-dasharray="17 15" marker-end="url(#mr)"/>
+  </g>
+  <g stroke="#17964a">
+    <path class="arrow" data-a="99" d="M375 204V190" marker-end="url(#mg)"/><path class="arrow" data-a="99" d="M571 204V190" marker-end="url(#mg)"/>
+    <path class="arrow" data-a="99" data-b="45" d="M726 517H754" marker-end="url(#mg)"/><path class="arrow" data-a="99" d="M726 709H754" marker-end="url(#mg)"/><path class="arrow" data-a="99" d="M726 839H754" marker-end="url(#mg)"/>
+    <path class="arrow" data-a="99" d="M44 627H18" marker-end="url(#mg)"/><path class="arrow" data-a="99" d="M44 1003H18" marker-end="url(#mg)"/>
+    <path class="arrow" data-a="99" d="M318 500 Q300 462 256 478" marker-end="url(#mg)"/><path class="arrow" data-a="99" d="M325 1118V1150" marker-end="url(#mg)"/>
+    <path class="arrow" data-a="18.6" d="M508 922V968" marker-end="url(#mg)"/><path class="arrow" data-a="23.5" d="M565 1222V1290" marker-end="url(#mg)"/>
+  </g>
+</g>
+
+<!-- vocabulary tags -->
+<g class="tag">
+  <text class="dyn" id="tg-feu" x="388" y="606">le feu</text>
+  <text class="dyn" id="tg-fumee" x="382" y="708" fill="#4a5258">la fumée</text>
+  <text class="dyn" id="tg-det" x="596" y="398">le détecteur de fumée</text>
+  <text class="dyn" id="tg-bip" x="420" y="476" font-size="30">BIP ! BIP !</text>
+  <text class="dyn" id="tg-fen" x="640" y="470" fill="#0f6b34">la fenêtre</text>
+  <text class="dyn" id="tg-911" x="850" y="1358" fill="#1d3f8f">On appelle le 911 !</text>
+</g>
+
+<!-- fire truck on the street -->
+<g class="dyn" id="truck">
+  <rect x="0" y="-62" width="150" height="46" rx="5" fill="#dc2a2a" stroke="#8f1616" stroke-width="2.5"/><path d="M150 -52 h34 l20 22 v14 h-54z" fill="#dc2a2a" stroke="#8f1616" stroke-width="2.5"/><path d="M158 -46 h22 l12 14 h-34z" fill="#bfe0f5" stroke="#8f1616" stroke-width="1.5"/>
+  <path d="M8 -70 H140 M8 -62 H140 M24 -70 v8 M48 -70 v8 M72 -70 v8 M96 -70 v8 M120 -70 v8" stroke="#d9d9d5" stroke-width="3.5"/><rect x="160" y="-60" width="14" height="8" rx="2" fill="#3f7fe0"/>
+  <path d="M0 -36 H150" stroke="#fff" stroke-width="4"/><circle cx="34" cy="-14" r="14" fill="#2b2b2b"/><circle cx="34" cy="-14" r="5" fill="#bbb"/><circle cx="168" cy="-14" r="14" fill="#2b2b2b"/><circle cx="168" cy="-14" r="5" fill="#bbb"/>
+  <text class="tag" x="96" y="-84">le camion de pompiers</text>
+</g>
+<g class="dyn" id="pompier">
+  <path d="M-6 -22 V0 M6 -22 V0" stroke="#2b2b2b" stroke-width="7" stroke-linecap="round"/><rect x="-13" y="-56" width="26" height="36" rx="7" fill="#f4c62c" stroke="#8f6f0c" stroke-width="2"/><path d="M-13 -34 H13" stroke="#d9d9d5" stroke-width="4"/>
+  <path id="pwave" d="M12 -50 L26 -70" stroke="#f4c62c" stroke-width="8" stroke-linecap="round"/><path d="M-12 -50 L-20 -30" stroke="#f4c62c" stroke-width="8" stroke-linecap="round"/>
+  <circle cy="-68" r="11" fill="#c98d63" stroke="#7a4a2a" stroke-width="1.5"/><circle cx="-3" cy="-67" r="1.5"/><circle cx="5" cy="-67" r="1.5"/><path d="M-2 -62 q3 3 6 0" fill="none" stroke="#7a2a1a" stroke-width="1.5"/>
+  <path d="M-15 -72 q15 -22 30 0 h4 v4 h-38 v-4z" fill="#dc2a2a" stroke="#8f1616" stroke-width="2"/>
+  <text class="tag" x="52" y="-90">le pompier</text>
+</g>
+
+<!-- the family at the mailbox -->
+<g class="dyn" id="family">
+  <g transform="translate(902 1497)"><path d="M-6 -30 V0 M6 -30 V0" stroke="#4a5a86" stroke-width="7" stroke-linecap="round"/><path d="M-14 -70 q-6 34 2 44 h24 q8 -10 2 -44z" fill="#c2123f"/><rect x="-13" y="-66" width="26" height="40" rx="8" fill="#4f9f8f" stroke="#2f6f62" stroke-width="2"/><circle cy="-80" r="12" fill="#f3cdb4" stroke="#7a4a2a" stroke-width="1.5"/><path d="M-13 -78 q-2 -18 13 -17 q15 -1 13 17 q-6 -10 -13 -9 q-7 -1 -13 9z" fill="#c2123f"/><path d="M6 -94 q6 6 6 16" fill="none" stroke="#2f6fd0" stroke-width="3"/><circle cx="-4" cy="-79" r="1.5"/><circle cx="4" cy="-79" r="1.5"/><path d="M-4 -74 q4 4 8 0" fill="none" stroke="#7a2a1a" stroke-width="1.5"/><text class="tag" y="-102" font-size="22" fill="#1d3f8f">Maman</text></g>
+  <g transform="translate(956 1500)"><path d="M-7 -34 V0 M7 -34 V0" stroke="#3a3f52" stroke-width="8" stroke-linecap="round"/><rect x="-15" y="-74" width="30" height="44" rx="8" fill="#34507a" stroke="#1f3352" stroke-width="2"/><circle cy="-88" r="13" fill="#f3cdb4" stroke="#7a4a2a" stroke-width="1.5"/><path d="M-13.500 -90 q0 -14 13.500 -14 q13.500 0 13.500 14 q-13 -8 -27 0z" fill="#5a3c26"/><circle cx="-4" cy="-87" r="1.5"/><circle cx="5" cy="-87" r="1.500"/><path d="M-4 -82 q4 4 8 0" fill="none" stroke="#7a2a1a" stroke-width="1.5"/><text class="tag" y="-112" font-size="22" fill="#1d3f8f">Papa</text></g>
+  <g transform="translate(1022 1512)"><path d="M-22 -12 V0 M-12 -12 V0 M8 -12 V0 M16 -12 V0" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M-22 -12 V0 M-12 -12 V0 M8 -12 V0 M16 -12 V0" fill="none" stroke="#9aa0a6" stroke-width="1"/><ellipse cx="-3" cy="-20" rx="24" ry="12" fill="#fff" stroke="#9aa0a6" stroke-width="2"/><path id="tail" d="M-25 -24 q-10 -6 -10 -18" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="-22" cy="-34" r="11" fill="#fff" stroke="#9aa0a6" stroke-width="2"/><path d="M-14 -42 q8 4 4 16 q-6 -2 -8 -12z" fill="#f1ece0" stroke="#9aa0a6" stroke-width="1.5"/><circle cx="-26" cy="-36" r="1.8"/><circle cx="-33" cy="-31" r="2.4"/><path d="M-27 -25 q8 6 16 -2" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="2 3"/><text class="tag" x="-4" y="12" font-size="20" fill="#1d3f8f" dominant-baseline="hanging">Justice</text></g>
+</g>
+
+<!-- River -->
+<g class="dyn" id="river">
+  <g id="rv-sleep"><use href="#r-head" transform="rotate(-80)"/><text id="zzz" x="14" y="-18" font-size="24" fill="#1f5fbf">z z z</text></g>
+  <g id="rv-stand">
+    <path id="leg1" d="M-5 -20 V-2" stroke="#f3cdb4" stroke-width="6" stroke-linecap="round"/><path id="leg2" d="M5 -20 V-2" stroke="#f3cdb4" stroke-width="6" stroke-linecap="round"/>
+    <rect x="-10" y="-30" width="20" height="12" rx="4" fill="#1f2f5c"/><rect x="-11" y="-47" width="22" height="20" rx="6" fill="#f28c28" stroke="#b85f10" stroke-width="1.3"/>
+    <path id="arm1" d="M-11 -43 L-17 -29" stroke="#f3cdb4" stroke-width="5" stroke-linecap="round"/><path id="arm2" d="M11 -43 L17 -29" stroke="#f3cdb4" stroke-width="5" stroke-linecap="round"/>
+    <use href="#r-head" y="-58"/>
+  </g>
+  <g id="rv-crawl"><use href="#r-crawl"/></g>
+  <text class="tag" id="rv-name" y="-76" font-size="24" fill="#f2711c">River</text>
+  <text class="tag" id="rv-bang" x="24" y="-66" font-size="40">!</text>
+</g>
+
+<rect width="1060" height="1640" filter="url(#grain)" opacity=".5" pointer-events="none" style="mix-blend-mode:multiply"/>
+</svg>
+
+<noscript><p>Voici le plan complet. Activez JavaScript pour voir River le suivre. / This is the full plan. Turn on JavaScript to watch River follow it.</p></noscript>
+
+<div class="bar">
+  <div class="cap" aria-live="polite"><b id="fr" lang="fr"></b><span id="en" lang="en"></span></div>
+  <input id="seek" type="range" min="0" max="58" step="0.1" value="0" aria-label="Avancer dans l'histoire / Move through the story">
+  <div class="row">
+    <button id="play" type="button">Pause</button>
+    <button id="again" type="button">Recommencer</button>
+    <button class="jump" type="button" data-t="4.5" aria-label="Étape 1">1</button>
+    <button class="jump" type="button" data-t="11" aria-label="Étape 2">2</button>
+    <button class="jump" type="button" data-t="18" aria-label="Étape 3">3</button>
+    <button class="jump" type="button" data-t="27" aria-label="Étape 4">4</button>
+    <button class="jump" type="button" data-t="42">Plan B</button>
+    <button id="voice" type="button" aria-pressed="false">Voix</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  document.documentElement.classList.add('js');
+  const $ = id => document.getElementById(id);
+  const svg = $('plan');
+  svg.classList.add('anim');
+  const END = 58;
+
+  // The story. t is when each part starts, in seconds; step lights one of the four boxes.
+  const SCENES = [
+    { t: 0, step: 0, fr: "C'est la nuit. River dort.", en: 'It is night. River is asleep.' },
+    { t: 4.5, step: 1, fr: 'Le feu ! Le détecteur de fumée sonne. Si tu vois du feu ou de la fumée, sors tout de suite !', en: 'Fire! The smoke detector goes off. If you see fire or smoke, get out right away!' },
+    { t: 11, step: 2, fr: 'River reste au ras du sol, sous la fumée.', en: 'River stays low to the floor, under the smoke.' },
+    { t: 18, step: 3, fr: 'Il suit les flèches pour sortir par le garage.', en: 'He follows the arrows and goes out through the garage.' },
+    { t: 27, step: 4, fr: 'Il retrouve sa famille au point de rassemblement : la boîte aux lettres noire dans la cour avant !', en: 'He meets his family at the meeting place: the black mailbox in the front yard!' },
+    { t: 34, step: 4, fr: 'Dehors, on appelle le 911. Le camion de pompiers arrive ! On ne retourne jamais à l\'intérieur.', en: 'Once outside, we call 911. The fire truck arrives! We never go back inside.' },
+    { t: 42, step: 3, fr: 'Plan B : si la fumée bloque le couloir, River sort par la fenêtre.', en: 'Plan B: if smoke blocks the hallway, River goes out the window.' },
+    { t: 52, step: 0, fr: 'Bravo, River ! Sortez. Restez dehors. Retrouvez-vous !', en: 'Well done, River! Get out. Stay out. Meet up!' },
+  ];
+
+  // ---- small helpers ----
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const span = (T, a, b) => clamp((T - a) / (b - a));           // 0 before a, 1 after b
+  const ease = u => u * u * (3 - 2 * u);
+  const show = (el, o) => { el.style.opacity = o; };
+  function quad(p0, c, p1, n = 14) { const out = []; for (let i = 0; i <= n; i++) { const u = i / n, v = 1 - u; out.push([v * v * p0[0] + 2 * v * u * c[0] + u * u * p1[0], v * v * p0[1] + 2 * v * u * c[1] + u * u * p1[1]]); } return out; }
+  function along(pts, u) {                                       // point a fraction u of the way along a line of points
+    let total = 0; const seg = [];
+    for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); total += d; }
+    let want = clamp(u) * total;
+    for (let i = 0; i < seg.length; i++) { if (want <= seg[i] || i === seg.length - 1) { const k = seg[i] ? want / seg[i] : 0; return { x: pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, y: pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k, dx: pts[i + 1][0] - pts[i][0] }; } want -= seg[i]; }
+  }
+
+  // ---- River's routes ----
+  const BED = [572, 456], MEET = [846, 1497];
+  const A1 = [[604, 500], [584, 560], [508, 562], [508, 886]];              // bedroom door, then down the hall
+  const A2 = [[508, 886], [508, 940]];                                      // through the door into the garage
+  const A3 = [[508, 940], [450, 972], [450, 1240], [565, 1300], [565, 1340]]; // past the car and out the big door
+  const A4 = [...quad([565, 1340], [612, 1490], [800, 1497]), MEET];       // the dotted line to the mailbox
+  const B1 = [[604, 500], [694, 524], [758, 524]];                          // out the bedroom window
+  const B2 = [[758, 524], [762, 1340], MEET];                               // around the side of the house
+
+  function riverAt(T) {
+    if (T < 6.6) return { x: BED[0], y: BED[1], pose: 'sleep' };
+    if (T < 11) return { x: 604, y: 500, pose: 'stand', bang: 1 };
+    if (T < 18) return { ...along(A1, ease(span(T, 11, 17.6))), pose: 'crawl', move: T < 17.6 };
+    if (T < 19.4) return { ...along(A2, span(T, 18, 19.4)), pose: 'crawl', move: 1 };
+    if (T < 27) return { ...along(A3, span(T, 19.4, 26.4)), pose: 'stand', move: T < 26.4 };
+    if (T < 42) return { ...along(A4, ease(span(T, 27, 31.5))), pose: 'stand', move: T < 31.5, hop: T > 31.5 && T < 34 };
+    if (T < 44) return { x: 604, y: 500, pose: 'stand', bang: 1, fade: span(T, 42.4, 43.2) };
+    if (T < 46.4) return { ...along(B1, span(T, 44, 46.4)), pose: 'crawl', move: 1 };
+    return { ...along(B2, ease(span(T, 46.4, 51.4))), pose: 'stand', move: T < 51.4, hop: T >= 52 };
+  }
+
+  // ---- smoke: soft grey puffs that start at the stove and drift to the hall ----
+  const PUFFS = [[448, 630, 26, 5.2], [420, 660, 30, 5.8], [452, 700, 28, 6.4], [398, 620, 30, 6.8], [440, 752, 30, 7.2], [372, 690, 34, 7.6], [486, 770, 26, 8.2], [508, 730, 26, 8.8], [330, 640, 34, 9], [508, 800, 26, 9.4], [508, 670, 26, 9.8], [300, 720, 36, 10.2], [508, 610, 24, 10.6], [508, 850, 24, 11], [250, 660, 36, 11.5], [508, 548, 22, 12]];
+  const HALL = [[508, 500, 28], [508, 590, 30], [500, 700, 32], [510, 790, 30], [548, 560, 22]];           // extra smoke for Plan B
+  const smoke = $('smoke'), NS = 'http://www.w3.org/2000/svg';
+  const puffs = [...PUFFS.map(p => ({ p })), ...HALL.map(p => ({ p, b: true }))].map((o, i) => { o.el = document.createElementNS(NS, 'circle'); o.el.style.opacity = 0; o.i = i; smoke.appendChild(o.el); return o; });
+
+  const arrows = [...svg.querySelectorAll('.arrow')].map(el => ({ el, a: +el.dataset.a, b: +el.dataset.b || 99 }));
+  const panels = [1, 2, 3, 4].map(n => $('p' + n));
+  const river = $('river'), poses = { sleep: $('rv-sleep'), stand: $('rv-stand'), crawl: $('rv-crawl') };
+  let scene = -1;
+
+  // Everything on screen is worked out from the time alone, so the slider can jump anywhere.
+  function render(T) {
+    const s = SCENES.findLastIndex(x => T >= x.t);
+    if (s !== scene) {
+      scene = s;
+      $('fr').textContent = SCENES[s].fr; $('en').textContent = SCENES[s].en;
+      panels.forEach((p, i) => p.classList.toggle('on', SCENES[s].step === i + 1 || s === SCENES.length - 1 || s === 0));
+      document.querySelectorAll('.jump').forEach(b => b.classList.toggle('cur', +b.dataset.t === SCENES[s].t));
+      say(SCENES[s].fr);
+    }
+    const quiet = T < 4.5, finale = T >= 52;
+    for (const a of arrows) a.el.classList.toggle('on', quiet || finale || (T >= a.a && T < 42) || (T >= a.b));
+
+    // fire, smoke and the detector
+    const burning = span(T, 4.5, 5.5);
+    const f = $('fire'); show(f, burning);
+    f.setAttribute('transform', `translate(450 668) scale(${(.9 + .12 * Math.sin(T * 11)) * burning} ${(1 + .16 * Math.sin(T * 13 + 1)) * burning}) translate(-450 -668)`);
+    for (const o of puffs) {
+      const [x, y, r, t0] = o.p;
+      const on = o.b ? span(T, 42.3, 43.6) * .62 : span(T, t0, t0 + 2) * .5;
+      show(o.el, on * (finale ? .7 : 1));
+      o.el.setAttribute('cx', x + 7 * Math.sin(T * .9 + o.i)); o.el.setAttribute('cy', y + 5 * Math.cos(T * .7 + o.i * 2)); o.el.setAttribute('r', r * (1 + .08 * Math.sin(T * 1.3 + o.i)));
+    }
+    const beep = T >= 5.6 && Math.floor(T * 2.5) % 2 === 0;
+    show($('rings'), beep ? 1 : 0); $('detled').setAttribute('fill', T >= 5.6 ? (beep ? '#dc2a2a' : '#7a1010') : '#17964a');
+    show($('tg-feu'), span(T, 5, 5.6) * (1 - span(T, 16, 17)));
+    show($('tg-fumee'), span(T, 7.6, 8.4) * (1 - span(T, 16, 17)));
+    show($('tg-det'), span(T, 5.8, 6.4) * (1 - span(T, 12, 13)));
+    show($('tg-bip'), T >= 5.6 && T < 18 ? (beep ? 1 : .25) : 0);
+    show($('tg-fen'), span(T, 44.4, 45) * (1 - span(T, 49, 50)));
+
+    // River
+    const r = riverAt(T);
+    for (const k in poses) poses[k].style.display = r.pose === k ? '' : 'none';
+    const step = r.move ? Math.sin(T * 12) : 0, hop = r.hop ? -Math.abs(Math.sin(T * 6)) * 12 : 0;
+    const face = r.dx < -1 ? -1 : 1, bob = r.pose === 'crawl' && r.move ? Math.sin(T * 14) * 1.5 : 0;
+    river.setAttribute('transform', `translate(${r.x.toFixed(1)} ${(r.y + hop + bob).toFixed(1)})`);
+    poses[r.pose].setAttribute('transform', r.pose === 'sleep' ? '' : `scale(${face * 1.05} 1.05)`);
+    $('leg1').setAttribute('transform', `rotate(${step * 24} -5 -20)`); $('leg2').setAttribute('transform', `rotate(${-step * 24} 5 -20)`);
+    $('arm1').setAttribute('transform', `rotate(${(r.hop ? 150 : -step * 22)} -11 -43)`); $('arm2').setAttribute('transform', `rotate(${(r.hop ? -150 : step * 22)} 11 -43)`);
+    show(river, r.fade === undefined ? 1 : r.fade);
+    show($('zzz'), .5 + .5 * Math.sin(T * 3));
+    $('rv-name').setAttribute('y', r.pose === 'stand' ? -76 : r.pose === 'crawl' ? -44 : -22);
+    show($('rv-bang'), r.bang ? 1 : 0);
+
+    // the family, the call and the fire fighters
+    show($('family'), span(T, 28.5, 30));
+    $('tail').setAttribute('transform', `rotate(${Math.sin(T * 9) * 18} -25 -24)`);
+    show($('tg-911'), span(T, 34.2, 35) * (1 - span(T, 41, 42)));
+    const drive = ease(span(T, 35.5, 39));
+    const tk = $('truck'); show(tk, T >= 35.5 ? 1 - span(T, 42, 42.8) + span(T, 52, 53) : 0);
+    tk.setAttribute('transform', `translate(${-240 + drive * 660} 1632)`);
+    const pm = $('pompier'); show(pm, span(T, 39.3, 40) * (1 - span(T, 42, 42.8)) + span(T, 52.5, 53.3));
+    pm.setAttribute('transform', 'translate(660 1630)'); $('pwave').setAttribute('transform', `rotate(${Math.sin(T * 7) * 16} 12 -50)`);
+  }
+
+  // ---- the read-aloud voice (off until someone taps Voix) ----
+  let voiceOn = false;
+  function say(text) {
+    if (!voiceOn || !playing || !('speechSynthesis' in window)) return;
+    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'fr-FR'; u.rate = .85; const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('fr')); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) {}
+  }
+  if (!('speechSynthesis' in window)) $('voice').hidden = true;
+  $('voice').onclick = () => { voiceOn = !voiceOn; $('voice').setAttribute('aria-pressed', voiceOn); if (voiceOn) say(SCENES[scene].fr); else try { speechSynthesis.cancel(); } catch (e) {} };
+
+  // ---- clock and controls ----
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let T = calm ? END - .01 : 0, playing = !calm, last = 0;
+  const seek = $('seek'), play = $('play');
+  const label = () => { play.textContent = playing ? 'Pause' : 'Lecture'; play.setAttribute('aria-label', playing ? 'Pause' : 'Lecture / Play'); };
+  function frame(now) {
+    const dt = Math.min(.1, (now - last) / 1000 || 0); last = now;
+    if (playing) { T += dt; if (T >= END + 3) T = 0; seek.value = Math.min(T, END); }
+    render(Math.min(T, END - .01));
+    requestAnimationFrame(frame);
+  }
+  const go = t => { T = t; scene = -1; seek.value = t; playing = true; label(); };
+  play.onclick = () => { playing = !playing; if (playing && T >= END) T = 0; if (!playing) try { speechSynthesis.cancel(); } catch (e) {} label(); };
+  $('again').onclick = () => go(0);
+  document.querySelectorAll('.jump').forEach(b => b.onclick = () => go(+b.dataset.t));
+  seek.oninput = () => { T = +seek.value; playing = false; label(); };
+  document.addEventListener('visibilitychange', () => { last = 0; });
+  addEventListener('keydown', e => { if (e.code === 'Space' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') { e.preventDefault(); play.click(); } });
+  label();
+  requestAnimationFrame(frame);
+  window.__seek = t => { T = t; playing = false; label(); render(t); };   // handy when testing: __seek(20)
+})();
+</script>
+</body>
+</html>

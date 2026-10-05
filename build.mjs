@@ -52,6 +52,9 @@ function markdown(src) {
     // {{name}} on its own line drops in a small interactive tool from src/demos/name.js
     const w = line.trim().match(/^\{\{([a-z-]+)\}\}$/);
     if (w) { out.push(`<div class="widget" id="w-${w[1]}"><p class="note">This calculator needs JavaScript turned on.</p></div>`); i++; continue; }
+    // {{embed /fire-plan/ A title}} on its own line shows a page from static/ in a frame, with a link to open it by itself
+    const e = line.trim().match(/^\{\{embed (\/[\w/-]+\/) (.+)\}\}$/);
+    if (e) { out.push(`<figure class="embed"><div class="frame"><iframe src="${e[1]}" title="${esc(e[2])}" loading="lazy" allowfullscreen></iframe></div><figcaption><a class="btn glass sm" href="${e[1]}">Open it full screen</a></figcaption></figure>`); i++; continue; }
     const h = line.match(/^(#{1,3})\s+(.*)$/);
     if (h) { const n = h[1].length + 1; out.push(`<h${n}>${inline(h[2])}</h${n}>`); i++; continue; }
     if (/^---+$/.test(line.trim())) { out.push('<hr>'); i++; continue; }
@@ -92,7 +95,7 @@ function loadPosts() {
     const topics = (meta.topics || '').split(',').map(t => t.trim()).filter(Boolean);
     for (const t of topics) if (!TOPICS.includes(t)) throw new Error(`${f}: unknown topic "${t}". Use one of: ${TOPICS.join(', ')}`);
     // plain text of the post, for search and for the Ask page
-    const text = m[2].replace(/```[\s\S]*?```/g, ' ').replace(/\{\{[a-z-]+\}\}/g, ' ').replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[#*`>_]/g, '').replace(/\s+/g, ' ').trim();
+    const text = m[2].replace(/```[\s\S]*?```/g, ' ').replace(/\{\{[^}]+\}\}/g, ' ').replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[#*`>_]/g, '').replace(/\s+/g, ' ').trim();
     return { ...meta, topics, slug, url: `/blog/${slug}/`, html: markdown(m[2]), text };
   }).filter(p => p.draft !== 'true').sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (Number(a.order) || 50) - (Number(b.order) || 50) || a.title.localeCompare(b.title)));
 }

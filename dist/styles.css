@@ -291,6 +291,11 @@ a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-stro
 .prose pre { margin: 0; padding: 1rem; border-radius: 14px; background: light-dark(rgb(10 70 90 / .06), rgb(0 0 0 / .3)); overflow-x: auto; }
 .prose pre code { background: none; padding: 0; }
 .prose hr { border: 0; border-top: 1px solid var(--hair); width: 100%; }
+/* a page from static/ shown inside a post ({{embed}} in build.mjs). The frame is as tall as a 1060 by 1640 drawing plus its controls. */
+.embed { margin: 0; display: grid; gap: .8rem; justify-items: start; width: 100%; max-width: 34rem; }
+.embed .frame { position: relative; width: 100%; padding-top: calc(154.8% + 13rem); border-radius: 20px; overflow: hidden; border: 1px solid var(--hair); background: #fbf6ea; }
+.embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.prose img { border-radius: 14px; border: 1px solid var(--hair); max-width: min(100%, 26rem); }
 
 /* ---------- request form ---------- */
 .form { --r: 32px; padding: clamp(1.4rem, 5vw, 3rem); display: grid; gap: 1.4rem; max-width: 46rem; }
