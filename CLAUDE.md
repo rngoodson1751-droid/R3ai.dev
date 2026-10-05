@@ -18,6 +18,15 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - A new post. Add `topics` to its header, and after building run `node tools/og.mjs <slug>` so it gets a link preview picture.
 - Photos for project cards. `projectCards()` in `build.mjs` already supports an `image` on each project. Pictures are only switched on for the games page (`pictures: true`); turn them on for the section pages once every card there has one.
 
+## The bus tracker (unlisted)
+
+- It lives in `worker/private/lobby-display.html` and `worker/transit/`; `README.md` has the map under "The bus tracker". It keeps its own dark navy look, not the site's glass style, and its header says LC TRANSIT in capitals beside the City logo.
+- "Post an alert" or "add a notice": insert a row in `transit_alerts` through the Cloudflare connector, with Spanish wording in `title_es` and `body_es`, and an `ends_at` (UTC) unless Robert says it is open-ended. "Take the alert down": delete the row.
+- "Bus N is on Route R today": insert into `transit_overrides`.
+- "New GTFS": unzip it, run `node tools/gtfs.mjs <folder>`, run `node tools/transit-test.mjs`, then commit.
+- After changing anything in `worker/transit/`, run `node tools/transit-test.mjs`.
+- The Zonar login is three Worker secrets. Never write it into a file, a commit or a command.
+
 ## Design rules
 
 - The look is iOS-style glass over a slow water shader, mostly transparent, in blues and greens only. Robert has approved the current layout and colours, so change them only when he asks.

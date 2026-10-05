@@ -1,6 +1,7 @@
 {
   // Cloudflare settings for r3ai.dev. The site is plain files served from ./dist.
-  // The one piece of server code, worker/index.js, saves post requests from /request/.
+  // The server code, worker/index.js, saves post requests from /request/ and runs the unlisted bus tracker.
+  // The tracker reads three secrets set in the dashboard, never here: ZONAR_CUSTOMER, ZONAR_USERNAME, ZONAR_PASSWORD.
   "name": "r3ai-dev",
   "compatibility_date": "2026-09-22",
   "main": "worker/index.js",

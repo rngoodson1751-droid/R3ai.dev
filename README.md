@@ -110,6 +110,31 @@ An unlisted page is online but not on the site: no card, no sitemap entry, nothi
 - `worker/index.js` serves it at `/work/<name>/<key>/`. The `UNLISTED` list at the top holds the SHA-256 of the key, not the key, so the link cannot be read out of this repository. Any other address under that name shows the usual "page not found".
 - The project also has an entry in `content/projects.json` with `"unlisted": true`, which keeps it off every page.
 
+### The bus tracker
+
+The lobby display is a live bus tracker. Its page is `worker/private/lobby-display.html`; everything behind it is in `worker/transit/`.
+
+- `network.json` is the routes, stops, route lines and timetable, made from the GTFS feed. When the feed changes, unzip it and run `node tools/gtfs.mjs path/to/folder`, then commit.
+- `live.js` answers `<page address>/live` every ten seconds with the buses in service, alerts and weather. Positions come from Zonar once three Worker secrets exist (`ZONAR_CUSTOMER`, `ZONAR_USERNAME`, `ZONAR_PASSWORD`, set in the Cloudflare dashboard under the Worker's Settings, Variables and Secrets). Until then `sim.js` supplies made-up buses 901 to 905 and the page shows a "Simulated data" label. Never put the Zonar login in this repository.
+- `matcher.js` works out which route each bus is on. Zonar reports a bus number and a position, never a route, so the matcher follows each bus's recent trail along the route lines; `fleet.js` drops buses that are off, silent or parked at the facility. The settings are at the top of each file. `node tools/transit-test.mjs` checks the matcher against simulated days and should print "All scenarios passed".
+- `<page address>/live?debug=1` shows what Zonar sent back (without the login), for when its format needs checking.
+
+Page settings go on the end of the link: `?lobby=1` for the lobby TV (no buttons; adds the weather, notices and phone-code panel), `?demo=10:20` to see it at that time of day with simulated buses and a sample alert, `?lang=es` for Spanish.
+
+Alerts and notices are rows in the `transit_alerts` table of the `r3ai-requests` database (layout in `worker/schema.sql`). An `alert` shows in the banner across the top; a `notice` shows in the lobby panel and the ticker. Times are UTC.
+
+```
+INSERT INTO transit_alerts (kind, title, body, title_es, body_es, routes, ends_at)
+VALUES ('alert', 'Route 3 detour on Mill Street', 'Mill Street is closed at Bank Street. Buses are using Broad Street.', 'Desvío de la Ruta 3 en Mill Street', 'Mill Street está cerrada en Bank Street. Los autobuses usan Broad Street.', '3', '2026-10-09 23:00:00');
+DELETE FROM transit_alerts WHERE id = 1;
+```
+
+If the matcher has a bus on the wrong route, or cannot tell, dispatch can say so for the day (`day` is YYYYMMDD, `bus` is the number as Zonar writes it):
+
+```
+INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('0609-37', '20261005', '2');
+```
+
 To make a new link (and switch the old one off), pick a new key and put its hash in `UNLISTED`:
 
 ```

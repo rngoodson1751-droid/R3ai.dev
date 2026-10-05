@@ -31,3 +31,31 @@ CREATE TABLE IF NOT EXISTS asks (
   ip_hash TEXT
 );
 CREATE INDEX IF NOT EXISTS asks_created ON asks (created_at);
+
+-- The bus tracker (worker/transit/). Already applied to the r3ai-requests database.
+-- transit_state: the route matcher's memory between requests, one row holding every bus's recent trail.
+CREATE TABLE IF NOT EXISTS transit_state (
+  k TEXT PRIMARY KEY,
+  v TEXT NOT NULL,
+  t INTEGER NOT NULL
+);
+-- transit_alerts: rider alerts and notices shown on the tracker. Times are UTC, as datetime('now') writes them.
+CREATE TABLE IF NOT EXISTS transit_alerts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT NOT NULL DEFAULT 'alert',   -- alert: the banner across the top. notice: the lobby panel and the ticker
+  title TEXT NOT NULL,
+  body TEXT NOT NULL DEFAULT '',
+  title_es TEXT,                        -- Spanish wording; the English shows when these are empty
+  body_es TEXT,
+  routes TEXT NOT NULL DEFAULT '',      -- route numbers it affects, such as '3' or '1,4'; empty for all
+  starts_at TEXT,                       -- empty = now
+  ends_at TEXT,                         -- empty = until it is deleted
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+-- transit_overrides: "bus 14 is on Route 2 today", for when dispatch knows better than the matcher. day is YYYYMMDD.
+CREATE TABLE IF NOT EXISTS transit_overrides (
+  bus TEXT NOT NULL,
+  day TEXT NOT NULL,
+  route TEXT NOT NULL,
+  PRIMARY KEY (bus, day)
+);
