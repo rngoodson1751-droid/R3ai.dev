@@ -61,7 +61,8 @@ function simFleet(now) {
 // Zonar's Ground Traffic Control interface, "showposition / current": the latest position of every asset.
 async function zonarText(env) {
   const q = new URLSearchParams({ customer: env.ZONAR_CUSTOMER, username: env.ZONAR_USERNAME, password: env.ZONAR_PASSWORD, action: 'showposition', operation: 'current', format: 'xml', version: '2', logvers: '3' });
-  const res = await fetch('https://omi.zonarsystems.net/interface.php?' + q, { signal: AbortSignal.timeout(12000) });
+  // Zonar refuses a request that does not say what is asking (error 113), and a Worker sends no User-Agent of its own.
+  const res = await fetch('https://omi.zonarsystems.net/interface.php?' + q, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; LCTransitTracker/1.0; +https://r3ai.dev)', accept: 'application/xml, text/xml, */*' }, signal: AbortSignal.timeout(12000) });
   if (!res.ok) throw new Error('Zonar answered ' + res.status); // never log the address: it carries the login
   return res.text();
 }
