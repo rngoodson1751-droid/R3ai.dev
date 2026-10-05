@@ -4,8 +4,8 @@
 // set as Worker secrets (ZONAR_CUSTOMER, ZONAR_USERNAME, ZONAR_PASSWORD); until then, from the
 // simulator in sim.js, and the page says so.
 import raw from './network.json';
-import { prepare, localTime, tripsOn } from './geo.js';
-import { update } from './fleet.js';
+import { prepare, localTime, tripsOn, metres } from './geo.js';
+import { update, LIVE } from './fleet.js';
 import { simReports, SIM } from './sim.js';
 
 export const networkForPage = JSON.stringify(raw).replace(/</g, '\\u003c'); // what the page draws from, taken before prepare() adds its working data
@@ -129,7 +129,14 @@ async function zonarFleet(env, now) {
 async function zonarDebug(env) {
   try {
     const text = await zonarText(env), now = Date.now(), reports = parseZonar(text, now);
-    return { ok: true, bytes: text.length, tags: [...new Set([...text.matchAll(/<([\w-]+)/g)].map(m => m[1]))].slice(0, 40), firstAsset: (text.match(/<asset\b[\s\S]*?<\/asset>/i) || [text.slice(0, 600)])[0].slice(0, 900), parsed: reports.length, sample: reports.slice(0, 3).map(r => ({ ...r, ageSeconds: Math.round((now - r.t) / 1000) })) };
+    // every unit and, if it is not on the map, why: the first place to look when a bus is missing
+    const yard = { lat: LIVE.YARD[0], lon: LIVE.YARD[1] };
+    const units = reports.map(r => {
+      const age = Math.round((now - r.t) / 60000), far = Math.round(metres(net, r, yard));
+      const why = r.power === false ? 'power off' : now - r.t > LIVE.STALE ? `no report for ${age} min` : far <= LIVE.YARD_M ? 'at the transit facility' : 'in service';
+      return { bus: r.id.split('-').pop(), power: r.power ? 'on' : 'off', lastReportMinutesAgo: age, lat: r.lat, lon: r.lon, mph: r.s == null ? null : Math.round(r.s * 2.237), metresFromFacility: far, status: why };
+    }).sort((x, y) => x.lastReportMinutesAgo - y.lastReportMinutesAgo);
+    return { ok: true, units, bytes: text.length, tags: [...new Set([...text.matchAll(/<([\w-]+)/g)].map(m => m[1]))].slice(0, 40), firstAsset: (text.match(/<asset\b[\s\S]*?<\/asset>/i) || [text.slice(0, 600)])[0].slice(0, 900), parsed: reports.length, sample: reports.slice(0, 3).map(r => ({ ...r, ageSeconds: Math.round((now - r.t) / 1000) })) };
   } catch (e) { return { ok: false, error: String(e?.message || e).slice(0, 200) }; }
 }
 
