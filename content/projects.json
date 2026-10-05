@@ -143,6 +143,23 @@
   {
     "section": "home",
     "kind": "Game",
+    "title": "River and the Nightjar",
+    "summary": "A storybook adventure in eleven chapters. River boards a midnight train that lays its own rails of light and rides north to a city of lanterns. The story is read out loud.",
+    "links": [
+      {
+        "label": "Play",
+        "href": "/games/river-and-the-nightjar/"
+      },
+      {
+        "label": "Read about it",
+        "href": "/blog/river-and-the-nightjar/"
+      }
+    ],
+    "image": "/shots/river-and-the-nightjar.jpg"
+  },
+  {
+    "section": "home",
+    "kind": "Game",
     "title": "Hand-tracking sailing simulator",
     "summary": "Sail a Sunfish, an Optimist or a pirate ship by moving your hands in front of the webcam.",
     "links": [

@@ -43,6 +43,19 @@ summary: One or two sentences shown in the post lists.
 
 Put the files in `static/`, for example `static/games/my-game/index.html`, and add a card for it in `content/projects.json`. Any card with a link that starts with `/games/` also shows on the games page at `/games/`. Give it a picture with `"image": "/shots/my-game.jpg"` and put a 16:9 screenshot in `static/shots/`.
 
+### River and the Nightjar
+
+This game is split into small files instead of one big page, all under `static/games/river-and-the-nightjar/`.
+
+- `index.html` is the page, its styles and the menus.
+- `js/main.js` runs the game: the frame loop, the camera, walking, and the helpers the chapters are written with.
+- `js/kit.js` builds every shape and painted texture. There are no image or sound files.
+- `js/ui.js` is the dialogue cards, menus, keepsake book and reading voice. `js/input.js` is keyboard, controller and touch. `js/audio.js` writes the music.
+- `js/story.js` holds the chapter list and the 22 keepsakes.
+- `js/chapters/` has one file per chapter (`c00.js` is the prologue, `c10.js` the epilogue), plus `common.js` and `city.js` for pieces they share.
+
+To open a chapter directly while working on it, add `?c=4` to the address (0 to 10). Adding `&auto=1` skips through the dialogue.
+
 ## Other pages
 
 - `/start/` is the Start here page. Its five posts are the `START` list in `build.mjs`.

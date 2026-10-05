@@ -381,7 +381,7 @@ for (const g of games) {
 const gameSize = slug => { const mb = gameFiles[slug].bytes / 1e6; return mb < 1 ? 'under 1 MB' : `${Math.round(mb)} MB`; };
 write('games/offline.json', JSON.stringify(Object.fromEntries(Object.entries(gameFiles).map(([k, v]) => [k, v.files]))));
 write('games/index.html', layout({
-  title: 'Games', path: '/games/', og: 'games', description: 'Browser games Robert built with AI: a kart racer, a rocket game for River and a bus simulator on real streets.',
+  title: 'Games', path: '/games/', og: 'games', description: 'Browser games Robert built with AI: a kart racer, a rocket game and a midnight train adventure for River, and a bus simulator on real streets.',
   body: `<section class="head"><h1>Games</h1><p>Everything here runs in your browser, with nothing to install. They are best on a computer with a keyboard or a controller.</p></section>
 ${projectCards('', { list: games, pictures: true })}
 <section class="sheet offline" id="offline" hidden>
