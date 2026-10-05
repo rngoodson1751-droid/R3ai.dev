@@ -57,6 +57,8 @@ header h1{font-size:1.4rem;letter-spacing:2px;color:#7ec8f5;text-transform:upper
 .eta-num{font-size:1.8rem;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
 .eta-lbl{font-size:.75rem;color:#7ec8f5}
 .next-sn small{font-weight:400;color:#9fb6d6;font-size:.8em}
+.stop-no{font-size:.75rem;color:#9fb6d6;margin-top:1px}
+.sl .sn{display:none;color:#9fb6d6}
 .en{color:#ff6b6b}.es{color:#f7c224}.eo{color:#6ecb1a}.ef{color:#4aa8ff}
 .pb-w{margin-top:6px;background:#1e3a6e;border-radius:4px;height:5px;overflow:hidden}
 .pb-f{height:100%;border-radius:4px;transition:width 1s linear}
@@ -115,8 +117,9 @@ noscript{display:block;padding:1rem;background:#5a3d00}
   .route-header{padding:6px 12px}
   .route-badge{width:2rem;height:2rem}
   .stop-sec{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;padding:6px 12px 8px}
-  .stop-lbl{grid-column:1;grid-row:1;margin-bottom:2px}
-  .next-sn,.no-bus{grid-column:1;grid-row:2}
+  .stop-lbl{display:none} /* no room for the "Next stop" label here; the stop number takes its line */
+  .next-sn,.no-bus{grid-column:1;grid-row:1}
+  .stop-no{grid-column:1;grid-row:2}
   .eta-row{grid-column:2;grid-row:1/3;flex-direction:column;align-items:center;gap:1px;margin:0;min-width:3.4rem}
   .eta-num{font-size:1.5rem}
   .eta-lbl{font-size:.62rem;text-align:center}
@@ -131,9 +134,10 @@ noscript{display:block;padding:1rem;background:#5a3d00}
   .lobbymode .stop-sec{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;padding:6px 12px 8px}
   .lobbymode .stop-lbl{grid-column:1;grid-row:1;margin-bottom:2px}
   .lobbymode .next-sn,.lobbymode .no-bus{grid-column:1;grid-row:2}
-  .lobbymode .eta-row{grid-column:2;grid-row:1/3;flex-direction:column;align-items:center;gap:1px;margin:0;min-width:3.4rem}
+  .lobbymode .stop-no{grid-column:1;grid-row:3}
+  .lobbymode .eta-row{grid-column:2;grid-row:1/4;flex-direction:column;align-items:center;gap:1px;margin:0;min-width:3.4rem}
   .lobbymode .eta-lbl{font-size:.62rem;text-align:center}
-  .lobbymode .pb-w{grid-column:1/-1;grid-row:3}
+  .lobbymode .pb-w{grid-column:1/-1;grid-row:4}
 }
 /* Phones and small tablets: each route becomes one compact row. */
 @media (max-width:900px),(max-height:520px){
@@ -155,7 +159,8 @@ noscript{display:block;padding:1rem;background:#5a3d00}
   .route-header,.route-info,.stop-sec{display:contents}
   .route-badge{grid-column:1;grid-row:1/4;width:2.1rem;height:2.1rem}
   .route-info h2{grid-column:2;grid-row:1;font-size:.7rem;font-weight:600;color:#9fb6d6}
-  .stop-lbl{display:none}
+  .stop-lbl,.stop-no{display:none}
+  .sl .sn{display:inline}
   .next-sn,.no-bus{grid-column:2;grid-row:2}
   .no-bus{padding:0}
   .sl{grid-column:2;grid-row:3;margin:0;font-size:.68rem}
@@ -221,8 +226,8 @@ document.body.classList.toggle('lobbymode', LOBBY);
 
 // ---------- words ----------
 const WORDS = {
-  en: { all: 'Next stop · all routes', next: 'Next stop', min: 'min', now: 'Now', bus: 'Bus {0}', onTime: 'On time', late: '{0} min late', early: '{0} min early', sched: 'Scheduled', noLive: 'no live bus', terminal: 'At the terminal', departs: 'Departs the terminal', toTerminal: 'min to the terminal', toStop: 'min to {0}', toLeave: 'min until it leaves', nextTrip: 'Next trip {0}', ended: 'Service has ended for today', noService: 'No service today', offRoute: 'Off its route', finding: 'Working out its route', showAll: 'Show all routes', live: 'Live', sim: 'Simulated data', schedOnly: 'Schedule only', updated: 'Position {0} ago', secs: '{0} s', mins: '{0} min', mph: '{0} mph', stopped: 'Stopped', nextBuses: 'Next buses here', noMore: 'No more buses today', locate: 'Stops near me', nearYou: 'Stops near you', locating: 'Finding your location', locOff: 'Location is turned off for this page.', locFar: 'You appear to be outside the bus service area.', ft: '{0} ft', mi: '{0} mi', wheel: 'Wheelchair accessible', bike: 'Bike rack', textSize: 'Change text size', toLang: 'Español', toLangLabel: 'Cambiar a español', phone: 'Track your bus on your phone', scan: 'Point your phone camera at the code.', weather: 'Weather', rain: '{0}% chance of rain', notice: 'Notice', alert: 'Service alert', more: '{0} of {1}', close: 'Close', route: 'Route {0}', showOnly: 'Show only {0} on the map', mapLabel: 'Map of bus routes, stops and buses', schedTag: 'scheduled', liveTag: 'live', here: 'You are here', tonight: 'Tonight', today: 'Today' },
-  es: { all: 'Próxima parada · todas las rutas', next: 'Próxima parada', min: 'min', now: 'Ya', bus: 'Autobús {0}', onTime: 'A tiempo', late: '{0} min tarde', early: '{0} min adelantado', sched: 'Programado', noLive: 'sin autobús en vivo', terminal: 'En la terminal', departs: 'Sale de la terminal', toTerminal: 'min a la terminal', toStop: 'min a {0}', toLeave: 'min para salir', nextTrip: 'Próximo viaje {0}', ended: 'El servicio terminó por hoy', noService: 'Hoy no hay servicio', offRoute: 'Fuera de su ruta', finding: 'Identificando su ruta', showAll: 'Mostrar todas las rutas', live: 'En vivo', sim: 'Datos simulados', schedOnly: 'Solo horario', updated: 'Posición hace {0}', secs: '{0} s', mins: '{0} min', mph: '{0} mph', stopped: 'Detenido', nextBuses: 'Próximos autobuses aquí', noMore: 'No hay más autobuses hoy', locate: 'Paradas cerca de mí', nearYou: 'Paradas cerca de usted', locating: 'Buscando su ubicación', locOff: 'La ubicación está desactivada para esta página.', locFar: 'Parece que está fuera del área de servicio.', ft: '{0} pies', mi: '{0} mi', wheel: 'Accesible para sillas de ruedas', bike: 'Portabicicletas', textSize: 'Cambiar el tamaño del texto', toLang: 'English', toLangLabel: 'Switch to English', phone: 'Siga su autobús en su teléfono', scan: 'Apunte la cámara de su teléfono al código.', weather: 'Clima', rain: '{0}% de probabilidad de lluvia', notice: 'Aviso', alert: 'Alerta de servicio', more: '{0} de {1}', close: 'Cerrar', route: 'Ruta {0}', showOnly: 'Mostrar solo {0} en el mapa', mapLabel: 'Mapa de rutas, paradas y autobuses', schedTag: 'programado', liveTag: 'en vivo', here: 'Usted está aquí', tonight: 'Esta noche', today: 'Hoy' },
+  en: { all: 'Next stop · all routes', next: 'Next stop', stopNo: 'Stop No. {0}', min: 'min', now: 'Now', bus: 'Bus {0}', onTime: 'On time', late: '{0} min late', early: '{0} min early', sched: 'Scheduled', noLive: 'no live bus', terminal: 'At the terminal', departs: 'Departs the terminal', toTerminal: 'min to the terminal', toStop: 'min to {0}', toLeave: 'min until it leaves', nextTrip: 'Next trip {0}', ended: 'Service has ended for today', noService: 'No service today', offRoute: 'Off its route', finding: 'Working out its route', showAll: 'Show all routes', live: 'Live', sim: 'Simulated data', schedOnly: 'Schedule only', updated: 'Position {0} ago', secs: '{0} s', mins: '{0} min', mph: '{0} mph', stopped: 'Stopped', nextBuses: 'Next buses here', noMore: 'No more buses today', locate: 'Stops near me', nearYou: 'Stops near you', locating: 'Finding your location', locOff: 'Location is turned off for this page.', locFar: 'You appear to be outside the bus service area.', ft: '{0} ft', mi: '{0} mi', wheel: 'Wheelchair accessible', bike: 'Bike rack', textSize: 'Change text size', toLang: 'Español', toLangLabel: 'Cambiar a español', phone: 'Track your bus on your phone', scan: 'Point your phone camera at the code.', weather: 'Weather', rain: '{0}% chance of rain', notice: 'Notice', alert: 'Service alert', more: '{0} of {1}', close: 'Close', route: 'Route {0}', showOnly: 'Show only {0} on the map', mapLabel: 'Map of bus routes, stops and buses', schedTag: 'scheduled', liveTag: 'live', here: 'You are here', tonight: 'Tonight', today: 'Today' },
+  es: { all: 'Próxima parada · todas las rutas', next: 'Próxima parada', stopNo: 'Parada n.º {0}', min: 'min', now: 'Ya', bus: 'Autobús {0}', onTime: 'A tiempo', late: '{0} min tarde', early: '{0} min adelantado', sched: 'Programado', noLive: 'sin autobús en vivo', terminal: 'En la terminal', departs: 'Sale de la terminal', toTerminal: 'min a la terminal', toStop: 'min a {0}', toLeave: 'min para salir', nextTrip: 'Próximo viaje {0}', ended: 'El servicio terminó por hoy', noService: 'Hoy no hay servicio', offRoute: 'Fuera de su ruta', finding: 'Identificando su ruta', showAll: 'Mostrar todas las rutas', live: 'En vivo', sim: 'Datos simulados', schedOnly: 'Solo horario', updated: 'Posición hace {0}', secs: '{0} s', mins: '{0} min', mph: '{0} mph', stopped: 'Detenido', nextBuses: 'Próximos autobuses aquí', noMore: 'No hay más autobuses hoy', locate: 'Paradas cerca de mí', nearYou: 'Paradas cerca de usted', locating: 'Buscando su ubicación', locOff: 'La ubicación está desactivada para esta página.', locFar: 'Parece que está fuera del área de servicio.', ft: '{0} pies', mi: '{0} mi', wheel: 'Accesible para sillas de ruedas', bike: 'Portabicicletas', textSize: 'Cambiar el tamaño del texto', toLang: 'English', toLangLabel: 'Switch to English', phone: 'Siga su autobús en su teléfono', scan: 'Apunte la cámara de su teléfono al código.', weather: 'Clima', rain: '{0}% de probabilidad de lluvia', notice: 'Aviso', alert: 'Alerta de servicio', more: '{0} de {1}', close: 'Cerrar', route: 'Ruta {0}', showOnly: 'Mostrar solo {0} en el mapa', mapLabel: 'Mapa de rutas, paradas y autobuses', schedTag: 'programado', liveTag: 'en vivo', here: 'Usted está aquí', tonight: 'Esta noche', today: 'Hoy' },
 };
 let lang = WORDS[Q.get('lang')] ? Q.get('lang') : WORDS[store.get('lct-lang')] ? store.get('lct-lang') : (navigator.language || '').toLowerCase().startsWith('es') ? 'es' : 'en';
 const t = (k, ...a) => (WORDS[lang][k] ?? WORDS.en[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i]);
@@ -420,7 +425,7 @@ function glide(nowP) {
 const badge = r => `<span class="rb" style="background:${r.color};color:${r.text}">${esc(r.id)}</span>`;
 function stopHtml(id) {
   const list = arrivals(id, 5);
-  return `<div class="pp"><h3>${esc(NET.stops[id][0])}</h3><div class="sub">${t('nextBuses')}</div><ul>` + (list.length ? list.map(a =>
+  return `<div class="pp"><h3>${esc(NET.stops[id][0])}</h3><div class="sub">${t('stopNo', esc(id))} · ${t('nextBuses')}</div><ul>` + (list.length ? list.map(a =>
     `<li>${badge(a.r)}<span class="nm">${esc(a.r.short)}</span><span class="tm">${etaText(a.sec)}</span><span class="tg ${a.live ? (a.delay >= LATE ? 'lt' : 'lv') : ''}">${a.live ? (a.delay >= LATE || a.delay <= EARLY ? delayText(a.delay) : t('liveTag')) : t('schedTag')}</span></li>`).join('') : `<li>${t('noMore')}</li>`) + '</ul></div>';
 }
 function showStop(id) { openStop = id; openBus = null; L.popup({ maxWidth: 300, autoPanPaddingTopLeft: [LOBBY ? 16 : 58, 12], autoPanPaddingBottomRight: [12, 12] }).setLatLng(NET.stops[id].slice(1)).setContent(stopHtml(id)).openOn(map); }
@@ -428,7 +433,7 @@ function busHtml(v) {
   const r = v.route && ROUTES[v.route], st = r && routeStatus(r);
   const age = v.age < 90 ? t('secs', v.age) : t('mins', Math.round(v.age / 60));
   let h = `<div class="pp"><h3>${t('bus', esc(busNo(v.id)))}</h3><div class="sub">${r ? badge(r) + ' ' + esc(routeName(r)) : t('finding')}</div>`;
-  if (st && st.kind === 'live') h += `<p><b>${delayText(v.delay)}</b></p><p>${t('next')}: ${esc(NET.stops[st.stop][0])}, ${etaText(st.eta)}</p>`;
+  if (st && st.kind === 'live') h += `<p><b>${delayText(v.delay)}</b></p><p>${t('next')}: ${esc(NET.stops[st.stop][0])} (${t('stopNo', esc(st.stop))}), ${etaText(st.eta)}</p>`;
   else if (st && st.kind === 'layover') h += `<p>${t('terminal')}. ${t('departs')} ${clockText(st.at)}</p>`;
   else if (st && st.kind === 'detour') h += `<p>${t('offRoute')}</p>`;
   h += `<p>${v.s > 1 ? t('mph', Math.round(v.s * 2.23694)) : t('stopped')} · ${t('updated', age)}</p>`;
@@ -442,11 +447,11 @@ const cards = {};
 for (const r of NET.routes) {
   const el = document.createElement('button');
   el.type = 'button'; el.className = 'route-card'; el.setAttribute('aria-pressed', 'false');
-  el.innerHTML = `<div class="route-header"><div class="route-badge" style="background:${r.color};color:${r.text}">${esc(r.id)}</div><div class="route-info"><h2></h2><div class="sl"></div></div></div><div class="stop-sec"><div class="stop-lbl"></div><div class="next-sn"></div><div class="eta-row"><span class="eta-num"></span><span class="eta-lbl"></span></div><div class="pb-w"><div class="pb-f" style="background:${r.color}"></div></div></div>`;
+  el.innerHTML = `<div class="route-header"><div class="route-badge" style="background:${r.color};color:${r.text}">${esc(r.id)}</div><div class="route-info"><h2></h2><div class="sl"></div></div></div><div class="stop-sec"><div class="stop-lbl"></div><div class="next-sn"></div><div class="stop-no"></div><div class="eta-row"><span class="eta-num"></span><span class="eta-lbl"></span></div><div class="pb-w"><div class="pb-f" style="background:${r.color}"></div></div></div>`;
   el.addEventListener('click', () => select(selected === r.id ? null : r.id));
   $('cards').appendChild(el);
   const q = s => el.querySelector(s);
-  cards[r.id] = { el, name: q('h2'), sl: q('.sl'), lbl: q('.stop-lbl'), stop: q('.next-sn'), row: q('.eta-row'), num: q('.eta-num'), unit: q('.eta-lbl'), bar: q('.pb-w'), fill: q('.pb-f') };
+  cards[r.id] = { el, name: q('h2'), sl: q('.sl'), lbl: q('.stop-lbl'), stop: q('.next-sn'), no: q('.stop-no'), row: q('.eta-row'), num: q('.eta-num'), unit: q('.eta-lbl'), bar: q('.pb-w'), fill: q('.pb-f') };
 }
 function renderCards() {
   const ticks = [];
@@ -466,14 +471,17 @@ function renderCards() {
     else if (s.kind === 'sched') { status = t('sched') + (simOrLive ? ' · ' + t('noLive') : ''); stop = NET.stops[s.stop][0]; near = etaText(s.eta); eta = s.end; unit = toEnd(s); prog = s.prog; }
     else if (s.kind === 'wait') { status = t('sched'); stop = t('nextTrip', clockText(s.at)); quiet = true; }
     else { status = t(s.kind === 'ended' ? 'ended' : 'noService'); stop = status; status = ''; quiet = true; }
+    const stopId = s.kind === 'live' || s.kind === 'sched' ? s.stop : s.kind === 'layover' ? r.patterns[0][0][0] : null, noText = stopId ? t('stopNo', stopId) : '';
     c.sl.textContent = status; c.sl.className = 'sl ' + cls;
+    if (noText) { const sn = document.createElement('span'); sn.className = 'sn'; sn.textContent = noText + (status ? ' · ' : ''); c.sl.prepend(sn); } // compact cards: the stop number leads this line
+    c.no.textContent = noText; c.no.hidden = !noText;
     c.stop.textContent = stop; c.stop.className = quiet ? 'no-bus' : 'next-sn';
     if (near) { const sm = document.createElement('small'); sm.textContent = ' · ' + near; c.stop.appendChild(sm); }
     c.row.hidden = eta == null; c.bar.hidden = prog == null;
     if (eta != null) { const now = eta < 45; c.num.textContent = now ? '\u2605' : Math.round(eta / 60); c.num.className = 'eta-num ' + etaClass(eta); c.unit.textContent = now ? t('now') : unit; }
     if (prog != null) c.fill.style.width = Math.round(Math.min(1, prog) * 100) + '%';
     const spoken = eta != null ? (eta < 45 ? t('now') : Math.round(eta / 60) + ' ' + unit) : '';
-    c.el.setAttribute('aria-label', [routeName(r), status, (s.kind === 'live' || s.kind === 'sched' ? t('next') + ' ' : '') + stop + (near ? ' ' + near : ''), spoken].filter(Boolean).join(', '));
+    c.el.setAttribute('aria-label', [routeName(r), status, (s.kind === 'live' || s.kind === 'sched' ? t('next') + ' ' : '') + stop + (noText ? ', ' + noText : '') + (near ? ', ' + near : ''), spoken].filter(Boolean).join(', '));
     ticks.push(t('route', r.id) + ': ' + stop + (near ? ' ' + near : '') + (spoken ? ', ' + spoken : '') + (s.kind === 'live' && (s.delay >= LATE || s.delay <= EARLY) ? ' (' + delayText(s.delay) + ')' : ''));
   }
   const notes = (DATA ? DATA.alerts : []).map(a => said(a, 'title'));
@@ -541,7 +549,7 @@ function renderNear() {
   const list = Object.keys(stopMarks).map(id => ({ id, m: far(me, NET.stops[id].slice(1)) })).sort((a, b) => a.m - b.m).slice(0, 3);
   el.innerHTML = `<h3><span>${t('nearYou')}</span><button type="button" id="near-x" aria-label="${t('close')}">&times;</button></h3><ul>` + list.map(s => {
     const a = arrivals(s.id, 1)[0], ft = s.m * 3.28084;
-    return `<li><button type="button" data-stop="${esc(s.id)}"><span>${esc(NET.stops[s.id][0])}<small>${ft < 1000 ? t('ft', Math.round(ft / 10) * 10) : t('mi', (s.m / 1609.344).toFixed(1))}${a ? ' · ' + badge(a.r) : ''}</small></span><span>${a ? etaText(a.sec) : ''}</span></button></li>`;
+    return `<li><button type="button" data-stop="${esc(s.id)}"><span>${esc(NET.stops[s.id][0])}<small>${t('stopNo', esc(s.id))} · ${ft < 1000 ? t('ft', Math.round(ft / 10) * 10) : t('mi', (s.m / 1609.344).toFixed(1))}${a ? ' · ' + badge(a.r) : ''}</small></span><span>${a ? etaText(a.sec) : ''}</span></button></li>`;
   }).join('') + '</ul>';
   $('near-x').onclick = () => { me = null; if (meMark) { map.removeLayer(meMark); meMark = null; } renderNear(); };
   el.querySelectorAll('[data-stop]').forEach(b => b.onclick = () => { const id = b.dataset.stop; map.setView(NET.stops[id].slice(1), Math.max(map.getZoom(), 16)); showStop(id); });
