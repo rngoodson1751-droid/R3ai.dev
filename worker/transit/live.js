@@ -150,8 +150,10 @@ async function geoGet(env, typeName, extra = {}) {
 export function busForDevice(name, scoped, known, named = {}) {
   const n = String(name || '').trim();
   for (const bus in named) if (String(named[bus]).trim().toLowerCase() === n.toLowerCase()) return bus;
+  // Geotab writes the fleet number "609-047" where Zonar writes "0609-47": both are Bus 47. When Zonar's list of
+  // buses is known, a Geotab vehicle outside it (a paratransit van, a support truck) is not a fixed-route bus.
   const fleet = n.match(/(?:^|\D)0?609[\s_-]?(\d{2,3})(?!\d)/);
-  if (fleet) return fleet[1];
+  if (fleet) { const bus = String(+fleet[1]); return known.size && !known.has(bus) ? null : bus; }
   if (!scoped) return null;
   const nums = (n.match(/\d+/g) || []).filter(x => x.length <= 3).map(x => String(+x));
   if (known.size) return nums.find(x => known.has(x)) || null;
@@ -164,13 +166,13 @@ async function geotabRead(env, now, known) {
   ]);
   let named = {};
   try { named = env.GEOTAB_BUSES ? JSON.parse(env.GEOTAB_BUSES) : {}; } catch { named = {}; }
-  const scoped = devices.length <= 30, busOf = {}, unmatched = [];
-  for (const d of devices) { const bus = busForDevice(d.name, scoped, known, named); if (bus) busOf[d.id] = bus; else unmatched.push(d.name); }
+  const scoped = devices.length <= 30, busOf = {}, unmatched = [], nameOf = {};
+  for (const d of devices) { const bus = busForDevice(d.name, scoped, known, named); if (bus) { busOf[d.id] = bus; nameOf[bus] = d.name; } else unmatched.push(d.name); }
   const reports = [];
   for (const i of infos) {
     const bus = busOf[i.device?.id], t = Date.parse(i.dateTime);
     if (!bus || !Number.isFinite(t) || (!i.latitude && !i.longitude)) continue;
-    reports.push({ id: bus, src: 'geotab', t, lat: i.latitude, lon: i.longitude, h: i.bearing >= 0 ? i.bearing : null, s: Number.isFinite(i.speed) ? i.speed * 0.27778 : null, power: i.isDeviceCommunicating !== false });
+    reports.push({ id: bus, src: 'geotab', name: nameOf[bus], t, lat: i.latitude, lon: i.longitude, h: i.bearing >= 0 ? i.bearing : null, s: Number.isFinite(i.speed) ? i.speed * 0.27778 : null, power: i.isDeviceCommunicating !== false });
   }
   return { reports, seen: devices.length, matched: Object.keys(busOf).length, unmatched: scoped ? unmatched.slice(0, 30) : null };
 }
@@ -216,7 +218,7 @@ async function trackerDebug(env) {
   const units = mergeReports(lists).map(r => {
     const far = Math.round(metres(net, r, yard));
     return {
-      bus: r.id, ...(zonarOn(env) ? { zonar: say(by[r.id].zonar) } : {}), ...(geotabOn(env) ? { geotab: say(by[r.id].geotab) } : {}), using: r.src, lastReportMinutesAgo: mins(r),
+      bus: r.id, ...(zonarOn(env) ? { zonar: say(by[r.id].zonar) } : {}), ...(geotabOn(env) ? { geotab: say(by[r.id].geotab), geotabName: by[r.id].geotab?.name ?? null } : {}), using: r.src, lastReportMinutesAgo: mins(r),
       lat: r.lat, lon: r.lon, mph: r.s == null ? null : Math.round(r.s * 2.237), metresFromFacility: far,
       status: r.power === false ? 'power off' : !heard(r, now) ? `no report for ${mins(r)} min` : far <= LIVE.YARD_M ? 'at the transit facility' : now - r.t > LIVE.STALE ? 'in service, standing still' : 'in service',
     };
