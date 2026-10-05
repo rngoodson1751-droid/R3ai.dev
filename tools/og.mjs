@@ -11,7 +11,7 @@ import { join, extname } from 'node:path';
 import { chromium } from 'playwright';
 
 const cards = [
-  { name: 'default', title: 'R cubed is Robert, Rachelle and River.', label: 'Software, sailing and family projects, built with AI' },
+  { name: 'default', title: 'R Cubed is Robert, Rachelle and River.', label: 'Software, sailing and family projects, built with AI' },
   { name: 'work', title: 'At work', label: 'Transit software and notes from a City Transit division' },
   { name: 'home', title: 'At home', label: 'Games, sailing, go-karts and family projects' },
   { name: 'blog', title: 'Blog', label: 'Every post from both sides of the site' },

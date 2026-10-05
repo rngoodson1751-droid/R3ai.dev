@@ -13,7 +13,7 @@ I'd asked Claude to build a kart racer for River. Then I asked where I could put
 
 ## The name
 
-R cubed is Robert, Rachelle and River. I wanted something short that said both "family" and "AI". `r3ai.dev` was available and cheap, so that was that.
+R Cubed is Robert, Rachelle and River. I wanted something short that said both "family" and "AI". `r3ai.dev` was available and cheap, so that was that.
 
 ## How it's put together
 

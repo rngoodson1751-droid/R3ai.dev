@@ -15,7 +15,7 @@ One site with two sides: what I build at work and what I build at home. A blog u
 
 ## Picking the name
 
-I liked "R cubed" for Robert, Rachelle and River. Claude checked which versions of the name were available across many domain endings in a batch, with prices. I picked r3ai.dev and registered it myself.
+I liked "R Cubed" for Robert, Rachelle and River. Claude checked which versions of the name were available across many domain endings in a batch, with prices. I picked r3ai.dev and registered it myself.
 
 ## Building it
 

@@ -140,7 +140,7 @@ function layout({ title, description, path, section = '', nav = '', body, og = '
 <body${section ? ` data-section="${section}"` : ''}>
 <canvas id="silk" aria-hidden="true"></canvas>
 <header class="glass bar">
-  <a class="mark" href="/" aria-label="R cubed, home page">R<sup>3</sup></a>
+  <a class="mark" href="/" aria-label="R Cubed, home page">R<sup>3</sup></a>
   <nav class="links" aria-label="Main">${links}</nav>
   <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
 </header>
@@ -210,7 +210,7 @@ write('index.html', layout({
   description: 'Robert Goodson builds software with AI: tools for public transit at work, and games and projects for his family at home.',
   body: `<section class="hero">
   <div>
-    <h1>R cubed is Robert, Rachelle and River.</h1>
+    <h1>R Cubed is Robert, Rachelle and River.</h1>
     <p>I'm Robert. I build software with AI: tools for public transit at work, and games, boats and go-karts for my family at home. This site keeps both in one place.</p>
     <div class="acts"><a class="btn" href="/work/">See the work side</a><a class="btn glass" href="/home/">See the home side</a></div>
   </div>
@@ -319,7 +319,7 @@ ${p.html}
 
 write('about/index.html', layout({
   title: 'About', path: '/about/', nav: 'about', description: 'Who is behind r3ai.dev and what the name means.',
-  body: `<section class="head"><h1>Three R's</h1><p>R cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></section>
+  body: `<section class="head"><h1>Three R's</h1><p>R Cubed is my family: Robert, Rachelle and River. I'm Robert, and I write everything here.</p></section>
 <div class="sheet strong post"><div class="prose">
 <h2>What this site is</h2>
 <p>I'm a self-taught web developer who manages a City Transit division. At work I build the tools the job needs. At home I build things for my family, like a rocket game for River and a kart racing game with sloths in it.</p>
@@ -525,7 +525,7 @@ ${posts.map(p => `<item><title>${esc(p.title)}</title><link>${SITE.url}${p.url}<
 `);
 write('search.json', JSON.stringify(posts.map(p => ({ t: p.title, u: p.url, s: p.summary, c: p.section, x: p.text }))));
 write('manifest.webmanifest', JSON.stringify({
-  name: 'R3 AI: Robert, Rachelle and River', short_name: 'R cubed', description: 'Software, games and family projects built with AI.',
+  name: 'R3 AI: Robert, Rachelle and River', short_name: 'R Cubed', description: 'Software, games and family projects built with AI.',
   start_url: '/', scope: '/', display: 'standalone', background_color: '#e9f4f5', theme_color: '#0b6cc4',
   icons: [
     { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
