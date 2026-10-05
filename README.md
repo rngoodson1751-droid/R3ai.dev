@@ -119,7 +119,7 @@ The lobby display is a live bus tracker. Its page is `worker/private/lobby-displ
 - `matcher.js` works out which route each bus is on. Zonar reports a bus number and a position, never a route, so the matcher follows each bus's recent trail along the route lines; `fleet.js` drops buses that are off, silent or parked at the facility. The settings are at the top of each file. `node tools/transit-test.mjs` checks the matcher against simulated days and should print "All scenarios passed".
 - `<page address>/live?debug=1` shows what Zonar sent back (without the login), for when its format needs checking.
 
-Page settings go on the end of the link: `?lobby=1` for the lobby TV (no buttons; adds the weather, notices and phone-code panel), `?demo=10:20` to see it at that time of day with simulated buses and a sample alert, `?lang=es` for Spanish.
+Page settings go on the end of the link: `?lobby=1` for the lobby TV (no buttons; adds the weather, notices and phone-code panel), `?demo=10:20` to see it at that time of day with simulated buses and a sample alert (this works whether or not Zonar is connected), `?lang=es` for Spanish.
 
 Alerts and notices are rows in the `transit_alerts` table of the `r3ai-requests` database (layout in `worker/schema.sql`). An `alert` shows in the banner across the top; a `notice` shows in the lobby panel and the ticker. Times are UTC.
 

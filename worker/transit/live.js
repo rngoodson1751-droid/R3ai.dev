@@ -25,9 +25,9 @@ async function cached(key, ms, make) {
 
 export async function live(request, env, url, ctx) {
   const demoAt = Number(url.searchParams.get('at')) || 0;
-  const useZonar = zonarOn(env);
-  if (useZonar && url.searchParams.has('debug')) return json(await zonarDebug(env));
-  const now = !useZonar && demoAt > 0 ? demoAt : Date.now();
+  if (zonarOn(env) && url.searchParams.has('debug')) return json(await zonarDebug(env));
+  const useZonar = zonarOn(env) && !demoAt; // the demo setting (?demo=10:20) always runs on simulated buses, and the page labels it so
+  const now = demoAt > 0 ? demoAt : Date.now();
   const lt = localTime(now, net.feed.timezone);
   let fleet;
   try { fleet = useZonar ? await zonarFleet(env, now) : simFleet(now); }
