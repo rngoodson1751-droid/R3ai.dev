@@ -26,7 +26,8 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - "Bus N is on Route R today": insert into `transit_overrides` (`bus` can be the short number, such as `47`).
 - "New GTFS": unzip it, run `node tools/gtfs.mjs <folder>`, run `node tools/transit-test.mjs`, then commit.
 - After changing anything in `worker/transit/`, run `node tools/transit-test.mjs`.
-- The Zonar login is three Worker secrets. Never write it into a file, a commit or a command.
+- Positions come from Zonar and Geotab, each bus using whichever heard from it last. "Why isn't bus N showing?": open `<page address>/live?debug=1` first.
+- The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
 
 ## Design rules
 

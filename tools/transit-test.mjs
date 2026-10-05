@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { prepare, localTime, tripsOn } from '../worker/transit/geo.js';
 import { simReports } from '../worker/transit/sim.js';
-import { update } from '../worker/transit/fleet.js';
+import { update, mergeReports } from '../worker/transit/fleet.js';
 
 const net = prepare(JSON.parse(readFileSync(new URL('../worker/transit/network.json', import.meta.url))));
 const truth = Object.fromEntries(net.routes.map((r, i) => [String(901 + i), r.id]));
@@ -57,6 +57,16 @@ run('Three-minute detour 220 m off the route', {
   from: at(5, 20), to: at(11, 0),
   mutate: (reports, t) => reports.map(r => (r.id === '903' && t >= at(9, 10) && t < at(9, 13) ? { ...r, lat: r.lat + 0.002 } : r)),
   expect: r => r.wrong === 0 && all5(r),
+});
+// Two trackers. The first one's unit on bus 903 died days ago (as Zonar's did on Bus 42); the second still hears it,
+// and its unit on bus 905 is the dead one. Every bus should still be matched, each from whichever tracker is alive.
+run('Two trackers, one dead unit on each', {
+  from: at(5, 20), to: at(11, 0),
+  mutate: (reports, t) => mergeReports([
+    reports.map(r => ({ ...r, src: 'zonar', t: r.id === '903' ? t - 9 * 86400e3 : Math.floor(r.t / 60e3) * 60e3 })), // stamped to the minute, like Zonar
+    reports.map(r => ({ ...r, src: 'geotab', t: r.id === '905' ? t - 3 * 86400e3 : r.t })),
+  ]),
+  expect: r => r.wrong === 0 && r.ghost === 0 && all5(r),
 });
 // Saturday: nothing in the timetable, so nothing should be shown.
 run('Saturday, no service', { from: at(8, 0) + 5 * 86400e3, to: at(9, 0) + 5 * 86400e3, expect: r => r.shown === 0 && r.wrong === 0 && r.ghost === 0 });

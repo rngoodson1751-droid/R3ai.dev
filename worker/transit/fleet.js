@@ -12,7 +12,14 @@ export const LIVE = {
   PROVEN: 12,                // have followed the route this many positions in a row, before it is shown on the route
 };
 
-// reports: [{id, t, lat, lon, h, s, power}]. states: {bus id: matcher state}, changed in place.
+// One list from several trackers: for each bus, the report heard most recently wins (a later list wins a tie).
+export function mergeReports(lists) {
+  const best = {};
+  for (const list of lists) for (const r of list) if (!best[r.id] || r.t >= best[r.id].t) best[r.id] = r;
+  return Object.values(best);
+}
+
+// reports: [{id, t, lat, lon, h, s, power, src}]. states: {bus id: matcher state}, changed in place.
 export function update(net, states, reports, nowMs, overrides = {}) {
   const yard = { lat: LIVE.YARD[0], lon: LIVE.YARD[1] };
   const online = [];
@@ -22,7 +29,8 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     const st = states[r.id];
     // The tracker stamps times to the minute, so two positions can carry the same time. A changed position is news.
     if (st && r.t <= st.seen && metres(net, r, st) >= TUNE.MOVE_M) r = { ...r, t: Math.max(st.seen + 1000, nowMs) };
-    states[r.id] = step(net, st, r, overrides[r.id] ?? overrides[r.id.split('-').pop()]); // dispatch may name a bus the short way: 47 for 0609-47
+    states[r.id] = step(net, st, r, overrides[r.id]);
+    if (r.src) states[r.id].src = r.src;
     online.push(r);
   }
   settle(net, states, online.map(r => r.id));
@@ -44,7 +52,7 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     vehicles.push({
       id, route: st.route, lat: snap ? snap[0] : st.lat, lon: snap ? snap[1] : st.lon, h: st.h ?? (snap ? snap[2] : null), s: st.s,
       age: Math.round((nowMs - st.seen) / 1000), d: on ? Math.round(st.d) : null, trip: trip?.start ?? null, delay: trip?.delay == null ? null : Math.round(trip.delay),
-      state: !on ? 'off-route' : trip?.state === 'layover' ? 'layover' : trip?.state === 'done' ? 'done' : 'on', by: st.by,
+      state: !on ? 'off-route' : trip?.state === 'layover' ? 'layover' : trip?.state === 'done' ? 'done' : 'on', by: st.by, src: st.src,
     });
   }
   for (const v of vehicles) { v.lat = +v.lat.toFixed(6); v.lon = +v.lon.toFixed(6); v.h = v.h == null ? null : Math.round(v.h); v.s = v.s == null ? null : +v.s.toFixed(1); }

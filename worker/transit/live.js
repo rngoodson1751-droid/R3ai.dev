@@ -1,11 +1,13 @@
 // The live service behind the lobby display: GET <page address>/live
 // Answers with the buses in service right now (each matched to a route), any rider alerts and
-// notices, and the weather. Bus positions come from the Zonar vehicle tracker when its login is
-// set as Worker secrets (ZONAR_CUSTOMER, ZONAR_USERNAME, ZONAR_PASSWORD); until then, from the
-// simulator in sim.js, and the page says so.
+// notices, and the weather. Bus positions come from the City's two vehicle trackers, whichever
+// have their login set as Worker secrets: Zonar (ZONAR_CUSTOMER, ZONAR_USERNAME, ZONAR_PASSWORD)
+// and Geotab (GEOTAB_DATABASE, GEOTAB_USERNAME, GEOTAB_PASSWORD, and GEOTAB_SERVER if it is not
+// my.geotab.com). With both set, each bus uses whichever tracker heard from it last, so one dead
+// unit does not take a bus off the map. With neither, the simulator in sim.js, and the page says so.
 import raw from './network.json';
 import { prepare, localTime, tripsOn, metres } from './geo.js';
-import { update, LIVE } from './fleet.js';
+import { update, mergeReports, LIVE } from './fleet.js';
 import { simReports, SIM } from './sim.js';
 
 export const networkForPage = JSON.stringify(raw).replace(/</g, '\\u003c'); // what the page draws from, taken before prepare() adds its working data
@@ -14,6 +16,10 @@ const TERMINAL = [net.routes[0].shape[0][0], net.routes[0].shape[0][1]];
 const ZONAR_EVERY = 20e3;   // never ask Zonar more often than this
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } });
 const zonarOn = env => !!(env.ZONAR_CUSTOMER && env.ZONAR_USERNAME && env.ZONAR_PASSWORD);
+const geotabOn = env => !!(env.GEOTAB_DATABASE && env.GEOTAB_USERNAME && env.GEOTAB_PASSWORD);
+const trackersOn = env => zonarOn(env) || geotabOn(env);
+const sourceName = env => [zonarOn(env) && 'zonar', geotabOn(env) && 'geotab'].filter(Boolean).join('+');
+const UA = 'Mozilla/5.0 (compatible; LCTransitTracker/1.0; +https://r3ai.dev)';
 const memo = {}; // small per-Worker memory: {key: {t, v}}
 async function cached(key, ms, make) {
   const now = Date.now(), hit = memo[key];
@@ -25,16 +31,16 @@ async function cached(key, ms, make) {
 
 export async function live(request, env, url, ctx) {
   const demoAt = Number(url.searchParams.get('at')) || 0;
-  if (zonarOn(env) && url.searchParams.has('debug')) return json(await zonarDebug(env));
-  const useZonar = zonarOn(env) && !demoAt; // the demo setting (?demo=10:20) always runs on simulated buses, and the page labels it so
+  if (trackersOn(env) && url.searchParams.has('debug')) return json(await trackerDebug(env));
+  const useZonar = trackersOn(env) && !demoAt; // the demo setting (?demo=10:20) always runs on simulated buses, and the page labels it so
   const now = demoAt > 0 ? demoAt : Date.now();
   const lt = localTime(now, net.feed.timezone);
   let fleet;
-  try { fleet = useZonar ? await zonarFleet(env, now) : simFleet(now); }
+  try { fleet = useZonar ? await liveFleet(env, now) : simFleet(now); }
   catch (e) { console.error('fleet failed', e?.message || e); fleet = { vehicles: [], counts: {}, error: 'no-data' }; }
   const [notes, wx] = await Promise.all([alerts(env), weather(ctx)]);
   return json({
-    now, source: useZonar ? 'zonar' : 'sim', error: fleet.error || null,
+    now, source: useZonar ? sourceName(env) : 'sim', error: fleet.error || null, trackers: fleet.trackers || null,
     service: net.routes.some(r => tripsOn(net, r, lt).length > 0),
     vehicles: fleet.vehicles, counts: fleet.counts,
     alerts: demoAt && !useZonar ? [...notes, ...SAMPLES] : notes, weather: wx,
@@ -62,7 +68,7 @@ function simFleet(now) {
 async function zonarText(env) {
   const q = new URLSearchParams({ customer: env.ZONAR_CUSTOMER, username: env.ZONAR_USERNAME, password: env.ZONAR_PASSWORD, action: 'showposition', operation: 'current', format: 'xml', version: '2', logvers: '3' });
   // Zonar refuses a request that does not say what is asking (error 113), and a Worker sends no User-Agent of its own.
-  const res = await fetch('https://omi.zonarsystems.net/interface.php?' + q, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; LCTransitTracker/1.0; +https://r3ai.dev)', accept: 'application/xml, text/xml, */*' }, signal: AbortSignal.timeout(12000) });
+  const res = await fetch('https://omi.zonarsystems.net/interface.php?' + q, { headers: { 'user-agent': UA, accept: 'application/xml, text/xml, */*' }, signal: AbortSignal.timeout(12000) });
   if (!res.ok) throw new Error('Zonar answered ' + res.status); // never log the address: it carries the login
   return res.text();
 }
@@ -89,7 +95,7 @@ export function parseZonar(text, now = Date.now()) {
     const hd = String(o.heading ?? '').trim().toUpperCase();
     const power = String(o.power ?? o.ignition ?? '').trim().toLowerCase();
     out.push({
-      id: String(o.fleet ?? o.assetnumber ?? o.name ?? o.id ?? '').trim(), t: when(String(o.time ?? o.timestamp ?? ''), now), lat, lon,
+      id: String(o.fleet ?? o.assetnumber ?? o.name ?? o.id ?? '').trim().split('-').pop(), src: 'zonar', t: when(String(o.time ?? o.timestamp ?? ''), now), lat, lon,
       h: hd in COMPASS ? COMPASS[hd] : Number.isFinite(parseFloat(hd)) ? parseFloat(hd) : null,
       s: Number.isFinite(speed) ? speed * (kmh ? 0.27778 : 0.44704) : null,
       power: power ? !/^(off|0|false|no)$/.test(power) : true,
@@ -109,35 +115,113 @@ export function parseZonar(text, now = Date.now()) {
   }
   return out.filter(r => r.id && Number.isFinite(r.lat) && Number.isFinite(r.lon) && Number.isFinite(r.t));
 }
-async function zonarFleet(env, now) {
-  return cached('zonar', 8e3, async () => {
+
+// ---------- Geotab ----------
+// MyGeotab's API: sign in once for a session, then ask for every device's current status.
+let geoSession = null, geoRefusedAt = 0;
+async function geoCall(host, method, params) {
+  const res = await fetch(`https://${host}/apiv1`, { method: 'POST', headers: { 'content-type': 'application/json', 'user-agent': UA }, body: JSON.stringify({ method, params }), signal: AbortSignal.timeout(12000) });
+  const body = await res.json().catch(() => null);
+  if (!res.ok || !body || body.error) {
+    const name = body?.error?.errors?.[0]?.name || body?.error?.name || String(body?.error?.message || res.status).slice(0, 80);
+    throw Object.assign(new Error('Geotab: ' + name), { expired: /InvalidUser|SessionExpired/i.test(name) }); // never the request itself: it carries the login
+  }
+  return body.result;
+}
+function geoSignIn(env) { // one sign-in shared by every request that needs it
+  // a refused sign-in is not retried for five minutes, so a wrong password cannot lock the account
+  if (Date.now() - geoRefusedAt < 5 * 60e3) return Promise.reject(new Error('Geotab: sign-in was refused; waiting before trying again'));
+  const first = String(env.GEOTAB_SERVER || 'my.geotab.com').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  return geoCall(first, 'Authenticate', { database: env.GEOTAB_DATABASE, userName: env.GEOTAB_USERNAME, password: env.GEOTAB_PASSWORD })
+    .then(r => ({ host: r.path && r.path !== 'ThisServer' ? r.path : first, credentials: r.credentials }))
+    .catch(e => { if (e.expired) geoRefusedAt = Date.now(); geoSession = null; throw e; });
+}
+async function geoGet(env, typeName, extra = {}) {
+  for (let attempt = 0; ; attempt++) {
+    const session = await (geoSession ??= geoSignIn(env));
+    try { return await geoCall(session.host, 'Get', { typeName, credentials: session.credentials, ...extra }); }
+    catch (e) { if (e.expired && attempt === 0) { geoSession = null; continue; } throw e; }
+  }
+}
+// Which bus a Geotab device is. A name carrying the fleet number ("0609-47") always counts. Any other
+// name is trusted only when the tracker's Geotab user can see a small set of vehicles, meaning it has
+// been limited to Transit: on a City-wide account, "Unit 47" could be anybody's truck. GEOTAB_BUSES,
+// an optional variable such as {"47":"Gillig 47","42":"TR-042"}, names them outright.
+export function busForDevice(name, scoped, known, named = {}) {
+  const n = String(name || '').trim();
+  for (const bus in named) if (String(named[bus]).trim().toLowerCase() === n.toLowerCase()) return bus;
+  const fleet = n.match(/(?:^|\D)0?609[\s_-]?(\d{2,3})(?!\d)/);
+  if (fleet) return fleet[1];
+  if (!scoped) return null;
+  const nums = (n.match(/\d+/g) || []).filter(x => x.length <= 3).map(x => String(+x));
+  if (known.size) return nums.find(x => known.has(x)) || null;
+  return nums.length ? nums[nums.length - 1] : null;
+}
+async function geotabRead(env, now, known) {
+  const [devices, infos] = await Promise.all([
+    cached('geoDevices', 6 * 3600e3, () => geoGet(env, 'Device', { propertySelector: { fields: ['id', 'name'], isIncluded: true } }).catch(e => { if (e.expired) throw e; return geoGet(env, 'Device'); })),
+    geoGet(env, 'DeviceStatusInfo'),
+  ]);
+  let named = {};
+  try { named = env.GEOTAB_BUSES ? JSON.parse(env.GEOTAB_BUSES) : {}; } catch { named = {}; }
+  const scoped = devices.length <= 30, busOf = {}, unmatched = [];
+  for (const d of devices) { const bus = busForDevice(d.name, scoped, known, named); if (bus) busOf[d.id] = bus; else unmatched.push(d.name); }
+  const reports = [];
+  for (const i of infos) {
+    const bus = busOf[i.device?.id], t = Date.parse(i.dateTime);
+    if (!bus || !Number.isFinite(t) || (!i.latitude && !i.longitude)) continue;
+    reports.push({ id: bus, src: 'geotab', t, lat: i.latitude, lon: i.longitude, h: i.bearing >= 0 ? i.bearing : null, s: Number.isFinite(i.speed) ? i.speed * 0.27778 : null, power: i.isDeviceCommunicating !== false });
+  }
+  return { reports, seen: devices.length, matched: Object.keys(busOf).length, unmatched: scoped ? unmatched.slice(0, 30) : null };
+}
+
+// ---------- the two trackers together ----------
+async function readTrackers(env, now, saved = {}) {
+  const lists = [], trackers = {};
+  let geo = null;
+  if (zonarOn(env)) {
+    if (saved.zonar && now - saved.zonar.t < ZONAR_EVERY) { lists.push(saved.zonar.reports); trackers.zonar = 'ok'; }
+    else try { saved.zonar = { t: now, reports: parseZonar(await zonarText(env), now) }; lists.push(saved.zonar.reports); trackers.zonar = 'ok'; }
+    catch (e) { console.error('Zonar not read', e?.message || e); trackers.zonar = String(e?.message || e).slice(0, 120); if (saved.zonar && now - saved.zonar.t < 120e3) lists.push(saved.zonar.reports); }
+  }
+  if (geotabOn(env)) {
+    try { geo = await geotabRead(env, now, new Set((saved.zonar?.reports || []).map(r => r.id))); lists.push(geo.reports); trackers.geotab = 'ok'; }
+    catch (e) { console.error('Geotab not read', e?.message || e); trackers.geotab = String(e?.message || e).slice(0, 120); }
+  }
+  return { lists, trackers, geo };
+}
+async function liveFleet(env, now) {
+  const every = geotabOn(env) ? 10e3 : ZONAR_EVERY; // Geotab reports more often than Zonar and allows far more requests
+  return cached('fleet', every / 2, async () => {
     const row = await env.DB.prepare('SELECT v FROM transit_state WHERE k = ?1').bind('buses').first();
     const saved = row ? JSON.parse(row.v) : { states: {}, fetched: 0, out: null };
-    if (saved.out && now - saved.fetched < ZONAR_EVERY) return saved.out; // another copy of the Worker asked Zonar a moment ago
-    let reports;
-    try { reports = parseZonar(await zonarText(env), now); }
-    catch (e) { console.error('Zonar not read', e?.message || e); return { vehicles: [], counts: {}, error: 'tracker-unavailable' }; }
+    if (saved.out && now - saved.fetched < every) return saved.out; // another copy of the Worker asked a moment ago
+    const { lists, trackers } = await readTrackers(env, now, saved);
+    if (!lists.length) return { vehicles: [], counts: {}, error: 'tracker-unavailable', trackers };
     const day = localTime(now, net.feed.timezone).day;
-    const forced = Object.fromEntries(((await env.DB.prepare('SELECT bus, route FROM transit_overrides WHERE day = ?1').bind(day).all().catch(() => ({ results: [] }))).results || []).map(o => [o.bus, o.route]));
-    const out = update(net, saved.states, reports, now, forced);
+    const forced = Object.fromEntries(((await env.DB.prepare('SELECT bus, route FROM transit_overrides WHERE day = ?1').bind(day).all().catch(() => ({ results: [] }))).results || []).map(o => [String(o.bus).split('-').pop(), o.route]));
+    const out = { ...update(net, saved.states, mergeReports(lists), now, forced), trackers };
     await env.DB.prepare('INSERT INTO transit_state (k, v, t) VALUES (?1, ?2, ?3) ON CONFLICT (k) DO UPDATE SET v = ?2, t = ?3')
-      .bind('buses', JSON.stringify({ states: saved.states, fetched: now, out }), now).run();
+      .bind('buses', JSON.stringify({ states: saved.states, fetched: now, out, zonar: saved.zonar }), now).run();
     return out;
   });
 }
-// <page address>/live?debug=1 while Zonar is connected: what came back, with no login in it, for tuning the reader above.
-async function zonarDebug(env) {
-  try {
-    const text = await zonarText(env), now = Date.now(), reports = parseZonar(text, now);
-    // every unit and, if it is not on the map, why: the first place to look when a bus is missing
-    const yard = { lat: LIVE.YARD[0], lon: LIVE.YARD[1] };
-    const units = reports.map(r => {
-      const age = Math.round((now - r.t) / 60000), far = Math.round(metres(net, r, yard));
-      const why = r.power === false ? 'power off' : now - r.t > LIVE.STALE ? `no report for ${age} min` : far <= LIVE.YARD_M ? 'at the transit facility' : 'in service';
-      return { bus: r.id.split('-').pop(), power: r.power ? 'on' : 'off', lastReportMinutesAgo: age, lat: r.lat, lon: r.lon, mph: r.s == null ? null : Math.round(r.s * 2.237), metresFromFacility: far, status: why };
-    }).sort((x, y) => x.lastReportMinutesAgo - y.lastReportMinutesAgo);
-    return { ok: true, units, bytes: text.length, tags: [...new Set([...text.matchAll(/<([\w-]+)/g)].map(m => m[1]))].slice(0, 40), firstAsset: (text.match(/<asset\b[\s\S]*?<\/asset>/i) || [text.slice(0, 600)])[0].slice(0, 900), parsed: reports.length, sample: reports.slice(0, 3).map(r => ({ ...r, ageSeconds: Math.round((now - r.t) / 1000) })) };
-  } catch (e) { return { ok: false, error: String(e?.message || e).slice(0, 200) }; }
+// <page address>/live?debug=1: every bus, what each tracker last said about it, and why it is or is not on the map.
+// The first place to look when a bus is missing. Nothing here carries a login.
+async function trackerDebug(env) {
+  const now = Date.now(), { lists, trackers, geo } = await readTrackers(env, now);
+  const yard = { lat: LIVE.YARD[0], lon: LIVE.YARD[1] }, by = {};
+  for (const r of lists.flat()) (by[r.id] ??= {})[r.src] = r;
+  const mins = r => Math.round((now - r.t) / 60000), say = r => (r ? `${r.power ? 'on' : 'off'}, ${mins(r)} min ago` : 'no unit found');
+  const units = mergeReports(lists).map(r => {
+    const far = Math.round(metres(net, r, yard));
+    return {
+      bus: r.id, ...(zonarOn(env) ? { zonar: say(by[r.id].zonar) } : {}), ...(geotabOn(env) ? { geotab: say(by[r.id].geotab) } : {}), using: r.src, lastReportMinutesAgo: mins(r),
+      lat: r.lat, lon: r.lon, mph: r.s == null ? null : Math.round(r.s * 2.237), metresFromFacility: far,
+      status: r.power === false ? 'power off' : now - r.t > LIVE.STALE ? `no report for ${mins(r)} min` : far <= LIVE.YARD_M ? 'at the transit facility' : 'in service',
+    };
+  }).sort((x, y) => x.lastReportMinutesAgo - y.lastReportMinutesAgo);
+  return { ok: lists.length > 0, trackers, units, ...(geo ? { geotab: { vehiclesThisLoginCanSee: geo.seen, matchedToBuses: geo.matched, notMatched: geo.unmatched ?? 'not listed: this login sees more than 30 vehicles, so only names carrying the fleet number are trusted. Limit the login to the Transit group, or set GEOTAB_BUSES.' } } : {}) };
 }
 
 // ---------- alerts and notices ----------
