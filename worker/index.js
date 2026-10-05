@@ -2,7 +2,17 @@
 //   /api/requests  post requests from the form at /request/, and the public list of approved ones
 //   /api/hit       counts a page view: the page address and the day, nothing about the visitor
 //   /api/ask       answers a question from the posts, using Cloudflare Workers AI
+//   /work/<name>/<key>/  unlisted pages: only someone holding the exact link can open them
 // Everything is stored in the r3ai-requests database (see worker/schema.sql).
+import lobbyDisplay from './private/lobby-display.html';
+
+// Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
+// opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
+// so the link cannot be worked out from the code. To change a link, see "Unlisted pages" in README.md.
+const UNLISTED = {
+  'lobby-display': { keyHash: '4d2a1fb5908fae1aa42b9dc27f493156fb1685593f3052a1bf57127de938a2f1', html: lobbyDisplay },
+};
+
 const SIDES = ['work', 'home', 'either'];
 const PER_PERSON_PER_HOUR = 5;
 const EVERYONE_PER_DAY = 200;
@@ -21,6 +31,16 @@ export default {
     }
     if (url.pathname === '/api/hit') return request.method === 'POST' ? hit(request, env, url) : json({ error: 'Not found.' }, 404);
     if (url.pathname === '/api/ask') return request.method === 'POST' ? ask(request, env, url) : json({ error: 'Use the page at /ask/ to ask a question.' }, 405, { Allow: 'POST' });
+    const unlisted = url.pathname.match(/^\/work\/([a-z0-9-]+)\/([a-z0-9]{16,64})\/?$/);
+    if (unlisted && Object.hasOwn(UNLISTED, unlisted[1]) && (request.method === 'GET' || request.method === 'HEAD')) {
+      const page = UNLISTED[unlisted[1]];
+      if (await sha256(unlisted[2]) === page.keyHash) return new Response(request.method === 'HEAD' ? null : page.html, { headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'x-robots-tag': 'noindex, nofollow, noarchive', // keep it out of search engines
+        'cache-control': 'private, no-cache',
+        'referrer-policy': 'strict-origin-when-cross-origin', // the map tile servers see r3ai.dev, never the link
+      } });
+    } // a wrong key falls through to the ordinary "page not found"
     return env.ASSETS.fetch(request);
   },
 };
@@ -28,6 +48,10 @@ export default {
 // ---------- small helpers ----------
 const sameOrigin = (request, url) => { const o = request.headers.get('origin'); return !o || o === url.origin; };
 const clean = (v, max) => String(v ?? '').replace(/\r/g, '').trim().slice(0, max);
+async function sha256(text) {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
 async function visitorHash(request) {
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
   const day = new Date().toISOString().slice(0, 10);

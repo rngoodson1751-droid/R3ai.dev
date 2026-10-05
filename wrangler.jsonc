@@ -7,7 +7,9 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // Unlisted pages are served by the Worker, so it has to see these addresses before the file server does.
+    "run_worker_first": ["/work/lobby-display/*"]
   },
   // Where post requests are stored.
   "d1_databases": [

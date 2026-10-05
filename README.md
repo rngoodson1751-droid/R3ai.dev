@@ -102,6 +102,24 @@ UPDATE requests SET status = 'asked', public_title = 'How the dispatch board pic
 
 The form allows five requests an hour from one visitor and 200 a day in total, and it ignores anything that fills in the hidden spam-trap box.
 
+## Unlisted pages
+
+An unlisted page is online but not on the site: no card, no sitemap entry, nothing in search, and search engines are told to skip it. It opens only for someone who has its exact link. The first one is the transit lobby display.
+
+- The page is one file in `worker/private/`, such as `worker/private/lobby-display.html`. It is not copied into `dist/`.
+- `worker/index.js` serves it at `/work/<name>/<key>/`. The `UNLISTED` list at the top holds the SHA-256 of the key, not the key, so the link cannot be read out of this repository. Any other address under that name shows the usual "page not found".
+- The project also has an entry in `content/projects.json` with `"unlisted": true`, which keeps it off every page.
+
+To make a new link (and switch the old one off), pick a new key and put its hash in `UNLISTED`:
+
+```
+KEY=$(openssl rand -hex 12); echo "https://r3ai.dev/work/lobby-display/$KEY/"; printf '%s' "$KEY" | sha256sum
+```
+
+To publish the page properly later, move the file to `static/`, remove `"unlisted": true` from its project and give the card a link.
+
+The link is a shared key, not a login: anyone it is forwarded to can open the page. This repository is public, so the page's source can also be read on GitHub by someone who looks for it. For sign-in by email address, put Cloudflare Access in front of `/work/lobby-display/*`.
+
 ## Cloudflare settings
 
-`wrangler.jsonc` tells Cloudflare to serve `./dist`, run `worker/index.js` for `/api/requests`, and connect the requests database. The built site is committed, so no build command is needed. If you would rather have Cloudflare build it, set the build command to `node build.mjs`.
+`wrangler.jsonc` tells Cloudflare to serve `./dist`, run `worker/index.js` for `/api/requests` and the unlisted pages, and connect the requests database. The built site is committed, so no build command is needed. If you would rather have Cloudflare build it, set the build command to `node build.mjs`.

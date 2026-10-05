@@ -61,6 +61,15 @@
     ]
   },
   {
+    "kind": "Rider information",
+    "status": "Unlisted",
+    "unlisted": true,
+    "title": "Transit lobby display",
+    "summary": "A full-screen board for a lobby TV: a map of every route, where each bus is on its schedule, and a countdown to its next stop.",
+    "section": "work",
+    "links": []
+  },
+  {
     "kind": "Procurement",
     "title": "Procurement determination tool",
     "summary": "A step-by-step wizard that asks about a purchase and produces the price-reasonableness and small-purchase forms.",

@@ -97,7 +97,8 @@ function loadPosts() {
   }).filter(p => p.draft !== 'true').sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (Number(a.order) || 50) - (Number(b.order) || 50) || a.title.localeCompare(b.title)));
 }
 const posts = loadPosts();
-const projects = JSON.parse(readFileSync('content/projects.json', 'utf8'));
+// a project marked "unlisted": true is kept on file but left off every page
+const projects = JSON.parse(readFileSync('content/projects.json', 'utf8')).filter(p => !p.unlisted);
 
 // ---------- templates ----------
 const NAV = [['/work/', 'At work', 'work'], ['/home/', 'At home', 'home'], ['/blog/', 'Blog', 'blog'], ['/request/', 'Request', 'request'], ['/about/', 'About', 'about']];
