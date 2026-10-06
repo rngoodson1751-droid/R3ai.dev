@@ -13,7 +13,7 @@ const at = (h, m = 0) => DAY + (h * 60 + m) * 60e3;
 let failed = 0;
 
 function run(name, { from, to, opt = {}, mutate, expect }) {
-  const states = {}; let wrong = 0, shown = 0, ghost = 0, identified = {}, unknownSecs = 0, samples = 0;
+  const states = {}; let wrong = 0, shown = 0, ghost = 0, identified = {}, unknownSecs = 0, samples = 0, detour = 0, detourBlind = 0;
   for (let t = from; t <= to; t += 10e3) {
     let reports = simReports(net, t, opt);
     if (mutate) reports = mutate(reports, t);
@@ -24,12 +24,12 @@ function run(name, { from, to, opt = {}, mutate, expect }) {
       if (!real) { ghost++; continue; }
       if (v.route == null) unknownSecs += 10;
       else if (v.route !== real) wrong++;
-      else { shown++; identified[v.id] ??= t; }
+      else { shown++; identified[v.id] ??= t; if (v.state === 'detour') { detour++; if (v.d == null || v.trip == null || v.delay == null) detourBlind++; } }
     }
   }
   const lt = localTime(from, net.feed.timezone), first = tripsOn(net, net.routes[0], lt)[0]?.[0];
   const idAfter = Object.entries(identified).map(([id, t]) => `${id}:${Math.max(0, Math.round((localTime(t, net.feed.timezone).sec - Math.max(first, lt.sec)) / 60 * 10) / 10)}m`).join(' ');
-  const ok = expect({ wrong, ghost, identified, shown, unknownSecs });
+  const ok = expect({ wrong, ghost, identified, shown, unknownSecs, detour, detourBlind });
   if (!ok) failed++;
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}\n      wrong-route samples ${wrong}, filtered-unit leaks ${ghost}, matched samples ${shown}, bus-minutes shown as "identifying" ${(unknownSecs / 60).toFixed(1)}\n      minutes after departure (or after start of watching) until matched: ${idAfter || 'none'}`);
 }
@@ -53,10 +53,11 @@ run('One wild GPS position every 10 minutes', {
   expect: r => r.wrong === 0 && all5(r),
 });
 // Bus 903 leaves its route for three minutes (a detour around a closed street) and comes back.
+// It must stay on Route 3, be flagged as detouring, and still carry a next stop and a time.
 run('Three-minute detour 220 m off the route', {
   from: at(5, 20), to: at(11, 0),
   mutate: (reports, t) => reports.map(r => (r.id === '903' && t >= at(9, 10) && t < at(9, 13) ? { ...r, lat: r.lat + 0.002 } : r)),
-  expect: r => r.wrong === 0 && all5(r),
+  expect: r => r.wrong === 0 && all5(r) && r.detour >= 10 && r.detourBlind === 0 && r.unknownSecs < 800,
 });
 // Two trackers. The first one's unit on bus 903 died days ago (as Zonar's did on Bus 42); the second still hears it,
 // and its unit on bus 905 is the dead one. Every bus should still be matched, each from whichever tracker is alive.
@@ -75,6 +76,18 @@ run('Tracker silent while a bus stands at the terminal', {
   from: at(5, 20), to: at(11, 0),
   mutate: reports => reports.map(r => { const was = lastSaid[r.id]; if (was && r.power && was.power && r.lat === was.lat && r.lon === was.lon) return was; if (was && r.power && was.power && !(r.s > 0.5) && !(was.s > 0.5)) return was; lastSaid[r.id] = r; return r; }),
   expect: r => r.wrong === 0 && all5(r) && r.shown >= 9200,
+});
+// A long detour that runs along another route's street: bus 901 (Route 1) is moved onto Route 4's line for
+// twelve minutes. It must be shown as Route 1 on a detour the whole time, never as a second Route 4 bus.
+import { pointAt, distAt, tripsOn as tripsFor } from '../worker/transit/geo.js';
+run('Twelve-minute detour along another route', {
+  from: at(5, 20), to: at(11, 0),
+  mutate: (reports, t) => reports.map(r => {
+    if (r.id !== '901' || t < at(9, 5) || t >= at(9, 17)) return r;
+    const r4 = net.byId['4'], p = pointAt(r4, 6000 + (t - at(9, 5)) / 1000 * 7);
+    return { ...r, lat: p[0], lon: p[1], h: p[2], s: 7 };
+  }),
+  expect: r => r.wrong === 0 && all5(r) && r.detour >= 40 && r.detourBlind === 0,
 });
 // Saturday: nothing in the timetable, so nothing should be shown.
 run('Saturday, no service', { from: at(8, 0) + 5 * 86400e3, to: at(9, 0) + 5 * 86400e3, expect: r => r.shown === 0 && r.wrong === 0 && r.ghost === 0 });

@@ -10,19 +10,23 @@ import { project, metres, angleGap } from './geo.js';
 
 export const TUNE = {
   OFF_M: 45,          // how far from a route's line still counts as on it
-  MOVE_M: 25,         // positions closer together than this are the bus standing still
-  TRAIL: 14,          // positions kept per bus
+  MOVE_M: 60,         // positions are added to the trail this far apart, so a tracker that reports every few
+                      // seconds and one that reports every minute are judged over similar distances
+  TRAIL: 16,          // positions kept per bus
   TRAIL_AGE: 25 * 60e3,
   NEED: 3,            // positions in a row on a route before it can be assigned
   LEAD: 3,            // and it must be this many ahead of every other route
-  DROP: 6,            // positions in a row off its route before a bus loses the assignment
+  SWITCH: 8,          // positions in a row on a different route before an assigned bus is moved to it: a detour
+                      // often runs a few blocks along another route's street, and that must not reassign the bus
+  DETOUR: 20 * 60e3,  // a bus off its route this long without rejoining it loses the assignment
   PARKED: 25 * 60e3,  // standing this long (longer than a layover) clears the bus for a fresh start
 };
 
 export const fresh = () => ({ trail: [], route: null, d: null, off: 0, by: null, fit: {}, seen: 0, moved: 0 });
 
 // Feed one position report {t, lat, lon, h, s} (ms, degrees, compass degrees or null, m/s or null).
-export function step(net, st, ping, forced) {
+// taken = routes another bus is running right now: an assigned bus is never moved onto one of those.
+export function step(net, st, ping, forced, taken) {
   st ??= fresh();
   if (ping.t <= st.seen) return st;
   Object.assign(st, { seen: ping.t, lat: ping.lat, lon: ping.lon, h: ping.h ?? null, s: ping.s ?? null });
@@ -30,7 +34,7 @@ export function step(net, st, ping, forced) {
   if (!last || metres(net, last, ping) >= TUNE.MOVE_M) { st.trail.push({ t: ping.t, lat: ping.lat, lon: ping.lon, h: ping.h ?? null, s: ping.s ?? null }); st.moved = ping.t; }
   if (ping.t - st.moved > TUNE.PARKED) { st.trail = []; st.route = null; st.d = null; st.by = null; st.fit = {}; return st; }
   st.trail = st.trail.filter(p => ping.t - p.t <= TUNE.TRAIL_AGE).slice(-TUNE.TRAIL);
-  if (st.moved === ping.t || forced) evaluate(net, st, forced);
+  if (st.moved === ping.t || forced) evaluate(net, st, forced, taken);
   return st;
 }
 
@@ -51,7 +55,7 @@ function follow(net, r, trail) {
   return { run, off, H };
 }
 
-function evaluate(net, st, forced) {
+function evaluate(net, st, forced, taken) {
   const res = {};
   for (const r of net.routes) res[r.id] = follow(net, r, st.trail);
   st.fit = Object.fromEntries(Object.entries(res).map(([id, v]) => [id, [v.run, v.off]]));
@@ -64,15 +68,12 @@ function evaluate(net, st, forced) {
     const clear = top && top[1].off === 0 && top[1].run >= TUNE.NEED && top[1].run - second >= TUNE.LEAD ? top[0] : null;
     const mine = st.route && res[st.route];
     if (!st.route) { if (clear) { st.route = clear; st.by = 'path'; } }
-    else if (mine.off >= 2 && clear && clear !== st.route) { st.route = clear; st.by = 'path'; } // its trail now follows another route
-    else if (trailingMisses(net, st) >= TUNE.DROP) { st.route = null; st.by = null; }
+    else if (mine.off === 0) st.onAt = st.seen;
+    else if (mine.off >= 2 && clear && clear !== st.route && res[clear].run >= TUNE.SWITCH && !taken?.has(clear)) { st.route = clear; st.by = 'path'; st.onAt = st.seen; } // its trail now follows another route
+    else if (st.seen - (st.onAt ?? st.seen) > TUNE.DETOUR) { st.route = null; st.by = null; }
+    if (st.route && st.onAt == null) st.onAt = st.seen;
   }
   place(net, st, st.route && res[st.route]);
-}
-function trailingMisses(net, st) { // positions in a row, newest first, that are off the assigned route's line
-  const r = net.byId[st.route]; let n = 0;
-  for (let i = st.trail.length - 1; i >= 0; i--) { if (project(net, r, st.trail[i].lat, st.trail[i].lon, TUNE.OFF_M).length) break; n++; }
-  return n;
 }
 function place(net, st, v) { // where along its route the bus is
   if (!v) { st.d = null; st.off = 0; return; }

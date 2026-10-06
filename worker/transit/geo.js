@@ -41,6 +41,21 @@ export function project(net, r, lat, lon, maxOff) {
   return out;
 }
 
+// Where a bus that has left its route will most likely come back to it: the nearest place on the line within
+// `ahead` metres past the last place it was on it (or anywhere on the line when that is not known).
+export function rejoin(net, r, lat, lon, fromD, ahead = 6000) {
+  const px = lon * net.kx, py = lat * net.ky;
+  let best = null;
+  for (const s of r.segs) {
+    const dx = s.bx - s.ax, dy = s.by - s.ay, L2 = dx * dx + dy * dy;
+    const f = L2 ? Math.max(0, Math.min(1, ((px - s.ax) * dx + (py - s.ay) * dy) / L2)) : 0;
+    const d = s.d0 + f * s.len, off = Math.hypot(px - s.ax - f * dx, py - s.ay - f * dy);
+    if (fromD != null && ((d - fromD) % r.length + r.length) % r.length > ahead) continue;
+    if (!best || off < best.off) best = { d, off };
+  }
+  return best;
+}
+
 // The point d metres along a route: [lat, lon, compass bearing].
 export function pointAt(r, d) {
   d = Math.max(0, Math.min(r.shape.at(-1)[2], d));

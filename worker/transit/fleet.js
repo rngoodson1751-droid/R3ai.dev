@@ -1,7 +1,7 @@
 // Turns raw tracker reports into the buses the display shows: in-service buses only, each with its
 // route, its place along the route and how late it is.
 import { step, settle, TUNE } from './matcher.js';
-import { pointAt, tripFor, localTime, metres } from './geo.js';
+import { pointAt, tripFor, localTime, metres, rejoin } from './geo.js';
 
 export const LIVE = {
   STALE: 300e3,              // a moving bus not heard from for this long is treated as offline
@@ -37,7 +37,8 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     const st = states[r.id];
     // The tracker stamps times to the minute, so two positions can carry the same time. A changed position is news.
     if (st && r.t <= st.seen && metres(net, r, st) >= TUNE.MOVE_M) r = { ...r, t: Math.max(st.seen + 1000, nowMs) };
-    states[r.id] = step(net, st, r, overrides[r.id]);
+    const taken = new Set(Object.entries(states).filter(([id, o]) => id !== r.id && o.route && o.off < 2 && nowMs - o.seen < LIVE.DWELL).map(([, o]) => o.route));
+    states[r.id] = step(net, st, r, overrides[r.id], taken);
     if (r.src) states[r.id].src = r.src;
     online.push(r);
   }
@@ -50,7 +51,11 @@ export function update(net, states, reports, nowMs, overrides = {}) {
       continue;
     }
     const r = net.byId[st.route], on = st.off < 2 && st.d != null;
-    const trip = on ? tripFor(net, r, st.d, lt) : null;
+    // Off its route (a detour round a closed street): work out where it will come back to the line, so the
+    // display can keep showing the next stop it will actually reach and roughly when.
+    const back = on ? null : rejoin(net, r, st.lat, st.lon, st.d);
+    const trip = on ? tripFor(net, r, st.d, lt) : back ? tripFor(net, r, back.d, lt) : null;
+    if (back && trip?.delay != null && trip.state === 'on') trip.delay += back.off / 7; // plus the drive back to the line
     if (trip?.state === 'done' && nowMs - st.moved > LIVE.IDLE_HIDE) continue; // finished for the day and parked
     // A bus driving to or from the facility can follow a route's line for a few blocks. It only counts as
     // running the route once it is near that route's timetable or has followed it for a good distance.
@@ -59,8 +64,8 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     const snap = on ? pointAt(r, st.d) : null;
     vehicles.push({
       id, route: st.route, lat: snap ? snap[0] : st.lat, lon: snap ? snap[1] : st.lon, h: st.h ?? (snap ? snap[2] : null), s: st.s,
-      age: Math.round((nowMs - st.seen) / 1000), d: on ? Math.round(st.d) : null, trip: trip?.start ?? null, delay: trip?.delay == null ? null : Math.round(trip.delay),
-      state: !on ? 'off-route' : trip?.state === 'layover' ? 'layover' : trip?.state === 'done' ? 'done' : 'on', by: st.by, src: st.src,
+      age: Math.round((nowMs - st.seen) / 1000), d: on ? Math.round(st.d) : back ? Math.round(back.d) : null, trip: trip?.start ?? null, delay: trip?.delay == null ? null : Math.round(trip.delay),
+      state: !on ? 'detour' : trip?.state === 'layover' ? 'layover' : trip?.state === 'done' ? 'done' : 'on', by: st.by, src: st.src,
     });
   }
   for (const v of vehicles) { v.lat = +v.lat.toFixed(6); v.lon = +v.lon.toFixed(6); v.h = v.h == null ? null : Math.round(v.h); v.s = v.s == null ? null : +v.s.toFixed(1); }
