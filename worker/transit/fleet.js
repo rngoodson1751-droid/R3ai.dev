@@ -1,6 +1,6 @@
 // Turns raw tracker reports into the buses the display shows: in-service buses only, each with its
 // route, its place along the route and how late it is.
-import { step, fresh, TUNE } from './matcher.js';
+import { step, fresh, atTerminal, TUNE } from './matcher.js';
 import { pointAt, tripFor, localTime, metres, rejoin } from './geo.js';
 
 export const LIVE = {
@@ -34,14 +34,19 @@ export function update(net, states, reports, nowMs, overrides = {}) {
   const online = [], live = reports.filter(r => heard(r, nowMs)), ids = new Set(live.map(r => r.id));
   for (let r of live) {
     const out = metres(net, r, yard);
-    if (out <= LIVE.YARD_M) { states[r.id] = { yard: r.t, seen: r.t }; continue; } // parked or warming up at the facility
+    if (out <= LIVE.YARD_M) { // parked or warming up at the facility. The route it had today is remembered, for when it comes back from lunch.
+      const o = states[r.id], was = o?.route && o.by !== 'override' ? { route: o.route, day: lt.day } : o?.was;
+      states[r.id] = { yard: r.t, seen: r.t, ...(was?.day === lt.day ? { was } : {}) };
+      continue;
+    }
     let st = states[r.id];
     // A bus coming out of the facility is driving to the terminal. Nothing it passes on the way says what route it will run.
-    if (!st || st.yard) st = st?.yard || out <= LIVE.YARD_NEAR ? { ...fresh(), dead: r.t } : undefined;
+    if (!st || st.yard) st = st?.yard || out <= LIVE.YARD_NEAR ? { ...fresh(), dead: r.t, ...(st?.was ? { was: st.was } : {}) } : undefined;
     // The tracker stamps times to the minute, so two positions can carry the same time. A changed position is news.
     if (st && r.t <= st.seen && metres(net, r, st) >= TUNE.MOVE_M) r = { ...r, t: Math.max(st.seen + 1000, nowMs) };
-    // One bus per route: a route another bus is on right now is not open to this one.
-    const held = new Set(Object.entries(states).filter(([id, o]) => id !== r.id && ids.has(id) && o.route && o.off < 2).map(([, o]) => o.route));
+    // One bus per route: a route another bus is on right now is not open to this one. A bus that has stood
+    // longer than a layover does not hold its route against one that is out running it.
+    const held = new Set(Object.entries(states).filter(([id, o]) => id !== r.id && ids.has(id) && o.route && o.off < 2 && nowMs - o.moved <= TUNE.PARKED).map(([, o]) => o.route));
     const had = st?.route;
     st = states[r.id] = step(net, st, r, { forced: overrides[r.id], held, lt });
     if (r.src) st.src = r.src;
@@ -55,6 +60,7 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     const st = states[id];
     if (!st.route) { grey(id, st); continue; } // no route yet: show it only while it is actually going somewhere
     const r = net.byId[st.route];
+    if (st.rest && !atTerminal(net, st)) { grey(id, st); continue; } // off to lunch or back to the facility: not running its route
     // Off its route. A stray position or a wide turn is not a detour: it has to stay off the line for a while.
     const away = st.off >= LIVE.AWAY && st.seen - (st.onAt ?? st.seen) >= LIVE.AWAY_MS;
     const on = !away && st.d != null;
@@ -63,6 +69,9 @@ export function update(net, states, reports, nowMs, overrides = {}) {
     // A bus that left its line at the terminal is not detouring: it is driving back to the facility, or going out on
     // a different route, which it will be given once it has passed that route's stops.
     if (away && !told && (st.onD == null || st.onD < 2 * TUNE.TERMINAL_M || st.onD > r.length - 2 * TUNE.TERMINAL_M)) { grey(id, st); continue; }
+    // Nor is one that left the line when no trip could have had it there: after its last trip of the morning or the
+    // day it may follow its own route for a few blocks on the way back to the facility.
+    if (away && !told && tripFor(net, r, st.d, lt)?.delay == null) { grey(id, st); continue; }
     // On a detour round a closed street: work out where it will come back to the line, so the display can keep
     // showing the next stop it will actually reach and roughly when.
     const back = on ? null : rejoin(net, r, st.lat, st.lon, st.d);

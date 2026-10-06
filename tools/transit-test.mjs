@@ -13,7 +13,7 @@ const at = (h, m = 0) => DAY + (h * 60 + m) * 60e3;
 let failed = 0;
 
 function run(name, { from, to, opt = {}, mutate, expect }) {
-  const states = {}; let wrong = 0, shown = 0, ghost = 0, identified = {}, unknownSecs = 0, samples = 0, detour = 0, detourBlind = 0;
+  const states = {}; let wrong = 0, shown = 0, ghost = 0, identified = {}, unknownSecs = 0, samples = 0, detour = 0, detourBlind = 0, greyLate = 0, back = {};
   for (let t = from; t <= to; t += 10e3) {
     let reports = simReports(net, t, opt);
     if (mutate) reports = mutate(reports, t);
@@ -22,16 +22,16 @@ function run(name, { from, to, opt = {}, mutate, expect }) {
       samples++;
       const real = (opt.truth ?? truth)[v.id];
       if (!real) { ghost++; continue; }
-      if (v.route == null) unknownSecs += 10;
+      if (v.route == null) { unknownSecs += 10; if (opt.greyFrom && t >= opt.greyFrom) greyLate++; }
       else if (v.route !== real) wrong++;
-      else { shown++; identified[v.id] ??= t; if (v.state === 'detour') { detour++; if (v.d == null || v.trip == null || v.delay == null) detourBlind++; } }
+      else { shown++; identified[v.id] ??= t; if (opt.greyFrom && t >= opt.greyFrom) back[v.id] ??= t; if (v.state === 'detour') { detour++; if (v.d == null || v.trip == null || v.delay == null) detourBlind++; } }
     }
   }
   const lt = localTime(from, net.feed.timezone), first = tripsOn(net, net.routes[0], lt)[0]?.[0];
   const idAfter = Object.entries(identified).map(([id, t]) => `${id}:${Math.max(0, Math.round((localTime(t, net.feed.timezone).sec - Math.max(first, lt.sec)) / 60 * 10) / 10)}m`).join(' ');
-  const ok = expect({ wrong, ghost, identified, shown, unknownSecs, detour, detourBlind });
+  const ok = expect({ wrong, ghost, identified, shown, unknownSecs, detour, detourBlind, greyLate, back });
   if (!ok) failed++;
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}\n      wrong-route samples ${wrong}, filtered-unit leaks ${ghost}, matched samples ${shown}, bus-minutes shown as "identifying" ${(unknownSecs / 60).toFixed(1)}, detour samples ${detour}\n      minutes after departure (or after start of watching) until matched: ${idAfter || 'none'}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}\n      wrong-route samples ${wrong}, filtered-unit leaks ${ghost}, matched samples ${shown}, bus-minutes shown as "identifying" ${(unknownSecs / 60).toFixed(1)}, detour samples ${detour}${opt.greyFrom ? `, grey after lunch ${greyLate}` : ''}\n      minutes after departure (or after start of watching) until matched: ${idAfter || 'none'}`);
 }
 
 const all5 = r => Object.keys(r.identified).length === 5;
@@ -92,6 +92,34 @@ run('Twelve-minute detour along another route', {
 // Saturday: nothing in the timetable, so nothing should be shown.
 run('Saturday, no service', { from: at(8, 0) + 5 * 86400e3, to: at(9, 0) + 5 * 86400e3, expect: r => r.shown === 0 && r.wrong === 0 && r.ghost === 0 });
 
+
+// ---- The lunch break. No trip leaves at 12:45, so every bus stands from about 12:30 until 1:45. Each must come
+// back on the route it had, at once, without waiting to pass three stops again.
+const lunch = { greyFrom: at(13, 40) }, backAtOnce = r => r.wrong === 0 && r.greyLate === 0 && Object.keys(r.back).length === 5 && Object.values(r.back).every(t => t <= at(13, 46));
+run('Lunch break: buses wait at the terminal, switched on', { from: at(5, 20), to: at(15, 0), opt: lunch, expect: backAtOnce });
+run('Lunch break: buses wait at the terminal, switched off', {
+  from: at(5, 20), to: at(15, 0), opt: lunch,
+  mutate: (reports, t) => reports.map(r => (truth[r.id] && t >= at(12, 35) && t < at(13, 38) ? { ...r, power: false } : r)),
+  expect: backAtOnce,
+});
+// They drive back to the facility for lunch along Broad Street (bus 44's real path, reversed) and return the same way.
+{
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/pullout-2026-10-06.json', import.meta.url)));
+  const path = fx.buses['44'].filter(p => p[0] <= 570), last = path.at(-1)[0];
+  const drive = (r, sec, rev) => { const q = rev ? last - sec : sec, p = path.findLast(p => p[0] <= q) ?? path[0]; return { ...r, lat: p[1], lon: p[2], h: p[3] == null ? null : (p[3] + (rev ? 180 : 0)) % 360, s: p[4], power: true }; };
+  run('Lunch break: buses go back to the facility and return', {
+    from: at(5, 20), to: at(15, 0), opt: lunch,
+    mutate: (reports, t) => reports.map((r, i) => {
+      if (!truth[r.id] || t < at(12, 33) || t >= at(13, 43)) return r;
+      const out = (t - at(12, 33) - i * 30e3) / 1000, home = (t - at(13, 28) - i * 30e3) / 1000;
+      if (out < 0) return r;
+      if (out <= last) return drive(r, out, true);
+      if (home < 0) return { ...r, lat: 30.2301, lon: -93.1543, h: null, s: 0, power: true }; // parked in the lot
+      return drive(r, Math.min(home, last), false);
+    }),
+    expect: r => backAtOnce(r) && r.detour === 0,
+  });
+}
 
 // ---- The morning pull-out. Before this was fixed, buses were given routes from their drive in from the
 // facility along Broad Street (which two routes also use), and then shown as detouring when they left the

@@ -27,6 +27,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - "New GTFS": unzip it, run `node tools/gtfs.mjs <folder>`, run `node tools/transit-test.mjs`, then commit.
 - After changing anything in `worker/transit/`, run `node tools/transit-test.mjs`.
 - A bus gets a route only after passing three of that route's own stops in order; until then it is grey with no route. That wait at the start of the day is intended. Do not bring back route guesses from the line a bus is following: the drive in from the facility along Broad Street fooled them (6 October 2026).
+- Each route runs 11 trips a day with a lunch break: nothing leaves at 12:45 pm. Buses keep their routes through it, so they should not go grey after the 1:45 pm departure.
 - Positions come from Zonar and Geotab, each bus using whichever heard from it last. "Why isn't bus N showing?": open `<page address>/live?debug=1` first.
 - The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
 

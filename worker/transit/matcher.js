@@ -27,8 +27,10 @@ export const TUNE = {
   NEAR: 20 * 60,      // a bus first seen part of the way round must be within this many seconds of the timetable
   GAP: 5 * 60e3,      // a bus not seen moving for this long starts its stop count again
   DEADHEAD: 20 * 60e3, // how long a bus that has left the facility is taken to be driving to the terminal
+  DUE: 30 * 60,       // a bus at the terminal is on duty when a trip leaves within this many seconds
   DETOUR: 20 * 60e3,  // a bus off its route this long without rejoining it loses the route
-  PARKED: 25 * 60e3,  // standing this long (longer than a layover) clears the bus for a fresh start
+  PARKED: 25 * 60e3,  // standing this long (longer than a layover) clears the bus for a fresh start, unless it is
+                      // waiting at the terminal for a later trip
 };
 
 export const fresh = () => ({ trail: [], route: null, d: null, off: 0, by: null, f: {}, fit: {}, seen: 0, moved: 0 });
@@ -61,9 +63,21 @@ export function step(net, st, ping, ctx = {}) {
   const last = st.trail.at(-1), p = { t: ping.t, lat: ping.lat, lon: ping.lon, h: ping.h ?? null, s: ping.s ?? null };
   const moved = !last || metres(net, last, ping) >= TUNE.MOVE_M;
   if (moved) { st.trail.push(p); st.moved = ping.t; }
-  if (ping.t - st.moved > TUNE.PARKED) { Object.assign(st, { trail: [], route: null, d: null, by: null, f: {}, fit: {}, off: 0 }); return st; }
-  st.trail = st.trail.filter(q => ping.t - q.t <= TUNE.TRAIL_AGE).slice(-TUNE.TRAIL);
   const home = atTerminal(net, ping);
+  if (ping.t - st.moved > TUNE.PARKED) {
+    // Standing longer than a layover. A bus waiting at the terminal for a later trip today (the drivers' lunch
+    // break) keeps its route; any other parked bus starts afresh.
+    const keep = st.route && st.by !== 'override' && home && tripsLeft(net, st.route, ctx.lt);
+    Object.assign(st, { trail: [], f: {}, fit: {}, off: 0 });
+    if (!keep) { Object.assign(st, { route: null, d: null, by: null }); return st; }
+  }
+  st.trail = st.trail.filter(q => ping.t - q.t <= TUNE.TRAIL_AGE).slice(-TUNE.TRAIL);
+  // A bus that had a route, went to the facility and is back at the terminal with trips still to run takes
+  // the same route up again, unless another bus is on it. If it leaves on a different route it is moved to that one.
+  if (st.was && home) {
+    if (!st.route && st.was.day === ctx.lt?.day && !ctx.held?.has(st.was.route) && tripsLeft(net, st.was.route, ctx.lt)) { st.route = st.was.route; st.by = 'kept'; st.onAt = ping.t; st.d = null; }
+    delete st.was;
+  }
   if (st.dead && (home || ping.t - st.dead > TUNE.DEADHEAD)) delete st.dead; // it has reached the terminal: its service starts here
   if (moved) for (const r of net.routes) advance(net, r, st.f[r.id] ??= { H: null, run: 0, off: 0, t: 0 }, p);
   if (home) for (const r of net.routes) { // every stop count starts at the terminal
@@ -72,6 +86,12 @@ export function step(net, st, ping, ctx = {}) {
     for (const h of f.H || []) { h.d0 = h.d; h.go = 0; h.term = 1; }
   }
   if (moved || home || ctx.forced || st.by === 'override') decide(net, st, ctx);
+  // Between duties. A bus at the terminal with no trip due (lunch, or the end of the day) is resting, and stays so
+  // while it drives to the facility and back, even where that drive runs along its own route. It is back on duty
+  // when it is at the terminal with a trip due, or once it has passed three of its stops again.
+  if (!st.route || st.by === 'override') delete st.rest;
+  else if (home && ctx.lt) { if (tripsOn(net, net.byId[st.route], ctx.lt).some(t => t[0] >= ctx.lt.sec - 600 && t[0] <= ctx.lt.sec + TUNE.DUE)) delete st.rest; else st.rest = 1; }
+  else if (st.rest && st.off === 0 && (st.fit[st.route]?.[2] ?? 0) >= TUNE.STOPS) delete st.rest;
   return st;
 }
 
@@ -143,6 +163,9 @@ function running(net, v, lt, midway) {
   const at = v.f.H.reduce((a, b) => (a.off <= b.off ? a : b)), trip = tripFor(net, v.r, at.d, lt);
   return trip?.delay != null && Math.abs(trip.delay) <= TUNE.NEAR;
 }
+
+// Has this route a trip still to leave the terminal today?
+function tripsLeft(net, id, lt) { return !!lt && !!net.byId[id] && tripsOn(net, net.byId[id], lt).some(t => t[0] >= lt.sec - 600); }
 
 function place(net, st, f) { // where along its route the bus is
   if (!f) { st.d = null; st.off = 0; return; }
