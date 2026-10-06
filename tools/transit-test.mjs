@@ -3,6 +3,7 @@
 // matcher assigns with the route the simulated bus is really running.
 import { readFileSync } from 'node:fs';
 import { prepare, localTime, tripsOn } from '../worker/transit/geo.js';
+import { pointAt, distAt, tripsOn as tripsFor } from '../worker/transit/geo.js';
 import { simReports } from '../worker/transit/sim.js';
 import { update, mergeReports } from '../worker/transit/fleet.js';
 
@@ -79,7 +80,6 @@ run('Tracker silent while a bus stands at the terminal', {
 });
 // A long detour that runs along another route's street: bus 901 (Route 1) is moved onto Route 4's line for
 // twelve minutes. It must be shown as Route 1 on a detour the whole time, never as a second Route 4 bus.
-import { pointAt, distAt, tripsOn as tripsFor } from '../worker/transit/geo.js';
 run('Twelve-minute detour along another route', {
   from: at(5, 20), to: at(11, 0),
   mutate: (reports, t) => reports.map(r => {
@@ -101,6 +101,26 @@ run('Lunch break: buses wait at the terminal, switched off', {
   from: at(5, 20), to: at(15, 0), opt: lunch,
   mutate: (reports, t) => reports.map(r => (truth[r.id] && t >= at(12, 35) && t < at(13, 38) ? { ...r, power: false } : r)),
   expect: backAtOnce,
+});
+// The tracker says nothing while a bus stands (Zonar): every bus must stay on the page through the break,
+// and be on its route again the moment it is heard leaving.
+{
+  const said = {};
+  run('Lunch break: tracker silent while the buses wait', {
+    from: at(5, 20), to: at(15, 0), opt: { greyFrom: at(13, 15) },
+    mutate: reports => reports.map(r => { const was = said[r.id]; if (was && r.power && was.power && !(r.s > 0.5) && !(was.s > 0.5)) return was; said[r.id] = r; return r; }),
+    expect: r => r.wrong === 0 && r.greyLate === 0 && Object.keys(r.back).length === 5 && Object.values(r.back).every(t => t <= at(13, 16)),
+  });
+}
+// The drivers take the buses somewhere else for lunch, off every route, park for 50 minutes and come back.
+run('Lunch break: buses are driven off for lunch and return', {
+  from: at(5, 20), to: at(15, 0), opt: lunch,
+  mutate: (reports, t) => reports.map((r, i) => {
+    if (!truth[r.id] || t < at(12, 34) || t >= at(13, 36)) return r;
+    const k = Math.min(1, (t - at(12, 34)) / 240e3, (at(13, 36) - t) / 240e3), home = pointAt(net.routes[0], 0); // four minutes each way
+    return { ...r, lat: home[0] + k * 0.0052, lon: home[1] - k * (0.0085 + i * 0.0004), h: null, s: k < 1 ? 6 : 0, power: true };
+  }),
+  expect: r => backAtOnce(r) && r.detour === 0,
 });
 // They drive back to the facility for lunch along Broad Street (bus 44's real path, reversed) and return the same way.
 {

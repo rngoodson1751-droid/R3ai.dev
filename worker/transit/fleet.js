@@ -5,6 +5,7 @@ import { pointAt, tripFor, localTime, metres, rejoin } from './geo.js';
 
 export const LIVE = {
   STALE: 300e3,              // a moving bus not heard from for this long is treated as offline
+  REST: 100 * 60e3,          // and a bus resting at the terminal between duties (the lunch break) for this long
   DWELL: 30 * 60e3,          // a bus that last reported standing still, power on, is taken to be standing there this long:
                              // the trackers go quiet while a bus waits at the terminal, and it should not vanish on its layover
   IDLE_HIDE: 5 * 60e3,       // an unmatched bus standing this long is not in service
@@ -23,15 +24,15 @@ export function mergeReports(lists) {
 }
 
 // Is this report recent enough to act on?
-export function heard(r, nowMs) {
-  const age = nowMs - r.t;
-  return r.power !== false && Number.isFinite(r.lat) && Number.isFinite(r.lon) && age > -120e3 && (age <= LIVE.STALE || (age <= LIVE.DWELL && !(r.s > 1)));
+export function heard(r, nowMs, resting) {
+  const age = nowMs - r.t, DWELL = resting ? LIVE.REST : LIVE.DWELL;
+  return r.power !== false && Number.isFinite(r.lat) && Number.isFinite(r.lon) && age > -120e3 && (age <= LIVE.STALE || (age <= DWELL && !(r.s > 1)));
 }
 
 // reports: [{id, t, lat, lon, h, s, power, src}]. states: {bus id: matcher state}, changed in place.
 export function update(net, states, reports, nowMs, overrides = {}) {
   const yard = { lat: LIVE.YARD[0], lon: LIVE.YARD[1] }, lt = localTime(nowMs, net.feed.timezone);
-  const online = [], live = reports.filter(r => heard(r, nowMs)), ids = new Set(live.map(r => r.id));
+  const online = [], live = reports.filter(r => heard(r, nowMs, states[r.id]?.rest)), ids = new Set(live.map(r => r.id));
   for (let r of live) {
     const out = metres(net, r, yard);
     if (out <= LIVE.YARD_M) { // parked or warming up at the facility. The route it had today is remembered, for when it comes back from lunch.

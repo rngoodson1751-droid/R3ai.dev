@@ -59,6 +59,7 @@ export function step(net, st, ping, ctx = {}) {
   st ??= fresh();
   st.f ??= {}; // state saved by an earlier version of this file has no stop counts: it simply starts counting
   if (ping.t <= st.seen) return st;
+  const wasHome = st.lat != null && atTerminal(net, st); // where it stood until now
   Object.assign(st, { seen: ping.t, lat: ping.lat, lon: ping.lon, h: ping.h ?? null, s: ping.s ?? null });
   const last = st.trail.at(-1), p = { t: ping.t, lat: ping.lat, lon: ping.lon, h: ping.h ?? null, s: ping.s ?? null };
   const moved = !last || metres(net, last, ping) >= TUNE.MOVE_M;
@@ -69,10 +70,10 @@ export function step(net, st, ping, ctx = {}) {
     // break) keeps its route; any other parked bus starts afresh.
     const keep = st.route && st.by !== 'override' && home && tripsLeft(net, st.route, ctx.lt);
     Object.assign(st, { trail: [], f: {}, fit: {}, off: 0 });
-    if (!keep) { Object.assign(st, { route: null, d: null, by: null }); return st; }
+    if (!keep) { remember(st, ctx.lt); Object.assign(st, { route: null, d: null, by: null }); return st; }
   }
   st.trail = st.trail.filter(q => ping.t - q.t <= TUNE.TRAIL_AGE).slice(-TUNE.TRAIL);
-  // A bus that had a route, went to the facility and is back at the terminal with trips still to run takes
+  // A bus that had a route, went away (to the facility, or anywhere else for lunch) and is back at the terminal with trips still to run takes
   // the same route up again, unless another bus is on it. If it leaves on a different route it is moved to that one.
   if (st.was && home) {
     if (!st.route && st.was.day === ctx.lt?.day && !ctx.held?.has(st.was.route) && tripsLeft(net, st.was.route, ctx.lt)) { st.route = st.was.route; st.by = 'kept'; st.onAt = ping.t; st.d = null; }
@@ -90,7 +91,8 @@ export function step(net, st, ping, ctx = {}) {
   // while it drives to the facility and back, even where that drive runs along its own route. It is back on duty
   // when it is at the terminal with a trip due, or once it has passed three of its stops again.
   if (!st.route || st.by === 'override') delete st.rest;
-  else if (home && ctx.lt) { if (tripsOn(net, net.byId[st.route], ctx.lt).some(t => t[0] >= ctx.lt.sec - 600 && t[0] <= ctx.lt.sec + TUNE.DUE)) delete st.rest; else st.rest = 1; }
+  // (a tracker that is silent while the bus stands first speaks when it is already leaving, so where it stood counts too)
+  else if ((home || (wasHome && st.rest)) && ctx.lt) { if (tripsOn(net, net.byId[st.route], ctx.lt).some(t => t[0] >= ctx.lt.sec - 600 && t[0] <= ctx.lt.sec + TUNE.DUE)) delete st.rest; else if (home) st.rest = 1; }
   else if (st.rest && st.off === 0 && (st.fit[st.route]?.[2] ?? 0) >= TUNE.STOPS) delete st.rest;
   return st;
 }
@@ -146,7 +148,7 @@ function decide(net, st, { forced, held, lt } = {}) {
     else if (mine.f.off === 0) st.onAt = st.seen;
     // a bus that has its route leaves it for another only from the terminal: a detour can pass another route's stops
     else if (mine.f.off >= 2 && won && won !== st.route && res[won].term) { st.route = won; st.by = 'stops'; st.onAt = st.seen; st.took = st.seen; st.d = null; }
-    else if (st.seen - (st.onAt ?? st.seen) > TUNE.DETOUR) { st.route = null; st.by = null; st.d = null; }
+    else if (st.seen - (st.onAt ?? st.seen) > TUNE.DETOUR) { remember(st, lt); st.route = null; st.by = null; st.d = null; }
     if (st.route && st.onAt == null) st.onAt = st.seen;
   }
   place(net, st, st.route && res[st.route].f);
@@ -163,6 +165,9 @@ function running(net, v, lt, midway) {
   const at = v.f.H.reduce((a, b) => (a.off <= b.off ? a : b)), trip = tripFor(net, v.r, at.d, lt);
   return trip?.delay != null && Math.abs(trip.delay) <= TUNE.NEAR;
 }
+
+// The route a bus is about to lose is kept in mind for the rest of the day, in case it comes back to the terminal.
+function remember(st, lt) { if (st.route && st.by !== 'override' && lt) st.was = { route: st.route, day: lt.day }; }
 
 // Has this route a trip still to leave the terminal today?
 function tripsLeft(net, id, lt) { return !!lt && !!net.byId[id] && tripsOn(net, net.byId[id], lt).some(t => t[0] >= lt.sec - 600); }
