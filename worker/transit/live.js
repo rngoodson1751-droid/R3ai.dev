@@ -192,11 +192,13 @@ async function readTrackers(env, now, saved = {}) {
   }
   return { lists, trackers, geo };
 }
+const RULES = 2; // raise this when the route matcher's rules change, so every bus is worked out afresh
 async function liveFleet(env, now) {
   const every = geotabOn(env) ? 10e3 : ZONAR_EVERY; // Geotab reports more often than Zonar and allows far more requests
   return cached('fleet', every / 2, async () => {
     const row = await env.DB.prepare('SELECT v FROM transit_state WHERE k = ?1').bind('buses').first();
     const saved = row ? JSON.parse(row.v) : { states: {}, fetched: 0, out: null };
+    if (saved.rules !== RULES) { saved.states = {}; saved.out = null; saved.rules = RULES; } // routes worked out under older rules are not carried over
     if (saved.out && now - saved.fetched < every) return saved.out; // another copy of the Worker asked a moment ago
     const { lists, trackers } = await readTrackers(env, now, saved);
     if (!lists.length) return { vehicles: [], counts: {}, error: 'tracker-unavailable', trackers };
@@ -204,7 +206,7 @@ async function liveFleet(env, now) {
     const forced = Object.fromEntries(((await env.DB.prepare('SELECT bus, route FROM transit_overrides WHERE day = ?1').bind(day).all().catch(() => ({ results: [] }))).results || []).map(o => [String(o.bus).split('-').pop(), o.route]));
     const out = { ...update(net, saved.states, mergeReports(lists), now, forced), trackers };
     await env.DB.prepare('INSERT INTO transit_state (k, v, t) VALUES (?1, ?2, ?3) ON CONFLICT (k) DO UPDATE SET v = ?2, t = ?3')
-      .bind('buses', JSON.stringify({ states: saved.states, fetched: now, out, zonar: saved.zonar }), now).run();
+      .bind('buses', JSON.stringify({ rules: RULES, states: saved.states, fetched: now, out, zonar: saved.zonar }), now).run();
     return out;
   });
 }

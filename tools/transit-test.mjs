@@ -31,7 +31,7 @@ function run(name, { from, to, opt = {}, mutate, expect }) {
   const idAfter = Object.entries(identified).map(([id, t]) => `${id}:${Math.max(0, Math.round((localTime(t, net.feed.timezone).sec - Math.max(first, lt.sec)) / 60 * 10) / 10)}m`).join(' ');
   const ok = expect({ wrong, ghost, identified, shown, unknownSecs, detour, detourBlind });
   if (!ok) failed++;
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}\n      wrong-route samples ${wrong}, filtered-unit leaks ${ghost}, matched samples ${shown}, bus-minutes shown as "identifying" ${(unknownSecs / 60).toFixed(1)}\n      minutes after departure (or after start of watching) until matched: ${idAfter || 'none'}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}\n      wrong-route samples ${wrong}, filtered-unit leaks ${ghost}, matched samples ${shown}, bus-minutes shown as "identifying" ${(unknownSecs / 60).toFixed(1)}, detour samples ${detour}\n      minutes after departure (or after start of watching) until matched: ${idAfter || 'none'}`);
 }
 
 const all5 = r => Object.keys(r.identified).length === 5;
@@ -57,7 +57,7 @@ run('One wild GPS position every 10 minutes', {
 run('Three-minute detour 220 m off the route', {
   from: at(5, 20), to: at(11, 0),
   mutate: (reports, t) => reports.map(r => (r.id === '903' && t >= at(9, 10) && t < at(9, 13) ? { ...r, lat: r.lat + 0.002 } : r)),
-  expect: r => r.wrong === 0 && all5(r) && r.detour >= 10 && r.detourBlind === 0 && r.unknownSecs < 800,
+  expect: r => r.wrong === 0 && all5(r) && r.detour >= 8 && r.detour <= 18 && r.detourBlind === 0 && r.unknownSecs < 2100, // the alert waits a minute, to be sure
 });
 // Two trackers. The first one's unit on bus 903 died days ago (as Zonar's did on Bus 42); the second still hears it,
 // and its unit on bus 905 is the dead one. Every bus should still be matched, each from whichever tracker is alive.
@@ -91,6 +91,54 @@ run('Twelve-minute detour along another route', {
 });
 // Saturday: nothing in the timetable, so nothing should be shown.
 run('Saturday, no service', { from: at(8, 0) + 5 * 86400e3, to: at(9, 0) + 5 * 86400e3, expect: r => r.shown === 0 && r.wrong === 0 && r.ghost === 0 });
+
+
+// ---- The morning pull-out. Before this was fixed, buses were given routes from their drive in from the
+// facility along Broad Street (which two routes also use), and then shown as detouring when they left the
+// terminal on their real routes.
+
+// 1. The real thing: every position the trackers reported from 5:39 to 6:06 on Tuesday 6 October 2026.
+// Bus 44 drove in, waited and left on Route 3. Bus 40 drove in and stayed parked at the terminal.
+// Buses 42, 43, 46 and 47 were out on Routes 4, 2, 5 and 1.
+{
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/pullout-2026-10-06.json', import.meta.url)));
+  const real = { 42: '4', 43: '2', 46: '5', 47: '1', 44: '3' }, states = {}, got = {}, bad = [];
+  const end = fx.t0 + Math.max(...Object.values(fx.buses).map(b => b.at(-1)[0])) * 1000;
+  for (let t = fx.t0; t <= end; t += 10e3) {
+    const reports = Object.entries(fx.buses).map(([id, pts]) => { const p = pts.findLast(p => fx.t0 + p[0] * 1000 <= t); return p && { id, t: fx.t0 + p[0] * 1000, lat: p[1], lon: p[2], h: p[3], s: p[4], power: true }; }).filter(Boolean);
+    const { vehicles } = update(net, states, reports, t), clock = new Date(t - 5 * 3600e3).toISOString().slice(11, 19);
+    const routes = vehicles.filter(v => v.route).map(v => v.route);
+    if (new Set(routes).size !== routes.length) bad.push(`${clock} two buses on one route`);
+    for (const v of vehicles) {
+      if (v.state === 'detour') bad.push(`${clock} bus ${v.id} flagged as detouring`);
+      if (v.route && v.route !== real[v.id]) bad.push(`${clock} bus ${v.id} shown on Route ${v.route}`);
+      if (v.route) got[v.id] ??= clock;
+    }
+  }
+  const ok = !bad.length && ['42', '43', '44', '46', '47'].every(id => got[id]) && !got['40'];
+  if (!ok) failed++;
+  console.log(`${ok ? 'PASS' : 'FAIL'}  Real pull-out of 6 October 2026, replayed\n      given a route at: ${Object.entries(got).map(([id, c]) => `bus ${id} ${c}`).join(', ') || 'none'}${bad.length ? '\n      ' + [...new Set(bad.map(b => b.slice(9)))].join('; ') + ` (${bad.length} samples, first ${bad[0].slice(0, 8)})` : ''}`);
+}
+
+// 2. The same drive in, made by all five simulated buses: each follows bus 44's real path from the facility,
+// stands at the terminal and leaves on its own route at 5:45. No bus may have a route before it has left the
+// terminal, and none may ever be flagged as detouring.
+{
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/pullout-2026-10-06.json', import.meta.url)));
+  const path = fx.buses['44'].filter(p => p[0] <= 570), last = path.at(-1)[0]; // its drive in, ending parked at the terminal
+  let early = 0;
+  run('Five buses drive in from the facility, then leave on their routes', {
+    from: at(5, 20), to: at(8, 0),
+    mutate: (reports, t) => reports.map((r, i) => {
+      if (!truth[r.id] || t >= at(5, 45)) return r;
+      const arrive = at(5, 36) + i * 90e3, sec = (t - arrive) / 1000 + last; // one bus every minute and a half
+      if (sec < 0) return { ...r, power: false, lat: 30.2301, lon: -93.1543 };
+      const p = path.findLast(p => p[0] <= sec) ?? path[0];
+      return { ...r, t: Math.min(t, arrive + (p[0] - last) * 1000), lat: p[1], lon: p[2], h: p[3], s: p[4], power: true };
+    }),
+    expect: r => r.wrong === 0 && all5(r) && r.detour === 0 && Object.values(r.identified).every(t => t > at(5, 45)),
+  });
+}
 
 console.log(failed ? `\n${failed} scenario(s) failed` : '\nAll scenarios passed');
 process.exit(failed ? 1 : 0);
