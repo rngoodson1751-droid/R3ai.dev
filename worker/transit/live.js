@@ -38,7 +38,11 @@ export async function tick(env, now = Date.now()) {
   if (!trips.length) return; // no service today
   const first = Math.min(...trips.map(t => t[0])), last = Math.max(...trips.map(t => t[0] + t[1].at(-1)[2]));
   if (lt.sec < first - 45 * 60 || lt.sec > last + 45 * 60) return; // from the drive in to the drive home
-  try { await liveFleet(env, now); } catch (e) { console.error('tick failed', e?.message || e); }
+  try {
+    await liveFleet(env, now);
+    // a mark to check the schedule by: SELECT t FROM transit_state WHERE k = 'tick' should be under two minutes old in service hours
+    await env.DB.prepare('INSERT INTO transit_state (k, v, t) VALUES (?1, ?2, ?3) ON CONFLICT (k) DO UPDATE SET v = ?2, t = ?3').bind('tick', '{}', now).run();
+  } catch (e) { console.error('tick failed', e?.message || e); }
 }
 
 export async function live(request, env, url, ctx) {
