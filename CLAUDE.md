@@ -31,6 +31,12 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - Positions come from Zonar and Geotab, each bus using whichever heard from it last. "Why isn't bus N showing?": open `<page address>/live?debug=1` first.
 - The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
 
+## Limiting Factor (unlisted)
+
+- A tool Robert is developing for local governments: staff log what holds a service back, and it ranks the limits by monthly cost and age. It lives in `worker/private/limiting-factor.html` and `worker/limits/api.js`; `README.md` has the map under "Limiting Factor". It keeps its own look, not the site's glass style.
+- The data is in the `lf_*` tables of `r3ai-requests`. Rows with `example = 1` are made-up samples. Never write a real person's name into a report.
+- After changing it, test with `npx wrangler dev --local` (the AI summary only works on the live site).
+
 ## Design rules
 
 - The look is iOS-style glass over a slow water shader, mostly transparent, in blues and greens only. Robert has approved the current layout and colours, so change them only when he asks.

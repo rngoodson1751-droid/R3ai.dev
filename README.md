@@ -138,7 +138,17 @@ If the matcher has a bus on the wrong route, or cannot tell, dispatch can say so
 INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('47', '20261005', '2');
 ```
 
-To make a new link (and switch the old one off), pick a new key and put its hash in `UNLISTED`:
+### Limiting Factor
+
+Limiting Factor is a working first version of a tool for finding what holds a service back. Staff log what got in the way of a step and roughly how many hours it costs a month; the page ranks those limits by cost and by how long they have been open, and writes a one-page brief for whoever controls the budget. Its page is `worker/private/limiting-factor.html` and it keeps its own look, not the site's glass style.
+
+- `worker/limits/api.js` answers `<page address>/api`. A plain read returns everything the page shows; a POST makes one change (a report, an import, a service, a status, the hourly rate) and returns the fresh data. The page asks again every 20 seconds, so two people see each other's entries.
+- The data is in the `lf_services`, `lf_reports`, `lf_status` and `lf_settings` tables of the `r3ai-requests` database (layout in `worker/schema.sql`). Reports store the role a person picked, never a name.
+- Several estimates of the same limit use the middle value, so one problem reported by five people is not counted five times. Imported records (the CSV box on the Data tab) replace estimates for that limit.
+- "Summarize themes with AI" uses Cloudflare Workers AI on the free allowance, at most 40 summaries a day. The model sees only the report text.
+- Anyone holding the link can add and change records. Keep names, health details and anything else personal out of it.
+
+To make a new link for either page (and switch the old one off), pick a new key and put its hash in `UNLISTED`, using the page's own name in the address:
 
 ```
 KEY=$(openssl rand -hex 12); echo "https://r3ai.dev/work/lobby-display/$KEY/"; printf '%s' "$KEY" | sha256sum

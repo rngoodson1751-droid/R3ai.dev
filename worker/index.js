@@ -4,9 +4,12 @@
 //   /api/ask       answers a question from the posts, using Cloudflare Workers AI
 //   /work/<name>/<key>/  unlisted pages: only someone holding the exact link can open them
 //   /work/lobby-display/<key>/live  the bus tracker's live data (worker/transit/)
+//   /work/limiting-factor/<key>/api  Limiting Factor's saved data (worker/limits/)
 // Everything is stored in the r3ai-requests database (see worker/schema.sql).
 import lobbyDisplay from './private/lobby-display.html';
 import { live, networkForPage } from './transit/live.js';
+import limitingFactor from './private/limiting-factor.html';
+import { limitsApi } from './limits/api.js';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -14,6 +17,8 @@ import { live, networkForPage } from './transit/live.js';
 const UNLISTED = {
   // the tracker page gets the route network written into it, and has a live data address beside it
   'lobby-display': { keyHash: '4d2a1fb5908fae1aa42b9dc27f493156fb1685593f3052a1bf57127de938a2f1', html: lobbyDisplay.replace('"__NETWORK__"', () => networkForPage), live },
+  // Limiting Factor: staff log what holds a service back; the page ranks it. Its api takes changes as well as reads.
+  'limiting-factor': { keyHash: '74140150af53a86e7e774e2000c498a8dffd3a056a3ec7f3c36bd4a807e43dcc', html: limitingFactor, api: limitsApi },
 };
 
 const SIDES = ['work', 'home', 'either'];
@@ -34,11 +39,13 @@ export default {
     }
     if (url.pathname === '/api/hit') return request.method === 'POST' ? hit(request, env, url) : json({ error: 'Not found.' }, 404);
     if (url.pathname === '/api/ask') return request.method === 'POST' ? ask(request, env, url) : json({ error: 'Use the page at /ask/ to ask a question.' }, 405, { Allow: 'POST' });
-    const unlisted = url.pathname.match(/^\/work\/([a-z0-9-]+)\/([a-z0-9]{16,64})(\/live)?(\/?)$/);
-    if (unlisted && Object.hasOwn(UNLISTED, unlisted[1]) && (request.method === 'GET' || request.method === 'HEAD')) {
+    const unlisted = url.pathname.match(/^\/work\/([a-z0-9-]+)\/([a-z0-9]{16,64})(\/live|\/api)?(\/?)$/);
+    const reading = request.method === 'GET' || request.method === 'HEAD';
+    if (unlisted && Object.hasOwn(UNLISTED, unlisted[1]) && (reading || (request.method === 'POST' && unlisted[3] === '/api'))) {
       const page = UNLISTED[unlisted[1]];
       if (await sha256(unlisted[2]) === page.keyHash) {
-        if (unlisted[3]) { if (page.live) return page.live(request, env, url, ctx); }
+        if (unlisted[3] === '/api') { if (page.api) return page.api(request, env, url); }
+        else if (unlisted[3]) { if (page.live) return page.live(request, env, url, ctx); }
         else if (!unlisted[4]) return Response.redirect(new URL(url.pathname + '/' + url.search, url), 301); // the page asks for "live" beside itself, which needs the closing slash
         else return new Response(request.method === 'HEAD' ? null : page.html, { headers: {
           'content-type': 'text/html; charset=utf-8',

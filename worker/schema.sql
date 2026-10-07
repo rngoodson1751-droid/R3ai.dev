@@ -59,3 +59,39 @@ CREATE TABLE IF NOT EXISTS transit_overrides (
   route TEXT NOT NULL,
   PRIMARY KEY (bus, day)
 );
+
+-- Limiting Factor (worker/limits/, unlisted). Already applied to the r3ai-requests database.
+-- lf_services: a service and its chain of steps. steps is JSON: [{"id":"...","name":"..."}].
+CREATE TABLE IF NOT EXISTS lf_services (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  steps TEXT NOT NULL,
+  example INTEGER NOT NULL DEFAULT 0,   -- 1 = made-up sample, removed by the page's "Remove example records"
+  created_at TEXT NOT NULL
+);
+-- lf_reports: one thing that held a step back. kind is reported (a staff estimate) or measured (imported).
+-- No name is stored, only the role the person picked.
+CREATE TABLE IF NOT EXISTS lf_reports (
+  id TEXT PRIMARY KEY,
+  service_id TEXT NOT NULL,
+  step_id TEXT NOT NULL,
+  category TEXT NOT NULL,
+  text TEXT NOT NULL DEFAULT '',
+  hours REAL NOT NULL DEFAULT 0,        -- hours lost per month
+  role TEXT NOT NULL DEFAULT 'Other',
+  kind TEXT NOT NULL DEFAULT 'reported',
+  example INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS lf_reports_created ON lf_reports (created_at);
+-- lf_status: open, funded or fixed for one limit. k is <service id>__<step id>__c<category number>.
+CREATE TABLE IF NOT EXISTS lf_status (
+  k TEXT PRIMARY KEY,
+  status TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+-- lf_settings: rate (loaded labor cost per hour) and the day's count of AI summaries (ai:YYYY-MM-DD).
+CREATE TABLE IF NOT EXISTS lf_settings (
+  k TEXT PRIMARY KEY,
+  v TEXT NOT NULL
+);
