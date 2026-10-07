@@ -22,6 +22,8 @@ export const TUNE = {
   TRAIL_AGE: 25 * 60e3,
   STOPS: 3,           // own stops passed in order before a route is given
   LEAD: 2,            // and this many more than any other route the bus could still be on
+  LOST: 5,            // positions in a row off a route's line before the run along it is given up
+  JUMP_M: 6000,       // a bus found up to this far ahead on its line after being missed was just not seen in between
   PAST_M: 25,         // a stop counts as passed once the bus is this far beyond it
   TERMINAL_M: 150,    // within this distance of the terminal a bus is "at the terminal"
   NEAR: 20 * 60,      // a bus first seen part of the way round must be within this many seconds of the timetable
@@ -83,7 +85,7 @@ export function step(net, st, ping, ctx = {}) {
   if (moved) for (const r of net.routes) advance(net, r, st.f[r.id] ??= { H: null, run: 0, off: 0, t: 0 }, p);
   if (home) for (const r of net.routes) { // every stop count starts at the terminal
     const f = st.f[r.id] ??= { H: null, run: 0, off: 0, t: 0 };
-    if (!f.H) { const C = project(net, r, ping.lat, ping.lon, TUNE.TERMINAL_M).filter(c => c.d < 2 * TUNE.TERMINAL_M); if (C.length) { f.H = C.map(begin); f.run = 1; f.off = 0; f.t = ping.t; } }
+    if (!f.H || f.off) { const C = project(net, r, ping.lat, ping.lon, TUNE.TERMINAL_M).filter(c => c.d < 2 * TUNE.TERMINAL_M); if (C.length) { f.H = C.map(begin); f.run = 1; f.off = 0; f.t = ping.t; } }
     for (const h of f.H || []) { h.d0 = h.d; h.go = 0; h.term = 1; }
   }
   if (moved || home || ctx.forced || st.by === 'override') decide(net, st, ctx);
@@ -120,7 +122,16 @@ function advance(net, r, f, p) {
   }
   if (next.length) { f.H = next; f.run++; f.off = 0; f.t = p.t; }
   else if ((!f.H || stale) && C.length) { f.H = C.map(begin); f.run = 1; f.off = 0; f.t = p.t; }
-  else { f.off++; if (f.off >= 2 || stale) { f.H = C.length ? C.map(begin) : null; f.run = C.length ? 1 : 0; if (C.length) { f.off = 0; f.t = p.t; } } }
+  // Off the line. The run is kept through a short stretch (a block where the bus's real street and the route's
+  // drawn line differ, as on Route 5 south of the terminal) and carries on where it comes back, so the stops
+  // counted so far are not lost. Only after LOST positions running is it dropped, or begun afresh elsewhere.
+  // A bus found further along the same stretch than it could have driven was simply not seen for a while: that
+  // begins a new run at once. (The far end of a loop that happens to share the block does not.)
+  else {
+    f.off++;
+    const jumped = f.off >= 2 && !!f.H && C.some(c => f.H.some(h => ((c.d - h.d) % L + L) % L <= TUNE.JUMP_M));
+    if (f.off >= TUNE.LOST || stale || jumped) { f.H = C.length ? C.map(begin) : null; f.run = C.length ? 1 : 0; if (C.length) { f.off = 0; f.t = p.t; } }
+  }
 }
 const begin = c => ({ d: c.d, off: c.off, d0: c.d, go: 0, term: 0 });
 

@@ -19,6 +19,9 @@
   ],
   // Cloudflare's AI models, used by Ask the site (/ask/). Runs on the free daily allowance.
   "ai": { "binding": "AI" },
+  // The bus tracker follows the buses every minute on weekdays, 10:00 to 23:59 UTC (early morning to evening in
+  // Lake Charles, summer or winter), so it keeps each bus's route when nobody has the page open.
+  "triggers": { "crons": ["* 10-23 * * MON-FRI"] },
   // Attaches the domain automatically on each deploy.
   "routes": [
     { "pattern": "r3ai.dev", "custom_domain": true }

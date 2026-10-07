@@ -29,6 +29,18 @@ async function cached(key, ms, make) {
   return v;
 }
 
+// Run every minute by Cloudflare (the schedule is in wrangler.jsonc) so the buses are followed all through the
+// service day, whether or not anyone has the page open. Without it the matcher only saw the buses while someone
+// was looking, and every bus had to pass its three stops again each time the page was opened.
+export async function tick(env, now = Date.now()) {
+  if (!trackersOn(env)) return;
+  const lt = localTime(now, net.feed.timezone), trips = net.routes.flatMap(r => tripsOn(net, r, lt));
+  if (!trips.length) return; // no service today
+  const first = Math.min(...trips.map(t => t[0])), last = Math.max(...trips.map(t => t[0] + t[1].at(-1)[2]));
+  if (lt.sec < first - 45 * 60 || lt.sec > last + 45 * 60) return; // from the drive in to the drive home
+  try { await liveFleet(env, now); } catch (e) { console.error('tick failed', e?.message || e); }
+}
+
 export async function live(request, env, url, ctx) {
   const demoAt = Number(url.searchParams.get('at')) || 0;
   if (trackersOn(env) && url.searchParams.has('debug')) return json(await trackerDebug(env));

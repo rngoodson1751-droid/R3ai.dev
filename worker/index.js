@@ -7,7 +7,7 @@
 //   /work/limiting-factor/<key>/api  Limiting Factor's saved data (worker/limits/)
 // Everything is stored in the r3ai-requests database (see worker/schema.sql).
 import lobbyDisplay from './private/lobby-display.html';
-import { live, networkForPage } from './transit/live.js';
+import { live, tick, networkForPage } from './transit/live.js';
 import limitingFactor from './private/limiting-factor.html';
 import { limitsApi } from './limits/api.js';
 
@@ -30,6 +30,8 @@ const ASKS_PER_DAY = 100;
 const MODELS = ['@cf/google/gemma-4-26b-a4b-it', '@cf/meta/llama-3.1-8b-instruct-fast'];
 
 export default {
+  // Every minute through the service day: keeps following the buses when nobody has the tracker open.
+  async scheduled(event, env, ctx) { ctx.waitUntil(tick(env)); },
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/requests') {

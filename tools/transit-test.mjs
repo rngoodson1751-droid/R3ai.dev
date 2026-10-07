@@ -93,6 +93,14 @@ run('Twelve-minute detour along another route', {
 run('Saturday, no service', { from: at(8, 0) + 5 * 86400e3, to: at(9, 0) + 5 * 86400e3, expect: r => r.shown === 0 && r.wrong === 0 && r.ghost === 0 });
 
 
+// Where the street a bus really uses is a block away from the route's drawn line: Route 5's buses run 150 m east
+// of the line for a few blocks south of the terminal. The stops counted before that stretch must still count.
+run('Route 5 drawn a block away from the street the buses use', {
+  from: at(5, 20), to: at(7, 0),
+  mutate: reports => reports.map(r => (r.id === '905' && r.power && r.lat > 30.2101 && r.lat < 30.2135 && r.lon < -93.2315 ? { ...r, lon: r.lon + 0.00156 } : r)),
+  expect: r => r.wrong === 0 && all5(r) && r.detour === 0 && r.identified['905'] <= at(5, 53),
+});
+
 // ---- The lunch break. No trip leaves at 12:45, so every bus stands from about 12:30 until 1:45. Each must come
 // back on the route it had, at once, without waiting to pass three stops again.
 const lunch = { greyFrom: at(13, 40) }, backAtOnce = r => r.wrong === 0 && r.greyLate === 0 && Object.keys(r.back).length === 5 && Object.values(r.back).every(t => t <= at(13, 46));
