@@ -19,7 +19,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ba
 .brand{display:flex;align-items:center;gap:.75rem;min-width:0}
 /* The City logo sits on a white disc so it reads on the dark header. Its height follows the title and clock. */
 .logo{height:2.75rem;width:2.75rem;flex-shrink:0;border-radius:50%;background:#fff;padding:.14rem;display:block}
-header h1{font-size:1.4rem;letter-spacing:2px;color:#7ec8f5;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header h1{font-size:1.4rem;letter-spacing:2px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill{font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.2rem .55rem;border-radius:99px;border:1px solid;white-space:nowrap;flex-shrink:0}
 .pill.live{color:#7be36a;border-color:#2f7d2a}.pill.live::before{content:"";display:inline-block;width:.5em;height:.5em;border-radius:50%;background:#7be36a;margin-right:.45em;animation:pulse 2s infinite}
 .pill.sim{color:#f7c224;border-color:#8a6d12}.pill.sched{color:#9fb6d6;border-color:#3a5a7a}
@@ -50,15 +50,11 @@ header{position:relative}
 .alert .n{font-size:.75rem;color:#ffe9a8;white-space:nowrap;padding-top:.15rem}
 .main{display:flex;flex:1;overflow:hidden;min-height:0}
 #map{flex:1;min-width:0;background:#dfe7ea}
-/* Plan in Google Maps: a see-through button hanging just under the header, centred on the map */
-.plan{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:800;display:inline-flex;align-items:center;gap:.45em;padding:.5rem 1rem;min-height:2.5rem;border-radius:99px;border:1px solid rgba(126,200,245,.75);background:rgba(13,21,38,.5);-webkit-backdrop-filter:blur(8px) saturate(1.3);backdrop-filter:blur(8px) saturate(1.3);color:#fff;font:700 .82rem/1 inherit;font-family:inherit;letter-spacing:.3px;text-decoration:none;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.28);cursor:pointer}
-.plan:hover,.plan:focus-visible{background:rgba(13,21,38,.72);border-color:#7ec8f5}
-.plan:focus-visible{outline:3px solid #7ec8f5;outline-offset:2px}
-.plan svg{width:1.05em;height:1.05em;flex-shrink:0}
-#map a.plan,#map a.plan:hover{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.55)} /* the map library colours every link on it blue */
-body.lobbymode .plan{display:none}
-/* phones and tablets only: gone on a wide screen worked with a mouse (the same 1100px line the detour notice uses) */
-@media (min-width:1101px) and (min-height:521px) and (hover:hover) and (pointer:fine){.plan{display:none}}
+/* Plan in Google Maps: a small square button under the stops-near-you button, in the same white. Phones and tablets
+   only: gone on a wide screen worked with a mouse (the same 1100px line the detour notice uses). */
+.leaflet-bar a.plan{display:flex;align-items:center;justify-content:center}
+.leaflet-bar a.plan svg{width:18px;height:18px}
+@media (min-width:1101px) and (min-height:521px) and (hover:hover) and (pointer:fine){.leaflet-bar.plan-bar{display:none}}
 .sidebar{width:19.375rem;flex-shrink:0;background:#0d1526;border-left:2px solid #1e3a6e;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:1000}
 .sidebar-title{font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:#7f9dbd;text-align:center;padding-bottom:8px;border-bottom:1px solid #1e3a6e}
 #cards{display:grid;gap:10px}
@@ -357,13 +353,6 @@ const etaClass = s => s <= 60 ? 'en' : s <= 300 ? 'es' : s <= 900 ? 'eo' : 'ef';
 const smallScreen = () => window.matchMedia('(max-width:900px),(max-height:520px)').matches;
 // Small screens may sit between zoom levels so the whole route network fits; big screens keep whole levels, which look sharpest.
 const map = L.map('map', { zoomControl: !LOBBY, zoomSnap: smallScreen() ? .25 : 1 }).setView([NET.routes[0].shape[0][0], NET.routes[0].shape[0][1]], 13);
-// Plan in Google Maps: opens Google's transit directions, which use this same timetable. Not on the lobby screen, which nobody can tap.
-const planBtn = document.createElement('a');
-planBtn.id = 'plan'; planBtn.className = 'plan'; planBtn.target = '_blank'; planBtn.rel = 'noopener';
-planBtn.href = 'https://www.google.com/maps/dir/?api=1&travelmode=transit';
-planBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></svg><span></span>';
-$('map').appendChild(planBtn);
-L.DomEvent.disableClickPropagation(planBtn);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(map);
 const lines = {}, arrows = {}, stopMarks = {}, routeBounds = L.latLngBounds([]);
 let selected = null, fittedSize = null, openStop = null, openBus = null;
@@ -609,10 +598,13 @@ function locate() {
     $('sidebar').scrollTop = 0;
   }, () => toast(t('locOff')), { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 });
 }
-let locateLink = null;
+let locateLink = null, planBtn = null;
 if (!LOBBY) {
   const Locate = L.Control.extend({ options: { position: 'topleft' }, onAdd() { const box = L.DomUtil.create('div', 'leaflet-bar'); locateLink = L.DomUtil.create('a', 'locate', box); locateLink.href = '#'; locateLink.innerHTML = '&#9678;'; locateLink.setAttribute('role', 'button'); L.DomEvent.on(locateLink, 'click', e => { L.DomEvent.stop(e); locate(); }); return box; } });
   map.addControl(new Locate());
+  // Plan in Google Maps: opens Google's transit directions, which use this same timetable. It sits under the button above.
+  const Plan = L.Control.extend({ options: { position: 'topleft' }, onAdd() { const box = L.DomUtil.create('div', 'leaflet-bar plan-bar'); planBtn = L.DomUtil.create('a', 'plan', box); planBtn.id = 'plan'; planBtn.href = 'https://www.google.com/maps/dir/?api=1&travelmode=transit'; planBtn.target = '_blank'; planBtn.rel = 'noopener'; planBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></svg>'; L.DomEvent.disableClickPropagation(box); return box; } });
+  map.addControl(new Plan());
 }
 
 // ---------- text size and language ----------
@@ -629,7 +621,7 @@ function renderWords() {
   $('btn-lang').textContent = lang === 'en' ? 'ES' : 'EN'; $('btn-lang').setAttribute('aria-label', t('toLangLabel')); $('btn-lang').title = t('toLang');
   $('btn-text').setAttribute('aria-label', t('textSize')); $('btn-text').title = t('textSize');
   $('map').setAttribute('aria-label', t('mapLabel'));
-  planBtn.lastChild.textContent = t('plan'); planBtn.setAttribute('aria-label', t('planLabel'));
+  if (planBtn) { planBtn.title = t('plan'); planBtn.setAttribute('aria-label', t('planLabel')); }
   $('sidebar').setAttribute('aria-label', t('all'));
   if (locateLink) { locateLink.title = t('locate'); locateLink.setAttribute('aria-label', t('locate')); }
 }
