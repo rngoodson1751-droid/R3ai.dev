@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS lf_status (
   status TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
--- lf_settings: rate (loaded labor cost per hour) and the day's count of AI summaries (ai:YYYY-MM-DD).
+-- lf_settings: rate (loaded labor cost per hour), roles (JSON list staff pick from) and the day's count of AI summaries (ai:YYYY-MM-DD).
 CREATE TABLE IF NOT EXISTS lf_settings (
   k TEXT PRIMARY KEY,
   v TEXT NOT NULL

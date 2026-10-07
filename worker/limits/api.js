@@ -4,7 +4,7 @@
 // Stored in the lf_* tables of the r3ai-requests database (worker/schema.sql). worker/index.js has
 // already checked the key in the address before this runs, so holding the link is the only gate.
 const CATS = ['Waiting on approval', 'Short staffed', 'Vehicle or equipment', 'Re-entering data', 'Missing information', 'Handoff to another department', 'Other'];
-const ROLES = ['Frontline', 'Supervisor', 'Office or admin', 'Manager', 'Other', 'Imported'];
+const ROLES = ['Frontline', 'Supervisor', 'Office or admin', 'Manager', 'Other']; // the list until one is saved from the Data tab
 const STATUSES = ['open', 'funded', 'fixed'];
 const MAX_SERVICES = 100, MAX_STEPS = 40, MAX_REPORTS = 5000, MAX_IMPORT = 300, AI_PER_DAY = 40;
 const MODELS = ['@cf/google/gemma-4-26b-a4b-it', '@cf/meta/llama-3.1-8b-instruct-fast'];
@@ -36,19 +36,22 @@ export async function limitsApi(request, env, url) {
 }
 
 async function everything(env) {
-  const [services, reports, statuses, rate] = await env.DB.batch([
+  const [services, reports, statuses, rate, roles] = await env.DB.batch([
     env.DB.prepare('SELECT id, name, steps, example, created_at FROM lf_services ORDER BY created_at, id'),
     env.DB.prepare('SELECT id, service_id, step_id, category, text, hours, role, kind, example, created_at FROM lf_reports ORDER BY created_at DESC LIMIT ?1').bind(MAX_REPORTS),
     env.DB.prepare('SELECT k, status FROM lf_status'),
     env.DB.prepare("SELECT v FROM lf_settings WHERE k = 'rate'"),
+    env.DB.prepare("SELECT v FROM lf_settings WHERE k = 'roles'"),
   ]);
   return {
     services: services.results.map(s => ({ id: s.id, name: s.name, steps: safeSteps(s.steps), example: !!s.example, createdAt: s.created_at })),
     reports: reports.results.map(r => ({ id: r.id, serviceId: r.service_id, stepId: r.step_id, category: r.category, text: r.text, hoursPerMonth: r.hours, role: r.role, kind: r.kind, example: !!r.example, createdAt: r.created_at })),
     statuses: Object.fromEntries(statuses.results.map(s => [s.k, s.status])),
     rate: Number(rate.results[0]?.v ?? 40),
+    roles: savedRoles(roles.results[0]?.v),
   };
 }
+function savedRoles(raw) { try { const a = JSON.parse(raw); return Array.isArray(a) && a.length ? a : ROLES; } catch { return ROLES; } }
 function safeSteps(raw) { try { const a = JSON.parse(raw); return Array.isArray(a) ? a : []; } catch { return []; } }
 
 function cleanSteps(steps) {
@@ -65,7 +68,7 @@ function cleanSteps(steps) {
 }
 
 // One report row, checked against the services as they are stored now.
-function reportRow(services, r, kind) {
+function reportRow(services, roles, r, kind) {
   const svc = services.find(s => s.id === r.serviceId);
   if (!svc) throw bad('That service no longer exists. Reload the page.');
   if (!safeSteps(svc.steps).some(s => s.id === r.stepId)) throw bad('That step no longer exists. Reload the page.');
@@ -74,7 +77,7 @@ function reportRow(services, r, kind) {
   const body = text(r.text, 600);
   if (kind === 'reported' && body.length < 8) throw bad('Say a little more about what got in the way.');
   return [newId(), svc.id, r.stepId, CATS.includes(r.category) ? r.category : 'Other', body, h,
-    kind === 'measured' ? 'Imported' : (ROLES.includes(r.role) ? r.role : 'Other'), kind, new Date().toISOString()];
+    kind === 'measured' ? 'Imported' : (roles.includes(r.role) ? r.role : 'Other'), kind, new Date().toISOString()];
 }
 const insertReport = (env, row) => env.DB.prepare(
   'INSERT INTO lf_reports (id, service_id, step_id, category, text, hours, role, kind, example, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9)').bind(...row);
@@ -82,6 +85,7 @@ const insertReport = (env, row) => env.DB.prepare(
 async function change(env, b) {
   const now = new Date().toISOString();
   const services = async () => (await env.DB.prepare('SELECT id, steps FROM lf_services').all()).results;
+  const roles = async () => savedRoles((await env.DB.prepare("SELECT v FROM lf_settings WHERE k = 'roles'").first())?.v);
   const room = async n => {
     const { c } = await env.DB.prepare('SELECT COUNT(*) AS c FROM lf_reports').first();
     if (c + n > MAX_REPORTS) throw bad('The report list is full. Remove old records before adding more.');
@@ -89,7 +93,7 @@ async function change(env, b) {
   switch (b.op) {
     case 'report': {
       await room(1);
-      await insertReport(env, reportRow(await services(), b, 'reported')).run();
+      await insertReport(env, reportRow(await services(), await roles(), b, 'reported')).run();
       return {};
     }
     case 'import': {
@@ -97,7 +101,7 @@ async function change(env, b) {
       if (b.rows.length > MAX_IMPORT) throw bad(`Import up to ${MAX_IMPORT} rows at a time.`);
       await room(b.rows.length);
       const all = await services();
-      await env.DB.batch(b.rows.map(r => insertReport(env, reportRow(all, r, 'measured'))));
+      await env.DB.batch(b.rows.map(r => insertReport(env, reportRow(all, [], r, 'measured'))));
       return { imported: b.rows.length };
     }
     case 'service': {
@@ -129,6 +133,13 @@ async function change(env, b) {
       const rate = Number(b.rate);
       if (!Number.isFinite(rate) || rate < 0 || rate > 1000) throw bad('The hourly rate has to be between 0 and 1,000.');
       await env.DB.prepare("INSERT INTO lf_settings (k, v) VALUES ('rate', ?1) ON CONFLICT (k) DO UPDATE SET v = ?1").bind(String(rate)).run();
+      return {};
+    }
+    case 'roles': {
+      const list = Array.isArray(b.roles) ? [...new Set(b.roles.map(r => text(r, 40)).filter(Boolean))] : [];
+      if (!list.length) throw bad('List at least one role.');
+      if (list.length > 12) throw bad('Keep it to 12 roles or fewer.');
+      await env.DB.prepare("INSERT INTO lf_settings (k, v) VALUES ('roles', ?1) ON CONFLICT (k) DO UPDATE SET v = ?1").bind(JSON.stringify(list)).run();
       return {};
     }
     case 'clearExamples': {

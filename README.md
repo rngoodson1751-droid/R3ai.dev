@@ -140,10 +140,10 @@ INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('47', '202610
 
 ### Limiting Factor
 
-Limiting Factor is a working first version of a tool for finding what holds a service back. Staff log what got in the way of a step and roughly how many hours it costs a month; the page ranks those limits by cost and by how long they have been open, and writes a one-page brief for whoever controls the budget. Its page is `worker/private/limiting-factor.html` and it keeps its own look, not the site's glass style.
+Limiting Factor is a working first version of a tool for finding what holds a service back. Staff log what got in the way of a step and roughly how many hours it costs a month; the page ranks those limits by cost and by how long they have been open, and writes a one-page brief for whoever controls the budget. Its page is `worker/private/limiting-factor.html`. It uses the site's blues, greens and clear glass with its own type, and has a Theme button (Auto, Light, Dark) in the header.
 
 - `worker/limits/api.js` answers `<page address>/api`. A plain read returns everything the page shows; a POST makes one change (a report, an import, a service, a status, the hourly rate) and returns the fresh data. The page asks again every 20 seconds, so two people see each other's entries.
-- The data is in the `lf_services`, `lf_reports`, `lf_status` and `lf_settings` tables of the `r3ai-requests` database (layout in `worker/schema.sql`). Reports store the role a person picked, never a name.
+- The data is in the `lf_services`, `lf_reports`, `lf_status` and `lf_settings` tables of the `r3ai-requests` database (layout in `worker/schema.sql`). Reports store the role a person picked, never a name. The services, their steps, the roles and the hourly rate are all edited on the page itself (Services and Data tabs), not in this repository.
 - Several estimates of the same limit use the middle value, so one problem reported by five people is not counted five times. Imported records (the CSV box on the Data tab) replace estimates for that limit.
 - "Summarize themes with AI" uses Cloudflare Workers AI on the free allowance, at most 40 summaries a day. The model sees only the report text.
 - Anyone holding the link can add and change records. Keep names, health details and anything else personal out of it.

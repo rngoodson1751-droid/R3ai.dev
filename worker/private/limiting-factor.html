@@ -5,74 +5,94 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="robots" content="noindex, nofollow, noarchive"/>
 <title>Limiting Factor</title>
+<script>try{var t=localStorage.getItem("lf-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <link rel="icon" href="/favicon.svg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Overpass:wght@600;800&display=swap" rel="stylesheet">
 <style>
-/* Layout: signage-style header, five tabs, one working surface at a time. Built phone first for staff entry, wider for managers. */
+/* Limiting Factor. Clear glass over still water, in the blues and greens of r3ai.dev.
+   Layout: signage-style header, five tabs, one working surface at a time. Phone first for staff entry.
+   Every surface is translucent so the ground shows through; type and numbers stay solid for reading.
+   Light and dark follow the device unless the Theme button in the header picks one. */
 :root{
-  --bg:#EDF0F1; --surface:#FFFFFF; --soft:#E1E8EA; --line:#D0D8DB;
-  --ink:#12232B; --muted:#55666E;
-  --accent:#0E5A6B; --accent-ink:#FFFFFF;
-  --signal:#B8480A;
-  --good:#1E7B4B; --warn:#8F5A00; --crit:#B3261E;
+  color-scheme:light dark;
+  --ground:light-dark(#f4fafb,#06161f);
+  --wash-a:light-dark(rgb(11 108 196 / .20),rgb(40 130 220 / .30));
+  --wash-b:light-dark(rgb(10 160 130 / .20),rgb(20 170 135 / .24));
+  --wash-c:light-dark(rgb(120 205 235 / .28),rgb(10 80 110 / .40));
+  --ink:light-dark(#0a2230,#e6f3f3);
+  --muted:light-dark(#3f5a66,#9ab5bc);
+  --blue:light-dark(#0b6cc4,#63b8ff);
+  --green:light-dark(#0a7f66,#52d9ad);
+  --accent:var(--blue);
+  --tide:linear-gradient(115deg,var(--blue),var(--green));
+  --accent-ink:light-dark(#ffffff,#04202a);
+  --signal:light-dark(#0a5aa6,#7cc6ff);
+  --surface:light-dark(rgb(255 255 255 / .46),rgb(140 215 230 / .07));
+  --field:light-dark(rgb(255 255 255 / .62),rgb(4 22 30 / .50));
+  --soft:light-dark(rgb(11 108 196 / .08),rgb(120 200 230 / .10));
+  --solid:light-dark(#f8fdfe,#0b2a36);
+  --line:light-dark(rgb(10 70 90 / .16),rgb(160 230 240 / .16));
+  --edge:light-dark(rgb(255 255 255 / .9),rgb(190 240 250 / .20));
+  --shade:light-dark(rgb(10 70 100 / .22),rgb(0 0 0 / .55));
+  --good:light-dark(#0a7f66,#52d9ad); --warn:light-dark(#8a5700,#e8bb5a); --crit:light-dark(#b3261e,#ff9288);
   --display:"Overpass","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r:6px;
+  --r:14px;
+  --blur:blur(18px) saturate(165%);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0E1A20; --surface:#15262E; --soft:#1C323B; --line:#27404A;
-  --ink:#E6EEF1; --muted:#92A5AD;
-  --accent:#5CC0D4; --accent-ink:#06222A;
-  --signal:#F28B4B;
-  --good:#5FCB93; --warn:#E3B04B; --crit:#FF8A80;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0E1A20; --surface:#15262E; --soft:#1C323B; --line:#27404A;
-  --ink:#E6EEF1; --muted:#92A5AD;
-  --accent:#5CC0D4; --accent-ink:#06222A;
-  --signal:#F28B4B;
-  --good:#5FCB93; --warn:#E3B04B; --crit:#FF8A80;
-  color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 img{max-width:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:env(safe-area-inset-top,0px) calc(48px + env(safe-area-inset-bottom,0px))}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100svh;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:env(safe-area-inset-top,0px) calc(48px + env(safe-area-inset-bottom,0px))}
+/* the water: three soft washes of colour, fixed behind everything */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(60vmax 50vmax at 8% -5%,var(--wash-a),transparent 62%),
+  radial-gradient(55vmax 48vmax at 100% 18%,var(--wash-b),transparent 60%),
+  radial-gradient(70vmax 55vmax at 45% 108%,var(--wash-c),transparent 64%)}
 .wrap{max-width:980px;margin-inline:auto}
+.glassy,.panel,.tile,.limit,.brief,nav.tabs,.tablewrap,.banner{background:var(--surface);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:1px solid var(--edge);box-shadow:inset 0 1px 0 light-dark(rgb(255 255 255 / .9),rgb(255 255 255 / .10)),0 14px 34px -22px var(--shade)}
 header.top{padding-block:20px 12px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
 h1{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
-.tag{color:var(--muted);font-size:14px}
-nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;overflow-x:auto;padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:20px}
-nav.tabs button{font:600 14px var(--display);letter-spacing:.04em;text-transform:uppercase;border:0;background:transparent;color:var(--muted);padding:10px 14px;border-radius:var(--r);cursor:pointer;white-space:nowrap}
-nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
-nav.tabs button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tag{color:var(--muted);font-size:14px;flex:1 1 220px;min-width:0}
+.theme{font:500 13px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--edge);border-radius:99px;padding:6px 12px;cursor:pointer;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+nav.tabs{position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:5;display:flex;gap:2px;overflow-x:auto;padding:5px;border-radius:99px;margin-bottom:22px;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{font:600 13px var(--display);letter-spacing:.05em;text-transform:uppercase;border:0;background:transparent;color:var(--muted);padding:9px 15px;border-radius:99px;cursor:pointer;white-space:nowrap;flex:1 0 auto}
+nav.tabs button[aria-selected="true"]{background:var(--tide);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0 0 4px}
 p.lead{margin:0 0 18px;color:var(--muted);max-width:62ch}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.panel{border-radius:var(--r);padding:18px}
 label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
 .field{margin-bottom:16px;min-width:0}
-select,input[type=text],input[type=number],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;min-width:0}
+select,input[type=text],input[type=number],textarea{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+select option{background:var(--solid);color:var(--ink)}
+::placeholder{color:var(--muted);opacity:.8}
 textarea{min-height:92px;resize:vertical}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:560px){.row{grid-template-columns:1fr}}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:500 13px var(--body);border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 12px;border-radius:99px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn{font:600 14px var(--body);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r);padding:11px 18px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
-.btn.danger{background:transparent;color:var(--crit);border:1px solid var(--crit)}
+.chip{font:500 13px var(--body);border:1px solid var(--line);background:var(--field);color:var(--ink);padding:7px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--tide);border-color:transparent;color:var(--accent-ink)}
+.btn{font:600 14px var(--body);background:var(--tide);color:var(--accent-ink);border:1px solid transparent;border-radius:99px;padding:10px 20px;cursor:pointer}
+.btn.ghost{background:var(--field);color:var(--accent);border-color:var(--accent)}
+.btn.danger{background:var(--field);color:var(--crit);border-color:var(--crit)}
 .btn[disabled]{opacity:.5;cursor:default}
 .note{font-size:13px;color:var(--muted)}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
 @media (max-width:700px){.tiles{grid-template-columns:1fr 1fr}}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.tile{border-radius:var(--r);padding:12px 14px;min-width:0}
 .tile b{display:block;font:500 24px var(--mono);color:var(--signal);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .tile span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.limit{display:grid;grid-template-columns:44px 1fr auto;gap:4px 14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer}
+.limit{display:grid;grid-template-columns:44px 1fr auto;gap:4px 14px;align-items:start;border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer}
 .limit:hover{border-color:var(--accent)}
 .rank{font:800 26px var(--display);color:var(--muted);line-height:1}
 .limit h3{margin:0 0 2px;font:600 16px var(--body);overflow-wrap:anywhere}
@@ -89,7 +109,7 @@ textarea{min-height:92px;resize:vertical}
 .recent .item{border-top:1px solid var(--line);padding-block:12px}
 .recent .item:first-child{border-top:0}
 .recent q{display:block;quotes:none;margin-bottom:2px;overflow-wrap:anywhere}
-.brief{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;max-width:720px}
+.brief{border-radius:var(--r);padding:22px;max-width:720px}
 .brief h3{font:800 20px var(--display);margin:0 0 2px}
 .brief dl{display:grid;grid-template-columns:140px 1fr;gap:8px 16px;margin:16px 0}
 @media (max-width:560px){.brief dl{grid-template-columns:1fr;gap:2px}.brief dt{margin-top:8px}}
@@ -97,20 +117,22 @@ textarea{min-height:92px;resize:vertical}
 .brief dd{margin:0;min-width:0;overflow-wrap:anywhere}
 .brief ul{margin:0;padding-left:18px}
 .brief .big{font:500 22px var(--mono);color:var(--signal)}
-.ai{background:var(--soft);border-radius:var(--r);padding:10px 12px;margin-top:6px;font-size:14px}
+.ai{background:var(--soft);border-radius:10px;padding:10px 12px;margin-top:6px;font-size:14px}
 .svc{margin-bottom:12px}
 .svc h3{margin:0 0 10px;font:600 16px var(--body)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);margin-block:12px}
+.tablewrap{overflow-x:auto;border-radius:10px;margin-block:12px}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 th{color:var(--muted);font-weight:600}
-pre{background:var(--soft);border-radius:var(--r);padding:10px 12px;overflow-x:auto;font:13px var(--mono);margin:8px 0}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r);font-size:14px;max-width:calc(100% - 32px);z-index:10}
-.banner{background:var(--soft);border-left:4px solid var(--warn);padding:10px 14px;border-radius:var(--r);margin-bottom:16px;font-size:14px}
-[data-view][hidden]{display:none}
+pre{background:var(--soft);border-radius:10px;padding:10px 12px;overflow-x:auto;font:13px var(--mono);margin:8px 0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:99px;font-size:14px;max-width:calc(100% - 32px);z-index:10}
+.banner{border-radius:var(--r);border-left:4px solid var(--warn);padding:10px 14px;margin-bottom:16px;font-size:14px}
 .ex{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px}
 @media (prefers-reduced-motion:no-preference){.limit{transition:border-color .15s}}
+/* For people who ask their device for less transparency, and browsers without the blur: solid surfaces. */
+@media (prefers-reduced-transparency:reduce){.glassy,.panel,.tile,.limit,.brief,nav.tabs,.tablewrap,.banner,.theme{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glassy,.panel,.tile,.limit,.brief,nav.tabs,.tablewrap,.banner,.theme{background:var(--solid)}}
 </style>
 </head>
 <body>
@@ -118,6 +140,7 @@ pre{background:var(--soft);border-radius:var(--r);padding:10px 12px;overflow-x:a
   <header class="top">
     <h1>Limiting Factor</h1>
     <span class="tag">Find what is holding a service back, and how long it has been.</span>
+    <button class="theme" id="theme" type="button">Theme: Auto</button>
   </header>
   <nav class="tabs" role="tablist" aria-label="Sections">
     <button role="tab" data-tab="report" aria-selected="true">Report</button>
@@ -182,7 +205,9 @@ pre{background:var(--soft);border-radius:var(--r);padding:10px 12px;overflow-x:a
     <p class="lead">Bring in measured records from the systems you already use. Nothing here changes those systems.</p>
     <div class="panel" style="margin-bottom:16px">
       <div class="field" style="max-width:280px"><label for="d-rate">Loaded labor cost per hour (USD)</label><input type="number" id="d-rate" min="0" step="1" inputmode="decimal"></div>
-      <p class="note" style="margin:0">Use salary plus benefits and overhead, divided by paid hours. Applies to every estimate.</p>
+      <p class="note" style="margin:0 0 16px">Use salary plus benefits and overhead, divided by paid hours. Applies to every estimate.</p>
+      <div class="field" style="max-width:420px"><label for="d-roles">Roles staff can pick, one per line</label><textarea id="d-roles"></textarea></div>
+      <div class="actions"><button class="btn ghost" id="d-roles-save" type="button">Save roles</button><span class="note">Keep roles broad enough that a report cannot be traced to one person.</span></div>
     </div>
     <div class="panel" style="margin-bottom:16px">
       <h3 style="margin:0 0 6px;font:600 16px var(--body)">Import measured delays (CSV)</h3>
@@ -193,7 +218,7 @@ Fixed route bus service,Vehicle prep,Short staffed,Late pull-out waiting on clea
       <div class="actions"><button class="btn ghost" id="d-prev" type="button">Check rows</button><button class="btn" id="d-go" type="button" disabled>Import</button><span class="note" id="d-msg"></span></div>
       <div id="d-table"></div>
     </div>
-    <div class="panel">
+    <div class="panel" id="d-expanel" hidden>
       <h3 style="margin:0 0 6px;font:600 16px var(--body)">Example records</h3>
       <p class="note" style="margin:0 0 10px" id="d-exnote"></p>
       <button class="btn danger" id="d-clear" type="button">Remove example records</button>
@@ -206,7 +231,6 @@ Fixed route bus service,Vehicle prep,Short staffed,Late pull-out waiting on clea
 (function(){
 "use strict";
 var CATS=["Waiting on approval","Short staffed","Vehicle or equipment","Re-entering data","Missing information","Handoff to another department","Other"];
-var ROLES=["Frontline","Supervisor","Office or admin","Manager","Other"];
 var HCHIPS=[1,2,4,8,16,40];
 var STAT={open:"Open",funded:"Funded",fixed:"Fixed"};
 var $=function(s,r){return (r||document).querySelector(s)};
@@ -219,7 +243,7 @@ function hrs(n){return (n<10?n.toFixed(1):Math.round(n).toString())}
 function age(d){return d<45?d+" days":Math.round(d/30)+" months"}
 function median(a){var s=a.slice().sort(function(x,y){return x-y});var m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2}
 
-var S={services:[],reports:[],statuses:{},rate:40,view:"report",filter:"open",pick:null,cat:0,ai:{},csvRows:[],armDelete:null};
+var S={services:[],reports:[],statuses:{},roles:["Frontline","Supervisor","Office or admin","Manager","Other"],rate:40,view:"report",filter:"open",pick:null,cat:0,ai:{},csvRows:[],armDelete:null};
 
 function toast(t){var el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){el.hidden=true},2600)}
 function copyText(t){
@@ -257,6 +281,20 @@ function computeLimits(){
   return out;
 }
 
+/* ---------- theme: Auto follows the device; Light and Dark stick on this device ---------- */
+(function(){
+  var order=["auto","light","dark"],names={auto:"Auto",light:"Light",dark:"Dark"},root=document.documentElement,btn=$("#theme");
+  var cur=root.getAttribute("data-theme")||"auto";
+  function show(){btn.textContent="Theme: "+names[cur]}
+  btn.addEventListener("click",function(){
+    cur=order[(order.indexOf(cur)+1)%3];
+    if(cur==="auto")root.removeAttribute("data-theme");else root.setAttribute("data-theme",cur);
+    try{if(cur==="auto")localStorage.removeItem("lf-theme");else localStorage.setItem("lf-theme",cur)}catch(e){}
+    show();
+  });
+  show();
+})();
+
 /* ---------- tabs ---------- */
 function setView(v){
   S.view=v;
@@ -283,7 +321,7 @@ function paintForm(){
     fs.value=svc.id;
     fillSelect(fst,svc.steps.map(function(s){return{v:s.id,t:s.name}}),true);
   }
-  if(!$("#f-role").options.length)fillSelect($("#f-role"),ROLES.map(function(r){return{v:r,t:r}}));
+  fillSelect($("#f-role"),S.roles.map(function(r){return{v:r,t:r}}),true);
   if(!$("#f-cats").children.length){
     $("#f-cats").innerHTML=CATS.map(function(c,i){return '<button type="button" class="chip" data-c="'+i+'" aria-pressed="'+(i===S.cat)+'">'+esc(c)+"</button>"}).join("");
     $("#f-hchips").innerHTML=HCHIPS.map(function(h){return '<button type="button" class="chip" data-h="'+h+'" aria-pressed="false">'+h+" h</button>"}).join("");
@@ -504,10 +542,18 @@ $("#d-clear").addEventListener("click",function(){
   if(!S.reports.some(function(r){return r.example})&&!S.services.some(function(s){return s.example})){toast("No example records to remove");return}
   send({op:"clearExamples"}).then(function(){toast("Example records removed")},function(err){toast(err.message)});
 });
+$("#d-roles-save").addEventListener("click",function(){
+  var roles=$("#d-roles").value.split("\n").map(function(r){return r.trim()}).filter(Boolean);
+  if(!roles.length){toast("List at least one role");return}
+  if(document.activeElement)document.activeElement.blur();
+  send({op:"roles",roles:roles}).then(function(){toast("Roles saved")},function(err){toast(err.message)});
+});
 function paintData(){
   var ae=document.activeElement;
   if(ae!==$("#d-rate"))$("#d-rate").value=S.rate;
+  if(ae!==$("#d-roles"))$("#d-roles").value=S.roles.join("\n");
   var n=S.reports.filter(function(r){return r.example}).length+S.services.filter(function(s){return s.example}).length;
+  $("#d-expanel").hidden=!n;
   $("#d-exnote").textContent=n?n+" example records are loaded so you can see how the tool works. Remove them before real use.":"No example records are loaded.";
 }
 
@@ -524,7 +570,7 @@ var seq=0;
 function take(d,n){
   if(n<seq)return; seq=n;
   S.services=(d.services||[]).map(function(s){s.steps=Array.isArray(s.steps)?s.steps:[];return s});
-  S.reports=d.reports||[];S.statuses=d.statuses||{};S.rate=d.rate>=0?+d.rate:40;
+  S.reports=d.reports||[];S.statuses=d.statuses||{};if(Array.isArray(d.roles)&&d.roles.length)S.roles=d.roles;S.rate=d.rate>=0?+d.rate:40;
   $("#banner").innerHTML="";paint();
 }
 function call(opts){

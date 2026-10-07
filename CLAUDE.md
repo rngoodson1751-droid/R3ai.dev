@@ -33,8 +33,8 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 ## Limiting Factor (unlisted)
 
-- A tool Robert is developing for local governments: staff log what holds a service back, and it ranks the limits by monthly cost and age. It lives in `worker/private/limiting-factor.html` and `worker/limits/api.js`; `README.md` has the map under "Limiting Factor". It keeps its own look, not the site's glass style.
-- The data is in the `lf_*` tables of `r3ai-requests`. Rows with `example = 1` are made-up samples. Never write a real person's name into a report.
+- A tool Robert is developing for local governments: staff log what holds a service back, and it ranks the limits by monthly cost and age. It lives in `worker/private/limiting-factor.html` and `worker/limits/api.js`; `README.md` has the map under "Limiting Factor". It uses the site's blues, greens and clear glass with its own type (Overpass and IBM Plex), in light and dark.
+- The data is in the `lf_*` tables of `r3ai-requests`. It holds the Transit Division's real services, steps and roles, which Robert and his staff edit on the page; do not overwrite them from here without asking. Rows with `example = 1` are made-up samples. Never write a real person's name into a report.
 - After changing it, test with `npx wrangler dev --local` (the AI summary only works on the live site).
 
 ## Design rules
