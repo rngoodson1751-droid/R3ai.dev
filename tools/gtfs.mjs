@@ -70,7 +70,8 @@ for (const r of csv('routes.txt')) {
   const flag = (field, yes) => mine.every(t => t[field] === yes);
   const ends = metres(shape.pts[0], shape.pts.at(-1));
   routes.push({
-    id: r.route_id, name: r.route_long_name || r.route_short_name,
+    // "Route 5 Nelson Road" in the feed reads "Route 5 - Nelson Road" here, like the other routes, until the feed itself is corrected
+    id: r.route_id, name: (r.route_long_name || r.route_short_name).replace(/^(Route \d+)\s+(?!-)/, '$1 - '),
     short: (r.route_long_name || r.route_short_name).replace(/^Route[\s-]*\d+\s*-?\s*/i, '').trim() || r.route_short_name,
     color: '#' + (r.route_color || '888888').toLowerCase(), text: '#' + (r.route_text_color || 'ffffff').toLowerCase(),
     wheelchair: flag('wheelchair_accessible', '1'), bikes: flag('bikes_allowed', '1'),
