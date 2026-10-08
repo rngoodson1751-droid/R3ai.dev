@@ -55,6 +55,12 @@ function markdown(src) {
     // {{embed /fire-plan/ A title}} on its own line shows a page from static/ in a frame, with a link to open it by itself
     const e = line.trim().match(/^\{\{embed (\/[\w/-]+\/) (.+)\}\}$/);
     if (e) { out.push(`<figure class="embed"><div class="frame"><iframe src="${e[1]}" title="${esc(e[2])}" loading="lazy" allowfullscreen></iframe></div><figcaption><a class="btn glass sm" href="${e[1]}">Open it full screen</a></figcaption></figure>`); i++; continue; }
+    // {{video /path/film.mp4 /path/poster.jpg A caption}} on its own line shows a video file from static/
+    const v = line.trim().match(/^\{\{video (\/[\w/.-]+\.mp4) (\/[\w/.-]+\.jpg) (.+)\}\}$/);
+    if (v) { out.push(`<figure class="video"><video controls playsinline preload="none" poster="${v[2]}" width="1280" height="720"><source src="${v[1]}" type="video/mp4"><a href="${v[1]}">Download the video</a></video><figcaption>${inline(v[3])}</figcaption></figure>`); i++; continue; }
+    // {{photo /path/picture.jpg A caption}} on its own line shows a wide picture with a caption under it
+    const ph = line.trim().match(/^\{\{photo (\/[\w/.-]+\.(?:jpg|png|webp)) (.+)\}\}$/);
+    if (ph) { out.push(`<figure class="photo"><a href="${ph[1]}"><img src="${ph[1]}" alt="${esc(ph[2])}" loading="lazy"></a><figcaption>${inline(ph[2])}</figcaption></figure>`); i++; continue; }
     const h = line.match(/^(#{1,3})\s+(.*)$/);
     if (h) { const n = h[1].length + 1; out.push(`<h${n}>${inline(h[2])}</h${n}>`); i++; continue; }
     if (/^---+$/.test(line.trim())) { out.push('<hr>'); i++; continue; }

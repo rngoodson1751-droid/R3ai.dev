@@ -296,6 +296,12 @@ a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-stro
 .embed .frame { position: relative; width: 100%; padding-top: calc(154.8% + 13rem); border-radius: 20px; overflow: hidden; border: 1px solid var(--hair); background: #fbf6ea; }
 .embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .prose img { border-radius: 14px; border: 1px solid var(--hair); max-width: min(100%, 26rem); }
+/* a video or a wide captioned picture in a post ({{video}} and {{photo}} in build.mjs) */
+.prose .video, .prose .photo { margin: 0; display: grid; gap: .6rem; width: 100%; }
+.prose .video video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 18px; border: 1px solid var(--hair); background: light-dark(#dfeef0, #031018); box-shadow: 0 18px 40px -24px var(--shade); }
+.prose .photo a { display: block; }
+.prose .photo img { display: block; width: 100%; max-width: 100%; border-radius: 18px; box-shadow: 0 18px 40px -24px var(--shade); }
+.prose .video figcaption, .prose .photo figcaption { color: var(--soft); font-size: .95rem; line-height: 1.45; }
 
 /* ---------- request form ---------- */
 .form { --r: 32px; padding: clamp(1.4rem, 5vw, 3rem); display: grid; gap: 1.4rem; max-width: 46rem; }
