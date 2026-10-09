@@ -2,7 +2,8 @@
   // Cloudflare settings for r3ai.dev. The site is plain files served from ./dist.
   // The server code, worker/index.js, saves post requests from /request/ and runs the unlisted pages (the bus tracker and Limiting Factor).
   // The tracker reads secrets set in the dashboard, never here: ZONAR_CUSTOMER, ZONAR_USERNAME, ZONAR_PASSWORD,
-  // GEOTAB_DATABASE, GEOTAB_USERNAME, GEOTAB_PASSWORD (and GEOTAB_SERVER, GEOTAB_BUSES if needed).
+  // GEOTAB_DATABASE, GEOTAB_USERNAME, GEOTAB_PASSWORD (and GEOTAB_SERVER, GEOTAB_BUSES if needed),
+  // and PARA_FEED_KEY, shared with the paratransit-app Worker so only it can read the paratransit vans' positions.
   "name": "r3ai-dev",
   "compatibility_date": "2026-09-22",
   "main": "worker/index.js",

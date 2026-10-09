@@ -46,6 +46,7 @@ export async function tick(env, now = Date.now()) {
 }
 
 export async function live(request, env, url, ctx) {
+  if (url.searchParams.has('vans')) return vans(request, env);
   const demoAt = Number(url.searchParams.get('at')) || 0;
   if (trackersOn(env) && url.searchParams.has('debug')) return json(await trackerDebug(env));
   const useZonar = trackersOn(env) && !demoAt; // the demo setting (?demo=10:20) always runs on simulated buses, and the page labels it so
@@ -163,12 +164,21 @@ async function geoGet(env, typeName, extra = {}) {
 // name is trusted only when the tracker's Geotab user can see a small set of vehicles, meaning it has
 // been limited to Transit: on a City-wide account, "Unit 47" could be anybody's truck. GEOTAB_BUSES,
 // an optional variable such as {"47":"Gillig 47","42":"TR-042"}, names them outright.
+export const isVanUnit = digits => /^00\d$/.test(String(digits));
+// A Transit vehicle's unit as the paratransit app writes it ("609-008"), or null for anything that is not a 609 unit.
+export function transitUnit(name) {
+  const m = String(name || '').match(/(?:^|\D)0?609[\s_-]?(\d{2,3})(?!\d)/);
+  return m ? `609-${m[1].padStart(3, '0')}` : null;
+}
 export function busForDevice(name, scoped, known, named = {}) {
   const n = String(name || '').trim();
   for (const bus in named) if (String(named[bus]).trim().toLowerCase() === n.toLowerCase()) return bus;
   // Geotab writes the fleet number "609-047" where Zonar writes "0609-47": both are Bus 47. When Zonar's list of
   // buses is known, a Geotab vehicle outside it (a paratransit van, a support truck) is not a fixed-route bus.
   const fleet = n.match(/(?:^|\D)0?609[\s_-]?(\d{2,3})(?!\d)/);
+  // Paratransit vans are written 609-002 ... 609-008 (a single-digit unit after "00"); fixed-route buses have
+  // two-digit numbers (609-047 is Bus 47). A van is never a bus, even when Zonar's list is not known.
+  if (fleet && isVanUnit(fleet[1])) return null;
   if (fleet) { const bus = String(+fleet[1]); return known.size && !known.has(bus) ? null : bus; }
   if (!scoped) return null;
   const nums = (n.match(/\d+/g) || []).filter(x => x.length <= 3).map(x => String(+x));
@@ -184,13 +194,20 @@ async function geotabRead(env, now, known) {
   try { named = env.GEOTAB_BUSES ? JSON.parse(env.GEOTAB_BUSES) : {}; } catch { named = {}; }
   const scoped = devices.length <= 30, busOf = {}, unmatched = [], nameOf = {};
   for (const d of devices) { const bus = busForDevice(d.name, scoped, known, named); if (bus) { busOf[d.id] = bus; nameOf[bus] = d.name; } else unmatched.push(d.name); }
-  const reports = [];
+  // Transit vehicles that are not fixed-route buses (the paratransit vans). Kept apart: they never reach the bus
+  // matcher or the lobby display, and are handed only to the paratransit app (see vans() below).
+  const otherOf = {};
+  for (const d of devices) if (!busOf[d.id]) { const unit = transitUnit(d.name); if (unit) otherOf[d.id] = { unit, name: d.name }; }
+  const reports = [], others = [];
   for (const i of infos) {
-    const bus = busOf[i.device?.id], t = Date.parse(i.dateTime);
-    if (!bus || !Number.isFinite(t) || (!i.latitude && !i.longitude)) continue;
-    reports.push({ id: bus, src: 'geotab', name: nameOf[bus], t, lat: i.latitude, lon: i.longitude, h: i.bearing >= 0 ? i.bearing : null, s: Number.isFinite(i.speed) ? i.speed * 0.27778 : null, power: i.isDeviceCommunicating !== false });
+    const t = Date.parse(i.dateTime);
+    if (!Number.isFinite(t) || (!i.latitude && !i.longitude)) continue;
+    const pos = { t, lat: i.latitude, lon: i.longitude, h: i.bearing >= 0 ? i.bearing : null, s: Number.isFinite(i.speed) ? i.speed * 0.27778 : null, power: i.isDeviceCommunicating !== false };
+    const bus = busOf[i.device?.id], other = otherOf[i.device?.id];
+    if (bus) reports.push({ id: bus, src: 'geotab', name: nameOf[bus], ...pos });
+    else if (other) others.push({ ...other, ...pos });
   }
-  return { reports, seen: devices.length, matched: Object.keys(busOf).length, unmatched: scoped ? unmatched.slice(0, 30) : null };
+  return { reports, others, seen: devices.length, matched: Object.keys(busOf).length, unmatched: scoped ? unmatched.slice(0, 30) : null };
 }
 
 // ---------- the two trackers together ----------
@@ -226,6 +243,33 @@ async function liveFleet(env, now) {
     return out;
   });
 }
+// <page address>/live?vans=1: the paratransit vans' latest Geotab positions, for the Para-Transit app only.
+// A van's position can show where a rider lives, so this answers only a request carrying the shared secret
+// PARA_FEED_KEY (set on both Workers); the paratransit app calls it over a private service binding.
+// Everyone else, the lobby display included, gets "not found".
+async function vans(request, env) {
+  const key = String(env.PARA_FEED_KEY || '');
+  const given = request.headers.get('x-para-feed') || '';
+  if (!key || given.length !== key.length || !(await sameSecret(given, key))) return json({ error: 'Not found' }, 404);
+  if (!geotabOn(env)) return json({ ok: false, error: 'geotab-not-set', vans: [] });
+  try {
+    const out = await cached('vans', 10e3, async () => {
+      const row = await env.DB.prepare('SELECT v FROM transit_state WHERE k = ?1').bind('buses').first();
+      const saved = row ? JSON.parse(row.v) : {};
+      const g = await geotabRead(env, Date.now(), new Set((saved.zonar?.reports || []).map(r => r.id)));
+      return g.others.map(v => ({ unit: v.unit, name: v.name, lat: +v.lat.toFixed(6), lon: +v.lon.toFixed(6), h: v.h == null ? null : Math.round(v.h),
+        s: v.s == null ? null : +v.s.toFixed(1), t: v.t, power: v.power }));
+    });
+    return json({ ok: true, now: Date.now(), vans: out });
+  } catch (e) { console.error('vans not read', e?.message || e); return json({ ok: false, error: 'geotab-unavailable', vans: [] }); }
+}
+async function sameSecret(a, b) {
+  const enc = new TextEncoder(), [x, y] = await Promise.all([a, b].map(v => crypto.subtle.digest('SHA-256', enc.encode(v))));
+  const p = new Uint8Array(x), q = new Uint8Array(y); let d = 0;
+  for (let i = 0; i < p.length; i++) d |= p[i] ^ q[i];
+  return d === 0;
+}
+
 // <page address>/live?debug=1: every bus, what each tracker last said about it, and why it is or is not on the map.
 // The first place to look when a bus is missing. Nothing here carries a login.
 async function trackerDebug(env) {

@@ -30,6 +30,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - Each route runs 11 trips a day with a lunch break: nothing leaves at 12:45 pm. Buses keep their routes through it, so they should not go grey after the 1:45 pm departure.
 - The tracker follows the buses every minute on weekdays through a Cloudflare schedule (`triggers` in `wrangler.jsonc`, `tick` in `worker/transit/live.js`), whether or not the page is open. If buses are grey with no route long after leaving the terminal, check that the schedule is still running: `SELECT t FROM transit_state WHERE k = 'tick'` should be under two minutes old.
 - Positions come from Zonar and Geotab, each bus using whichever heard from it last. "Why isn't bus N showing?": open `<page address>/live?debug=1` first.
+- Paratransit vans (Geotab names 609-002 to 609-008) are not buses and must never reach the lobby display. Their positions go only to the Para-Transit app through `live?vans=1`, which requires the `PARA_FEED_KEY` secret header. Never relax that check.
 - The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
 
 ## Limiting Factor (unlisted)
