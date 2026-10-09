@@ -285,7 +285,9 @@ async function trackerDebug(env) {
       status: r.power === false ? 'power off' : !heard(r, now) ? `no report for ${mins(r)} min` : far <= LIVE.YARD_M ? 'at the transit facility' : now - r.t > LIVE.STALE ? 'in service, standing still' : 'in service',
     };
   }).sort((x, y) => x.lastReportMinutesAgo - y.lastReportMinutesAgo);
-  return { ok: lists.length > 0, trackers, units, ...(geo ? { geotab: { vehiclesThisLoginCanSee: geo.seen, matchedToBuses: geo.matched, notMatched: geo.unmatched ?? 'not listed: this login sees more than 30 vehicles, so only names carrying the fleet number are trusted. Limit the login to the Transit group, or set GEOTAB_BUSES.' } } : {}) };
+  // Paratransit vans: which units this Geotab login sees and when each last reported (no positions here; those go only to the Para-Transit app).
+  const vansSeen = geo ? geo.others.map(v => ({ unit: v.unit, geotabName: v.name, lastReportMinutesAgo: mins(v), power: v.power ? 'on' : 'off' })) : null;
+  return { ok: lists.length > 0, trackers, units, ...(vansSeen ? { paratransitVans: vansSeen, paraFeedKeySet: !!env.PARA_FEED_KEY } : {}), ...(geo ? { geotab: { vehiclesThisLoginCanSee: geo.seen, matchedToBuses: geo.matched, notMatched: geo.unmatched ?? 'not listed: this login sees more than 30 vehicles, so only names carrying the fleet number are trusted. Limit the login to the Transit group, or set GEOTAB_BUSES.' } } : {}) };
 }
 
 // ---------- alerts and notices ----------
