@@ -6,6 +6,8 @@
   // and PARA_FEED_KEY, shared with the paratransit-app Worker so only it can read the paratransit vans' positions.
   "name": "r3ai-dev",
   "compatibility_date": "2026-09-22",
+  // Keep variables added in the Cloudflare dashboard when a push redeploys the Worker.
+  "keep_vars": true,
   "main": "worker/index.js",
   "assets": {
     "directory": "./dist",
