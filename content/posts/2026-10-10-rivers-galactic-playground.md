@@ -53,7 +53,7 @@ Player one is the Captain. If somebody wanders too far away, they float back to 
 
 A voice reads every mission and everything the characters say. It can be turned off in the pause menu.
 
-Nobody can lose. Fall off the edge and you float back in a bubble. The robot king's attacks only bounce you backwards. Rocks on the surf road only make you wobble.
+Nobody can lose. Walk to an edge and you stop there. Miss a jump and a bubble carries you straight back to where you were standing. The robot king's attacks only bounce you backwards. Rocks on the surf road only make you wobble.
 
 {{photo /shots/galactic-king-grumble.jpg King Grumble, mid-stomp. The yellow ring is a shockwave. You jump over it.}}
 
