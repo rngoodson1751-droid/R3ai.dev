@@ -8,7 +8,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - Pushing to `main` publishes. Cloudflare deploys the Worker `r3ai-dev` from this repo within a minute or two.
 - The service worker (`src/sw.js`) is network-first, so published changes show up right away. If you change what it caches, bump the `PAGES` cache name.
 - No dependencies and no framework. Keep it that way unless Robert asks otherwise.
-- Everything pushed must be mobile ready. This is Robert's standing rule (10 October 2026). Before pushing, check every new or changed page, post, game or tool at phone width (about 390 px wide, and sideways for games), and give anything interactive touch controls. A game that needs a keyboard or controller is not finished.
+- Everything pushed must be mobile ready. This is Robert's standing rule (10 October 2026). Before pushing, check every new or changed page, post, game or tool at phone width (about 390 px wide, and sideways for games), and give anything interactive touch controls. A game that needs a keyboard or controller is not finished. The rule applies to work from 10 October 2026 forward. Pages and games already on the site before then do not need to be gone back over unless Robert asks.
 - To test with the request form working, run `npx wrangler dev --local` after `npx wrangler d1 execute r3ai-requests --local --file worker/schema.sql`. Ask the site needs Cloudflare's AI service, which has no local version, so test it on the live site.
 
 ## Things Robert may ask for
