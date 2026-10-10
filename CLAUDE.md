@@ -33,9 +33,9 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - Paratransit vans (Geotab names 609-002 to 609-008) are not buses and must never reach the lobby display. Their positions go only to the Para-Transit app through `live?vans=1`, which requires the `PARA_FEED_KEY` secret header. Never relax that check.
 - The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
 
-## Get Around LC (unlisted, temporary)
+## City Navigator (unlisted, temporary)
 
-- A rider guide for Robert's leadership class bus exercise: `worker/private/get-around.html`, with its `UNLISTED` entry in `worker/index.js`. `README.md` has the details under "Get Around LC". It keeps the bus tracker's dark navy look.
+- A rider guide for Robert's leadership class bus exercise: `worker/private/get-around.html`, with its `UNLISTED` entry in `worker/index.js`. `README.md` has the details under "City Navigator". Robert named it City Navigator; its address stays `/work/get-around/`. Its look is bright frosted glass for reading in full sun (near-black on near-white, large type), not the tracker's dark navy. Keep that contrast in any change.
 - It switches off at `until` in its `UNLISTED` entry. Its `live` address must keep refusing `?vans=1` and `?debug=1`.
 
 ## Limiting Factor (unlisted)

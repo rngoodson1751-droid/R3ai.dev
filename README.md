@@ -139,9 +139,9 @@ If the matcher has a bus on the wrong route, or cannot tell, dispatch can say so
 INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('47', '20261005', '2');
 ```
 
-### Get Around LC (temporary)
+### City Navigator (temporary)
 
-A rider guide made for one leadership class exercise (October 2026), in which about 15 people get around Lake Charles using only the buses. Its page is `worker/private/get-around.html`; it uses the bus tracker's dark navy look and the same live buses and timetable.
+City Navigator is a rider guide made for one leadership class exercise (October 2026), in which about 15 people get around Lake Charles using only the buses. Its page is `worker/private/get-around.html` (the address keeps the first name, `/work/get-around/`). It uses the same live buses and timetable as the bus tracker, in its own bright frosted-glass look built to be read outdoors in full sun: near-black text on near-white glass, heavy type and large tap targets. On a wide screen the panel floats over the map; on a phone it is a sheet under the map.
 
 - Four tabs: **Trip** (a trip planner: walk to a stop, one bus or two with a change at a stop both routes serve, walk to the door, from the timetable adjusted by live delays; tap the map to use any spot), **Buses** (stops near you with their next buses, and each route's live bus), **Places** (30 places a person without a car needs: government offices, clinics and hospitals, groceries, jobs and libraries, help services, each with its nearest stop) and **Help** (fares and how to ride, phone numbers and links, and trip notes kept on the phone for the class debrief).
 - The places, fares and phone numbers were researched in October 2026 and are written into the page. To change them, edit the page.
