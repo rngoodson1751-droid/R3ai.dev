@@ -118,6 +118,23 @@
   {
     "section": "home",
     "kind": "Game",
+    "title": "River's Galactic Playground",
+    "summary": "A 3D space adventure for up to three players on one screen. Eight worlds and 24 stars, with dinosaurs, penguins, a rainbow surf ride and a grumpy robot king to tickle. Nobody can lose.",
+    "links": [
+      {
+        "label": "Play",
+        "href": "/games/rivers-galactic-playground/"
+      },
+      {
+        "label": "Read about it",
+        "href": "/blog/rivers-galactic-playground/"
+      }
+    ],
+    "image": "/shots/rivers-galactic-playground.jpg"
+  },
+  {
+    "section": "home",
+    "kind": "Game",
     "title": "Sloth Rocket Grand Prix",
     "summary": "A 3D kart racer that runs in the browser. Five courses, five karts and split screen for up to four drivers, with Xbox controllers, a wheel and pedals, or the keyboard.",
     "links": [
