@@ -65,7 +65,7 @@ Nobody can lose. Walk to an edge and you stop there. Miss a jump and a bubble ca
 
 Open the game in a browser. It works on a computer, a tablet or a phone.
 
-- **Xbox controller:** press A to join. The left stick moves. A jumps, and A again in the air is a double jump. X spins, B is a rocket dash and Y says hello. The right stick looks around. The Menu button pauses.
+- **Xbox controller:** press A to join. The left stick moves. A jumps, and A again in the air is a double jump. Hold A on the way down to float. X spins, B is a rocket dash and Y says hello. The right stick looks around. The Menu button pauses.
 - **Keyboard:** press Space to join. Move with WASD or the arrows, jump with Space, spin with J, dash with K and say hello with L. Q and E turn the view.
 - **Phone or tablet:** turn it sideways and tap to start. A thumb stick appears wherever your left thumb lands, the buttons are on the right, and dragging the picture looks around.
 
