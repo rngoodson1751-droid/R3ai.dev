@@ -59,10 +59,11 @@ Nobody can lose. Fall off the edge and you float back in a bubble. The robot kin
 
 ## How to play
 
-Open the game in Chrome or Edge on a computer.
+Open the game in a browser. It works on a computer, a tablet or a phone.
 
 - **Xbox controller:** press A to join. The left stick moves. A jumps, and A again in the air is a double jump. X spins, B is a rocket dash and Y says hello. The right stick looks around. The Menu button pauses.
 - **Keyboard:** press Space to join. Move with WASD or the arrows, jump with Space, spin with J, dash with K and say hello with L. Q and E turn the view.
+- **Phone or tablet:** turn it sideways and tap to start. A thumb stick appears wherever your left thumb lands, the buttons are on the right, and dragging the picture looks around.
 
 The pause menu has the missions for the world you are in, a full screen switch, a photo button and the settings.
 
@@ -77,7 +78,7 @@ Claude played it before any of us did. It ran the game in a browser with pretend
 - Every shape is built from code. There are no artist-made models, so it looks like a toy box and not like a studio game.
 - Claude could not hold a real controller, hear the music or see how fast it runs on our computer. Those tests belong to River.
 - The gem hunts in the four newest worlds were only partly played through, so a gem may turn out to be harder to reach than it should be.
-- It needs a controller or a keyboard. There are no touch controls, so it is not a phone game.
+- The touch controls were tested on a pretend phone, not in a hand. A phone is one player. Three players still need controllers.
 - Sound sometimes stays off until you click the game once. Browsers do that.
 - It does not rival the latest Mario. Nintendo can relax.
 
