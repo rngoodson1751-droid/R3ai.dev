@@ -150,6 +150,22 @@ textarea{min-height:8rem;resize:vertical;line-height:1.45;font-weight:500}
 .toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.7rem 1.1rem;font-size:.95rem;font-weight:600;z-index:3000;max-width:90vw;text-align:center;box-shadow:var(--shadow)}
 [hidden]{display:none!important}
 noscript{display:block;padding:1rem;background:#ffd95e}
+/* trip notes: the send button sits apart from the others so it is not tapped by mistake */
+.send{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.send .btn{text-decoration:none}
+h2 .done{display:none;float:right;background:var(--navy);color:#fff;border:0;border-radius:99px;padding:.3rem .9rem;font-size:.85rem;font-weight:800;letter-spacing:0;text-transform:none;margin-top:-4px}
+/* While typing notes on a phone, everything above the notes slides away so the box fills the space above the keyboard */
+@media (max-width:900px){
+  header,.alert,#map,.tabs{transition:margin .2s ease,opacity .2s ease}
+  body.writing header,body.writing .alert,body.writing #map,body.writing .tabs{display:none!important}
+  body.writing .panel{margin-top:0;border-radius:0}
+  body.writing #p-help>:not(.notes-wrap){display:none}
+  body.writing #p-help{padding-top:10px}
+  body.writing .notes-wrap h2{margin-top:2px}
+  body.writing h2 .done{display:inline-block}
+  body.writing .notes-wrap .hint{display:none}
+  body.writing #notes{height:calc(var(--vvh,60vh) - 12.5rem);min-height:6rem}
+}
 /* Browsers without blur, or people who turn transparency down: solid panels */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){header,.panel{background:#f7f9fc}}
 @media (prefers-reduced-transparency:reduce){header,.panel{background:#f7f9fc;backdrop-filter:none;-webkit-backdrop-filter:none}}
@@ -222,11 +238,14 @@ noscript{display:block;padding:1rem;background:#ffd95e}
       <div class="card"><ul class="facts" id="facts"></ul></div>
       <h2>Phone numbers and links</h2>
       <div class="card links" id="links"></div>
-      <h2>My trip notes</h2>
+      <div class="notes-wrap" id="notes-wrap">
+      <h2>My trip notes <button class="done" id="done" type="button">Done</button></h2>
       <div class="card">
-        <p class="muted small" style="margin-bottom:6px">For the class debrief: what was easy, what was hard, how long things took. Saved on this phone only.</p>
+        <p class="muted small hint" style="margin-bottom:6px">For the class debrief: what was easy, what was hard, how long things took. Saved on this phone only.</p>
         <textarea id="notes" aria-label="My trip notes"></textarea>
-        <div class="btns"><button class="btn ghost" id="stamp" type="button">Add the time</button><button class="btn ghost" id="copy" type="button">Copy notes</button><a class="btn" id="mail" style="text-decoration:none" href="mailto:robert.goodson@cityoflc.us">Email notes to Robert</a></div>
+        <div class="btns"><button class="btn ghost" id="stamp" type="button">Add the time</button><button class="btn ghost" id="copy" type="button">Copy notes</button></div>
+        <div class="send"><a class="btn" id="mail" href="mailto:robert.goodson@cityoflc.us">Email notes to Robert</a></div>
+      </div>
       </div>
       <p class="foot">A prototype made for one class exercise. Bus times come from the City's published timetable and the buses' GPS, and may differ from what happens on the street. Place details were checked in October 2026; call ahead before a trip that matters. For official information call Lake Charles Transit at 337-491-1253.</p>
     </section>
@@ -678,6 +697,13 @@ $('mail').addEventListener('click', e => {
   const body = notes.value.trim() || '(No notes yet)';
   e.currentTarget.href = 'mailto:robert.goodson@cityoflc.us?subject=' + encodeURIComponent('City Navigator trip notes') + '&body=' + encodeURIComponent(body + '\n\nSent from City Navigator');
 });
+// Writing mode on phones: hide the map, header and tabs while the notes box has the keyboard
+const vv = window.visualViewport;
+const fitNotes = () => document.documentElement.style.setProperty('--vvh', (vv ? vv.height : innerHeight) + 'px');
+if (vv) vv.addEventListener('resize', fitNotes);
+notes.addEventListener('focus', () => { fitNotes(); document.body.classList.add('writing'); $('p-help').scrollTop = 0; setTimeout(() => { window.scrollTo(0, 0); fitNotes(); }, 250); });
+$('notes-wrap').addEventListener('focusout', e => { if (!$('notes-wrap').contains(e.relatedTarget)) setTimeout(() => { if (!$('notes-wrap').contains(document.activeElement)) { document.body.classList.remove('writing'); map.invalidateSize(); } }, 150); });
+$('done').onclick = () => { notes.blur(); document.body.classList.remove('writing'); setTimeout(() => map.invalidateSize(), 60); };
 $('copy').onclick = async () => { try { await navigator.clipboard.writeText(notes.value); toast('Notes copied'); } catch { notes.select(); toast('Select all and copy'); } };
 
 $('alert').addEventListener('click', () => $('alert').classList.toggle('open'));
