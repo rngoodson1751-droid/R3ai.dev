@@ -226,7 +226,7 @@ noscript{display:block;padding:1rem;background:#ffd95e}
       <div class="card">
         <p class="muted small" style="margin-bottom:6px">For the class debrief: what was easy, what was hard, how long things took. Saved on this phone only.</p>
         <textarea id="notes" aria-label="My trip notes"></textarea>
-        <div class="btns"><button class="btn ghost" id="stamp" type="button">Add the time</button><button class="btn ghost" id="copy" type="button">Copy notes</button></div>
+        <div class="btns"><button class="btn ghost" id="stamp" type="button">Add the time</button><button class="btn ghost" id="copy" type="button">Copy notes</button><a class="btn" id="mail" style="text-decoration:none" href="mailto:robert.goodson@cityoflc.us">Email notes to Robert</a></div>
       </div>
       <p class="foot">A prototype made for one class exercise. Bus times come from the City's published timetable and the buses' GPS, and may differ from what happens on the street. Place details were checked in October 2026; call ahead before a trip that matters. For official information call Lake Charles Transit at 337-491-1253.</p>
     </section>
@@ -673,6 +673,11 @@ const notes = $('notes');
 notes.value = store.get('gal-notes') || '';
 notes.addEventListener('input', () => store.set('gal-notes', notes.value));
 $('stamp').onclick = () => { const t = clockText(localTime(nowMs()).sec); notes.value += (notes.value && !notes.value.endsWith('\n') ? '\n' : '') + t + ' '; store.set('gal-notes', notes.value); notes.focus(); };
+// Opens the phone's mail app with the notes filled in, addressed to Robert Goodson (Transit Division)
+$('mail').addEventListener('click', e => {
+  const body = notes.value.trim() || '(No notes yet)';
+  e.currentTarget.href = 'mailto:robert.goodson@cityoflc.us?subject=' + encodeURIComponent('City Navigator trip notes') + '&body=' + encodeURIComponent(body + '\n\nSent from City Navigator');
+});
 $('copy').onclick = async () => { try { await navigator.clipboard.writeText(notes.value); toast('Notes copied'); } catch { notes.select(); toast('Select all and copy'); } };
 
 $('alert').addEventListener('click', () => $('alert').classList.toggle('open'));
