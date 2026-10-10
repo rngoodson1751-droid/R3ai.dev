@@ -47,11 +47,13 @@ The first hero is River. Claude named the other two Zib and Luma, after the frie
 
 {{photo /shots/rivers-galactic-playground.jpg Comet Surf with all three heroes: Zib, River and Luma.}}
 
-Player one is the Captain. If somebody wanders too far away, they float back to the Captain in a bubble.
+Player one is the Captain. If somebody gets left behind, they float back to the Captain in a bubble. Anyone can ask for a lift by pressing a trigger, and the Captain can press one to call the whole squad over.
+
+The first time you play, the game asks your name. Tap one, spell it, or skip. After that it says welcome back.
 
 ## Built for a kid who is still learning to read
 
-A voice reads every mission and everything the characters say. It can be turned off in the pause menu.
+A voice reads every mission and everything the characters say. The game picks the most natural voice your browser has, and the pause menu lets you try the others or turn it off.
 
 Nobody can lose. Walk to an edge and you stop there. Miss a jump and a bubble carries you straight back to where you were standing. The robot king's attacks only bounce you backwards. Rocks on the surf road only make you wobble.
 
