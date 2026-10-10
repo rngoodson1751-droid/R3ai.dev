@@ -12,6 +12,8 @@ Well. Space and alien games.
 
 But it's a start.
 
+It also makes River do his happy dance. That is the only review I need.
+
 [Play River's Galactic Playground](/games/rivers-galactic-playground/)
 
 ## Where it came from
