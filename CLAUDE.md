@@ -33,6 +33,11 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - Paratransit vans (Geotab names 609-002 to 609-008) are not buses and must never reach the lobby display. Their positions go only to the Para-Transit app through `live?vans=1`, which requires the `PARA_FEED_KEY` secret header. Never relax that check.
 - The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
 
+## Get Around LC (unlisted, temporary)
+
+- A rider guide for Robert's leadership class bus exercise: `worker/private/get-around.html`, with its `UNLISTED` entry in `worker/index.js`. `README.md` has the details under "Get Around LC". It keeps the bus tracker's dark navy look.
+- It switches off at `until` in its `UNLISTED` entry. Its `live` address must keep refusing `?vans=1` and `?debug=1`.
+
 ## Limiting Factor (unlisted)
 
 - A tool Robert is developing for local governments: staff log what holds a service back, and it ranks the limits by monthly cost and age. It lives in `worker/private/limiting-factor.html` and `worker/limits/api.js`; `README.md` has the map under "Limiting Factor". It uses the site's blues, greens and clear glass with its own type (Overpass and IBM Plex), in light and dark.

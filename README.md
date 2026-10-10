@@ -139,6 +139,15 @@ If the matcher has a bus on the wrong route, or cannot tell, dispatch can say so
 INSERT OR REPLACE INTO transit_overrides (bus, day, route) VALUES ('47', '20261005', '2');
 ```
 
+### Get Around LC (temporary)
+
+A rider guide made for one leadership class exercise (October 2026), in which about 15 people get around Lake Charles using only the buses. Its page is `worker/private/get-around.html`; it uses the bus tracker's dark navy look and the same live buses and timetable.
+
+- Four tabs: **Trip** (a trip planner: walk to a stop, one bus or two with a change at a stop both routes serve, walk to the door, from the timetable adjusted by live delays; tap the map to use any spot), **Buses** (stops near you with their next buses, and each route's live bus), **Places** (30 places a person without a car needs: government offices, clinics and hospitals, groceries, jobs and libraries, help services, each with its nearest stop) and **Help** (fares and how to ride, phone numbers and links, and trip notes kept on the phone for the class debrief).
+- The places, fares and phone numbers were researched in October 2026 and are written into the page. To change them, edit the page.
+- Its `live` address gives bus positions only. `?vans=1` and `?debug=1` answer "not found" there, so it never shows paratransit vans or the tracker's debug listing.
+- The link switches itself off at `until` in `UNLISTED` (end of Friday 16 October 2026). Change or remove that date to keep it longer. `?demo=10:20` works as on the tracker for practice.
+
 ### Limiting Factor
 
 Limiting Factor is a working first version of a tool for finding what holds a service back. Staff log what got in the way of a step and roughly how many hours it costs a month; the page ranks those limits by cost and by how long they have been open, and writes a one-page brief for whoever controls the budget. Its page is `worker/private/limiting-factor.html`. It uses the site's blues, greens and clear glass with its own type, and has a Theme button (Auto, Light, Dark) in the header.
@@ -149,7 +158,7 @@ Limiting Factor is a working first version of a tool for finding what holds a se
 - "Summarize themes with AI" uses Cloudflare Workers AI on the free allowance, at most 40 summaries a day. The model sees only the report text.
 - Anyone holding the link can add and change records. Keep names, health details and anything else personal out of it.
 
-To make a new link for either page (and switch the old one off), pick a new key and put its hash in `UNLISTED`, using the page's own name in the address:
+To make a new link for any of these pages (and switch the old one off), pick a new key and put its hash in `UNLISTED`, using the page's own name in the address:
 
 ```
 KEY=$(openssl rand -hex 12); echo "https://r3ai.dev/work/lobby-display/$KEY/"; printf '%s' "$KEY" | sha256sum

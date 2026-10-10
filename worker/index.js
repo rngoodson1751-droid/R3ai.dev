@@ -9,6 +9,7 @@
 import lobbyDisplay from './private/lobby-display.html';
 import { live, tick, networkForPage } from './transit/live.js';
 import limitingFactor from './private/limiting-factor.html';
+import getAround from './private/get-around.html';
 import { limitsApi } from './limits/api.js';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
@@ -19,7 +20,15 @@ const UNLISTED = {
   'lobby-display': { keyHash: '4d2a1fb5908fae1aa42b9dc27f493156fb1685593f3052a1bf57127de938a2f1', html: lobbyDisplay.replace('"__NETWORK__"', () => networkForPage), live },
   // Limiting Factor: staff log what holds a service back; the page ranks it. Its api takes changes as well as reads.
   'limiting-factor': { keyHash: '74140150af53a86e7e774e2000c498a8dffd3a056a3ec7f3c36bd4a807e43dcc', html: limitingFactor, api: limitsApi },
+  // Get Around LC: a rider guide for one leadership class exercise. Same buses as the tracker, plus a trip planner and
+  // local resources. It switches itself off at "until" (UTC). Its live address gives bus positions only: never the
+  // paratransit vans or the tracker's debug listing.
+  'get-around': { keyHash: 'c7c9d376c3576ad24b80153fac794ab24bcbd351ecfe10281645b011eba5d1eb', until: '2026-10-17T05:00:00Z', html: getAround.replace('"__NETWORK__"', () => networkForPage), live: riderLive },
 };
+function riderLive(request, env, url, ctx) {
+  if (url.searchParams.has('vans') || url.searchParams.has('debug')) return json({ error: 'Not found.' }, 404);
+  return live(request, env, url, ctx);
+}
 
 const SIDES = ['work', 'home', 'either'];
 const PER_PERSON_PER_HOUR = 5;
@@ -45,7 +54,7 @@ export default {
     const reading = request.method === 'GET' || request.method === 'HEAD';
     if (unlisted && Object.hasOwn(UNLISTED, unlisted[1]) && (reading || (request.method === 'POST' && unlisted[3] === '/api'))) {
       const page = UNLISTED[unlisted[1]];
-      if (await sha256(unlisted[2]) === page.keyHash) {
+      if (await sha256(unlisted[2]) === page.keyHash && !(page.until && Date.now() > Date.parse(page.until))) {
         if (unlisted[3] === '/api') { if (page.api) return page.api(request, env, url); }
         else if (unlisted[3]) { if (page.live) return page.live(request, env, url, ctx); }
         else if (!unlisted[4]) return Response.redirect(new URL(url.pathname + '/' + url.search, url), 301); // the page asks for "live" beside itself, which needs the closing slash
