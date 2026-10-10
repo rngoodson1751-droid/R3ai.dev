@@ -485,9 +485,11 @@ $('w-at').onclick = () => { when = 'at'; $('w-at').setAttribute('aria-pressed', 
 
 // One bus ride: board route r's trip (start) at pattern index i, get off at index j.
 // Itineraries: ride once, or ride twice with a change at a stop both routes serve (nearly always the terminal).
-function rides(lt, from, to, leave) {
+// A place that names its stop (p.stop) is reached from that stop only.
+const stopFor = (pt, p) => p && p.stop && NET.stops[p.stop] ? [{ id: p.stop, m: meters(pt, [NET.stops[p.stop][1], NET.stops[p.stop][2]]) }] : null;
+function rides(lt, from, to, leave, fromPlace, toPlace) {
   const out = [];
-  const O = nearStops(from, 6, 1000), D = nearStops(to, 6, 1000);
+  const O = stopFor(from, fromPlace) || nearStops(from, 6, 1000), D = stopFor(to, toPlace) || nearStops(to, 6, 1000);
   const oWalk = Object.fromEntries(O.map(s => [s.id, walkSec(s.m)])), dWalk = Object.fromEntries(D.map(s => [s.id, walkSec(s.m)]));
   const trips = Object.fromEntries(NET.routes.map(r => [r.id, tripsOn(r, lt)]));
   // every boarding we can make from the origin: {r, start, pattern, i, dep}
@@ -552,7 +554,7 @@ async function plan() {
   let found = [], dayN = 0, lt = null;
   for (let n = 0; n < 8 && !found.length; n++) {
     lt = n === 0 ? localTime(nowMs()) : dayAhead(n);
-    found = rides(lt, from.pt, to.pt, n === 0 ? leave : (when === 'at' ? leave : 0));
+    found = rides(lt, from.pt, to.pt, n === 0 ? leave : (when === 'at' ? leave : 0), from.place, to.place);
     dayN = n;
   }
   if (walkOnly <= 20 * 60) found = found.filter(o => o.arrive - o.leave < walkOnly);   // a bus slower than walking is no help
