@@ -47,7 +47,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 ## Design rules
 
-- The look is iOS-style glass over a slow water shader, mostly transparent, in blues and greens only. Robert has approved the current layout and colours, so change them only when he asks.
+- The look is frosted glass over a slow water shader, in blues and greens only. Robert asked for the iOS 27 frosted look on 10 October 2026: more blur behind the glass, a darkened rim and a bright top highlight (the `--frost`, `--rim` and `--shine` tokens). He has approved the layout and colours, so change them only when he asks.
 - Colours come from the tokens at the top of `src/styles.css`, with `light-dark()` for the two themes. Check both themes and a phone width before publishing.
 - The blue to green gradient (`--tide`) is for primary buttons, the current nav pill and small marks. Only floating controls use `.glass`; content sits on `.sheet`.
 - Headings are Newsreader, body text is Geist, content is left aligned.

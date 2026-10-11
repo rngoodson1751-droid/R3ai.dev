@@ -1,6 +1,6 @@
-/* r3ai.dev, clear water edition.
+/* r3ai.dev, frosted water edition (the iOS 27 glass: more diffusion behind the glass, a darkened rim, brighter highlights).
    Plan: blues and greens, the colours of the lake I sail on, over a slow shader that moves like water.
-   Surfaces stay mostly transparent so the water shows through. Blue and green meet in one gradient
+   Surfaces are frosted: the water still shows as soft colour and movement, but text always sits on calm glass. Blue and green meet in one gradient
    (the "tide") that is used for the primary button, the nav pill and small marks, and nowhere else.
    Only the floating controls are liquid glass. The showpiece is the clear cube of three R's.
    Type: Newsreader for headings, Geist for reading. Content is left aligned. */
@@ -16,11 +16,14 @@
   --accent: var(--blue);
   --tide: linear-gradient(115deg, var(--blue), var(--green));
   --on-tide: light-dark(#ffffff, #04202a);
-  --surface: light-dark(rgb(255 255 255 / .3), rgb(150 225 235 / .055));
-  --surface-strong: light-dark(rgb(248 253 254 / .6), rgb(8 32 42 / .58));
+  --surface: light-dark(rgb(246 252 253 / .54), rgb(26 64 76 / .46));
+  --surface-strong: light-dark(rgb(249 253 254 / .76), rgb(12 40 50 / .74));
   --hair: light-dark(rgb(10 70 90 / .14), rgb(160 230 240 / .15));
-  --edge: light-dark(rgb(255 255 255 / .9), rgb(190 240 250 / .22));
-  --glass: light-dark(rgb(255 255 255 / .28), rgb(40 95 110 / .28));
+  --edge: light-dark(rgb(255 255 255 / .96), rgb(200 245 252 / .3));
+  --rim: light-dark(rgb(10 60 80 / .17), rgb(0 0 0 / .55));
+  --shine: light-dark(rgb(255 255 255 / .98), rgb(255 255 255 / .3));
+  --frost: blur(26px) saturate(175%);
+  --glass: light-dark(rgb(250 254 255 / .52), rgb(36 84 98 / .52));
   --shade: light-dark(rgb(10 70 100 / .26), rgb(0 0 0 / .6));
   --display: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -58,13 +61,14 @@ p { margin: 0; text-wrap: pretty; }
   position: relative;
   isolation: isolate;
   background: var(--glass);
-  -webkit-backdrop-filter: blur(18px) saturate(170%);
-  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: var(--frost);
+  backdrop-filter: var(--frost);
   border: 1px solid var(--edge);
   border-radius: 999px;
   box-shadow:
-    inset 0 1px 0 light-dark(rgb(255 255 255 / .95), rgb(255 255 255 / .22)),
-    inset 0 -1px 1px light-dark(rgb(10 70 100 / .1), rgb(0 0 0 / .4)),
+    inset 0 1.5px 0 var(--shine),
+    inset 0 -1px 1px light-dark(rgb(10 70 100 / .14), rgb(0 0 0 / .45)),
+    0 0 0 1px var(--rim),
     0 14px 34px -18px var(--shade),
     0 2px 6px -2px light-dark(rgb(10 70 100 / .12), rgb(0 0 0 / .5));
 }
@@ -82,7 +86,7 @@ p { margin: 0; text-wrap: pretty; }
 }
 .glass:hover::after { opacity: 1; }
 @media (prefers-reduced-transparency: reduce) {
-  .glass { background: var(--surface-strong); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass, .sheet { background: light-dark(#f4fafb, #0c2630); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 /* ---------- top capsule and phone tab bar ---------- */
@@ -99,7 +103,7 @@ p { margin: 0; text-wrap: pretty; }
   padding: .32rem .36rem .32rem 1.05rem;
   view-transition-name: bar;
 }
-.bar, .tabs { background: light-dark(rgb(240 250 252 / .62), rgb(9 36 47 / .62)); }
+.bar, .tabs { background: light-dark(rgb(244 251 253 / .7), rgb(10 38 49 / .7)); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
 .mark { font: 600 1.35rem/1 var(--display); text-decoration: none; margin-right: .5rem; letter-spacing: -.02em; }
 .mark sup { font-size: .58em; color: var(--green); margin-left: .04em; }
 .links, .tabs { position: relative; }
@@ -230,8 +234,9 @@ button.btn { font: inherit; font-weight: 500; cursor: pointer; }
   background: var(--surface);
   border: 1px solid var(--hair);
   border-radius: var(--r);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: var(--frost);
+  backdrop-filter: var(--frost);
+  box-shadow: inset 0 1px 0 var(--shine), 0 0 0 1px var(--rim), 0 18px 40px -30px var(--shade);
 }
 .sheet.strong { background: var(--surface-strong); }
 @supports (corner-shape: squircle) { .sheet { corner-shape: squircle; border-radius: calc(var(--r) * 1.7); } }
@@ -414,7 +419,7 @@ a.chip:hover { color: var(--accent); border-color: currentColor; }
 @media print {
   #silk, .bar, .tabs, .foot, .head, .note, .demo-controls, .steps, .people button { display: none !important; }
   body { background: #fff; color: #000; padding: 0; }
-  .sheet, .paper { border: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 0; }
+  .sheet, .paper { border: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; padding: 0; }
 }
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
