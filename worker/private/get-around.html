@@ -133,6 +133,8 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue);outline:none;bo
 .gorow .btn.ghost{flex:0 0 auto;min-height:3.1rem;padding:0 1.05rem;font-size:.95rem}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .tip{margin:10px 2px 0}
+/* route numbers are white on every colour, with a thin dark outline so they read on the yellow and in the sun */
+.rb,.rt,.bus b{text-shadow:1px 0 0 rgba(10,23,38,.72),-1px 0 0 rgba(10,23,38,.72),0 1px 0 rgba(10,23,38,.72),0 -1px 0 rgba(10,23,38,.72),.75px .75px 0 rgba(10,23,38,.72),-.75px .75px 0 rgba(10,23,38,.72),.75px -.75px 0 rgba(10,23,38,.72),-.75px -.75px 0 rgba(10,23,38,.72)}
 .rb{width:1.6rem;height:1.6rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--round);font-weight:900;font-size:.84rem;flex-shrink:0;vertical-align:middle;box-shadow:0 0 0 1.5px rgba(10,23,38,.25)}
 #results:not(:empty){margin-top:12px;scroll-margin-top:8px}
 .opt{cursor:pointer;text-align:left;width:100%;color:var(--ink)}
@@ -478,6 +480,7 @@ function runsOn(id, lt) {
   return !!s.days[lt.dow] && lt.day >= s.start && lt.day <= s.end;
 }
 const tripsOn = (r, lt) => r.trips.filter(x => runsOn(x[2], lt)).map(x => [x[0], r.patterns[x[1]]]);
+for (const r of NET.routes) r.text = '#fff';   // the timetable gives Route 3 black numbers on its yellow; here every route number is white, with a dark edge from the styles
 const ROUTES = Object.fromEntries(NET.routes.map(r => [r.id, r]));
 const STOP_ROUTES = {};
 for (const r of NET.routes) for (const p of r.patterns) p.forEach((s, i) => { if (!(i === p.length - 1 && s[0] === p[0][0])) (STOP_ROUTES[s[0]] ||= new Set()).add(r.id); });
