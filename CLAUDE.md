@@ -36,7 +36,9 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 ## City Navigator (unlisted, temporary)
 
-- A rider guide for Robert's leadership class bus exercise: `worker/private/get-around.html`, with its `UNLISTED` entry in `worker/index.js`. `README.md` has the details under "City Navigator". Robert named it City Navigator; its address stays `/work/get-around/`. Its look is bright frosted glass for reading in full sun (near-black on near-white, large type), not the tracker's dark navy. Keep that contrast in any change.
+- A rider guide for Robert's leadership class bus exercise: `worker/private/get-around.html`, with its `UNLISTED` entry in `worker/index.js`. `README.md` has the details under "City Navigator". Robert named it City Navigator; its address stays `/work/get-around/`. Its look is bright frosted glass for reading in full sun (near-black on near-white, large type), not the tracker's dark navy. Keep that contrast in any change. It opens on a start screen (a live sentence about the next bus, the five routes, a Where to? search, three ways in) over a full-screen map; the tabs appear after that. On a phone the panel is a sheet with three heights. Robert asked for this landing on 11 October 2026 and wants it to feel like a new Apple interface: keep it uncluttered.
+- Its link went out to the class by email and QR code on 11 October 2026. Never change its address or key.
+- After changing it, check it at phone size (about 402 by 690, which is an iPhone 17 Pro in Chrome) with location on and off, on a weekday time and on a day with no service.
 - It switches off at `until` in its `UNLISTED` entry. Its `live` address must keep refusing `?vans=1` and `?debug=1`.
 
 ## Limiting Factor (unlisted)
