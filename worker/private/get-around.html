@@ -260,6 +260,11 @@ dialog.pick[open]{display:flex;flex-direction:column}
 .prow .tx{min-width:0;flex:1}
 .prow b{display:block;font-size:.98rem;font-weight:700;line-height:1.22;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .prow small{display:block;font-size:.8rem;font-weight:500;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.prow small.walk{color:var(--ok);font-weight:700;white-space:normal}
+.prow.far small.walk{color:var(--warn)}
+.prow .pi.ext{background:#e3f4ec;color:#0f6b36}
+.more-map{margin-top:12px}
+.none.searching{padding:10px 6px;color:var(--ink-3)}
 .prow .rs{display:inline-flex;gap:3px;flex-shrink:0}
 .prow .rs .rb{width:1.35rem;height:1.35rem;font-size:.74rem}
 .none{padding:22px 6px;font-size:.98rem;line-height:1.45;color:var(--ink-2)}
@@ -417,7 +422,7 @@ dialog.pick[open]{display:flex;flex-direction:column}
 </div>
 <dialog class="pick" id="pick" aria-labelledby="pick-h">
   <div class="pick-top"><h2 id="pick-h">Where to?</h2><button class="done" id="pick-x" type="button">Cancel</button></div>
-  <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="pick-q" type="search" placeholder="Search places and bus stops" aria-label="Search places and bus stops" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><button class="clr" id="pick-clr" type="button" aria-label="Clear the search" hidden>&times;</button></div>
+  <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="pick-q" type="search" placeholder="Search a business, place, address or stop" aria-label="Search a business, place, address or stop" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><button class="clr" id="pick-clr" type="button" aria-label="Clear the search" hidden>&times;</button></div>
   <div class="jump" id="pick-jump" role="group" aria-label="Jump to a kind of place"></div>
   <div class="pick-list" id="pick-list"></div>
 </dialog>
@@ -774,6 +779,7 @@ async function endPoint(end) {
   if (v === 'tap') return { pt: tapPts[end], name: 'the spot you picked' };
   if (v.startsWith('place:')) { const p = PLACES[+v.slice(6)]; return { pt: [p.lat, p.lng], name: p.name, place: p }; }
   if (v.startsWith('stop:')) { const id = v.slice(5); return { pt: [NET.stops[id][1], NET.stops[id][2]], name: stopName(id), stop: id }; }
+  if (v.startsWith('geo:')) { const g = GEO[+v.slice(4)]; return g ? { pt: [g.lat, g.lon], name: g.name } : null; }
   return null;
 }
 $('swap').addEventListener('click', () => {
@@ -1052,7 +1058,13 @@ function matchScore(e, words) {
   }
   return total;
 }
+// how far a spot is from the bus: the nearest stop and the walk to it
+function walkNote(lat, lon) { const s = nearStops([lat, lon], 1, 5000)[0], w = walkMin(walkSec(s.m)); return { s, w, text: w > 25 ? `Far from a bus route (${w} min walk to the nearest stop)` : `${w} min walk from ${stopName(s.id)}` }; }
 function rowHtml(v, sub) {
+  if (v.startsWith('geo:')) {
+    const g = GEO[+v.slice(4)], n = walkNote(g.lat, g.lon);
+    return `<button type="button" class="prow${n.w > 25 ? ' far' : ''}" data-v="${esc(v)}"><span class="pi ext">${GLYPH.pin}</span><span class="tx"><b>${esc(g.name)}</b><small>${esc([g.kind, g.addr].filter(Boolean).join(' · ') || 'Lake Charles')}</small><small class="walk">${esc(n.text)}</small></span></button>`;
+  }
   if (v.startsWith('place:')) {
     const p = PLACES[+v.slice(6)];
     return `<button type="button" class="prow" data-v="${esc(v)}"><span class="pi">${GLYPH[p.cat] || GLYPH.pin}</span><span class="tx"><b>${esc(p.name)}</b><small>${esc(sub || shortAddr(p.address))}</small></span></button>`;
@@ -1062,15 +1074,26 @@ function rowHtml(v, sub) {
 }
 const special = (v, glyph, title, sub) => `<button type="button" class="prow" data-v="${v}"><span class="pi go">${glyph}</span><span class="tx"><b>${title}</b><small>${sub}</small></span></button>`;
 // The last few places chosen, kept on this phone
+// Businesses and addresses from the wider search (OpenStreetMap). Each one chosen becomes an option in the From and To lists.
+const GEO = [];
+function geoValue(g) {
+  let i = GEO.findIndex(x => x.name === g.name && Math.abs(x.lat - g.lat) < 1e-5 && Math.abs(x.lon - g.lon) < 1e-5);
+  if (i < 0) {
+    i = GEO.push({ name: String(g.name).slice(0, 80), addr: String(g.addr || '').slice(0, 120), kind: String(g.kind || '').slice(0, 30), lat: +g.lat, lon: +g.lon }) - 1;
+    for (const sel of ['from', 'to']) { const o = document.createElement('option'); o.value = 'geo:' + i; o.textContent = GEO[i].name; $(sel).appendChild(o); }
+  }
+  return 'geo:' + i;
+}
 const recentKeys = () => { try { const a = JSON.parse(store.get('gal-recent') || '[]'); return Array.isArray(a) ? a : []; } catch { return []; } };
 function remember(v) {
-  const key = v.startsWith('place:') ? 'p:' + PLACES[+v.slice(6)].name : v.startsWith('stop:') ? 's:' + v.slice(5) : null;
+  const key = v.startsWith('place:') ? 'p:' + PLACES[+v.slice(6)].name : v.startsWith('stop:') ? 's:' + v.slice(5) : v.startsWith('geo:') && GEO[+v.slice(4)] ? 'g:' + JSON.stringify(GEO[+v.slice(4)]) : null;
   if (key) store.set('gal-recent', JSON.stringify([key, ...recentKeys().filter(k => k !== key)].slice(0, 4)));
 }
 function recents() {
   return recentKeys().map(k => {
     if (typeof k !== 'string') return null;
     if (k.startsWith('p:')) { const i = PLACES.findIndex(p => p.name === k.slice(2)); return i < 0 ? null : 'place:' + i; }
+    if (k.startsWith('g:')) { try { const g = JSON.parse(k.slice(2)); return Number.isFinite(g.lat) && Number.isFinite(g.lon) && g.name ? geoValue(g) : null; } catch { return null; } }
     return STOP_ROUTES[k.slice(2)] ? 'stop:' + k.slice(2) : null;
   }).filter(Boolean);
 }
@@ -1083,9 +1106,10 @@ function renderPick() {
   if (q) {
     const words = q.split(' ');
     const hits = FIND.map(e => [matchScore(e, words), e]).filter(x => x[0]).sort((a, b) => b[0] - a[0] || a[1].kind - b[1].kind || a[1].name.localeCompare(b[1].name)).slice(0, 40);
-    list.innerHTML = hits.length ? `<div class="grp">${hits.map(x => rowHtml(x[1].v)).join('')}</div>`
-      : `<p class="none">Nothing matches <b>${esc($('pick-q').value.trim())}</b>. Try a street name, a kind of place such as grocery or library, or a stop number.</p><div class="grp">${onMap}</div>`;
+    list.innerHTML = (hits.length ? `<div class="grp">${hits.map(x => rowHtml(x[1].v)).join('')}</div>` : '')
+      + `<div id="more"></div><div class="grp more-map">${onMap}</div>`;
     list.scrollTop = 0;
+    searchMore($('pick-q').value.trim(), hits.length);
     return;
   }
   let h = `<div class="grp">${pickFor === 'from' ? special('me', GLYPH.arrow, 'My location', 'Use where this phone is now') : ''}${onMap}</div>`;
@@ -1098,6 +1122,37 @@ function renderPick() {
   for (const c of CATS) h += `<h3 data-c="${esc(c)}">${esc(c)}</h3><div class="grp">${PLACES.filter(p => p.cat === c).map(p => rowHtml('place:' + p.i)).join('')}</div>`;
   h += `<h3 data-c="Bus stops">Bus stops</h3><div class="grp">${SERVED.slice().sort((a, b) => stopName(a).localeCompare(stopName(b)) || a - b).map(id => rowHtml('stop:' + id)).join('')}</div>`;
   list.innerHTML = h;
+}
+// The wider search: businesses, kinds of place and street addresses from OpenStreetMap, through the page's own api address
+let moreTimer = 0, moreAsk = null;
+const moreCache = new Map();
+function searchMore(text, localCount) {
+  clearTimeout(moreTimer); if (moreAsk) moreAsk.abort();
+  const box = $('more'); if (!box) return;
+  const q = text.replace(/\s+/g, ' ').trim();
+  const head = `<h3>More places in Lake Charles</h3>`;
+  if (q.length < 3) { box.innerHTML = localCount ? '' : `<p class="none">Keep typing to search businesses and addresses.</p>`; return; }
+  const show = list => {
+    if (!$('more') || $('pick-q').value.trim() !== text) return;
+    const rows = list.map(g => ({ g, n: walkNote(g.lat, g.lon) })).sort((a, b) => (a.n.w > 25) - (b.n.w > 25)).slice(0, 10);
+    $('more').innerHTML = rows.length ? head + `<div class="grp">${rows.map(x => rowHtml(geoValue(x.g))).join('')}</div>`
+      : localCount ? '' : `<p class="none">Nothing found for <b>${esc(q)}</b>. Try a business name, a kind of place such as pharmacy or laundromat, or a street address.</p>`;
+  };
+  if (moreCache.has(q.toLowerCase())) return show(moreCache.get(q.toLowerCase()));
+  box.innerHTML = head + `<p class="none searching">Searching&hellip;</p>`;
+  moreTimer = setTimeout(async () => {
+    moreAsk = new AbortController();
+    try {
+      const res = await fetch('api?q=' + encodeURIComponent(q), { signal: moreAsk.signal });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'no answer');
+      const list = (data.results || []).filter(g => g && g.name && Number.isFinite(g.lat) && Number.isFinite(g.lon));
+      moreCache.set(q.toLowerCase(), list); show(list);
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      if ($('more') && $('pick-q').value.trim() === text) $('more').innerHTML = head + `<p class="none">The wider search is not answering right now. Check your signal, or choose a spot on the map.</p>`;
+    }
+  }, 450);
 }
 $('pick-jump').innerHTML = [...CATS.filter(c => c !== 'Transit'), 'Bus stops'].map(c => `<button type="button" data-c="${esc(c)}">${esc(c)}</button>`).join('');
 $('pick-jump').addEventListener('click', e => {
@@ -1202,7 +1257,7 @@ $('home-routes').addEventListener('click', e => {
 });
 $('hero').addEventListener('click', e => { if (e.target.closest('[data-stop]')) goStop(homeStop); });
 $('places-n').textContent = PLACES.length + ' by bus';
-$('where-n').textContent = `${PLACES.length} places and ${SERVED.length} bus stops`;
+$('where-n').textContent = 'Search any business, place, address or stop';
 $('where').onclick = () => openPick('to');
 $('s-near').onclick = () => { tab('stops'); nearMe(); };
 $('s-places').onclick = () => tab('places');

@@ -11,6 +11,7 @@ import { live, tick, networkForPage } from './transit/live.js';
 import limitingFactor from './private/limiting-factor.html';
 import getAround from './private/get-around.html';
 import { limitsApi } from './limits/api.js';
+import { placeSearch } from './navigator/search.js';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -22,8 +23,8 @@ const UNLISTED = {
   'limiting-factor': { keyHash: '74140150af53a86e7e774e2000c498a8dffd3a056a3ec7f3c36bd4a807e43dcc', html: limitingFactor, api: limitsApi },
   // Get Around LC: a rider guide for one leadership class exercise. Same buses as the tracker, plus a trip planner and
   // local resources. It switches itself off at "until" (UTC). Its live address gives bus positions only: never the
-  // paratransit vans or the tracker's debug listing.
-  'get-around': { keyHash: 'c7c9d376c3576ad24b80153fac794ab24bcbd351ecfe10281645b011eba5d1eb', until: '2026-10-17T05:00:00Z', html: getAround.replace('"__NETWORK__"', () => networkForPage), live: riderLive },
+  // paratransit vans or the tracker's debug listing. Its api address searches OpenStreetMap for places not in its own list (navigator/search.js).
+  'get-around': { keyHash: 'c7c9d376c3576ad24b80153fac794ab24bcbd351ecfe10281645b011eba5d1eb', until: '2026-10-17T05:00:00Z', html: getAround.replace('"__NETWORK__"', () => networkForPage), live: riderLive, api: placeSearch },
 };
 function riderLive(request, env, url, ctx) {
   if (url.searchParams.has('vans') || url.searchParams.has('debug')) return json({ error: 'Not found.' }, 404);
