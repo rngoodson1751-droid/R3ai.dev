@@ -264,6 +264,7 @@ dialog.pick[open]{display:flex;flex-direction:column}
 .prow.far small.walk{color:var(--warn)}
 .prow .pi.ext{background:#e3f4ec;color:#0f6b36}
 .more-map{margin-top:12px}
+.credit{font-size:.74rem;color:var(--ink-3);text-align:right;margin:5px 4px 0}
 /* while the wider search runs: a turning ring by the heading and in the search box, and grey rows where results will appear */
 .pick-list h3.busy{display:flex;align-items:center;gap:8px;color:var(--blue)}
 .spin{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(10,86,194,.22);border-top-color:var(--blue);animation:spin .75s linear infinite;flex-shrink:0}
@@ -1149,7 +1150,8 @@ function searchMore(text, localCount) {
     if (!$('more') || $('pick-q').value.trim() !== text) return;
     $('pick').classList.remove('busy'); $('more').removeAttribute('aria-busy');
     const rows = list.map(g => ({ g, n: walkNote(g.lat, g.lon) })).sort((a, b) => (a.n.w > 25) - (b.n.w > 25)).slice(0, 10);
-    $('more').innerHTML = rows.length ? head + `<div class="grp">${rows.map(x => rowHtml(geoValue(x.g))).join('')}</div>`
+    const credit = `<p class="credit">${list.source === 'google' ? 'Results from Google' : 'Results from OpenStreetMap contributors'}</p>`;
+    $('more').innerHTML = rows.length ? head + `<div class="grp">${rows.map(x => rowHtml(geoValue(x.g))).join('')}</div>` + credit
       : localCount ? '' : `<p class="none">Nothing found for <b>${esc(q)}</b>. Try a business name, a kind of place such as pharmacy or laundromat, or a street address.</p>`;
   };
   if (moreCache.has(q.toLowerCase())) return show(moreCache.get(q.toLowerCase()));
@@ -1162,7 +1164,7 @@ function searchMore(text, localCount) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'no answer');
       const list = (data.results || []).filter(g => g && g.name && Number.isFinite(g.lat) && Number.isFinite(g.lon));
-      moreCache.set(q.toLowerCase(), list); show(list);
+      list.source = data.source; moreCache.set(q.toLowerCase(), list); show(list);
     } catch (e) {
       if (e.name === 'AbortError') return;
       $('pick').classList.remove('busy');
