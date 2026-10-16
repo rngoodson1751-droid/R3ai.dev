@@ -1052,7 +1052,7 @@ function featHtml(id, full) {
   const r = SF.stops[id];
   if (!r || FEAT.every(([k]) => r[k] == null) && !r.notes) return `<div class="feats"><span class="ft none">Stop details not recorded yet</span></div>`;
   const chips = FEAT.filter(([k]) => r[k] != null).sort((a, b) => r[b[0]] - r[a[0]]).map(([k, label, d]) =>
-    `<span class="ft ${r[k] ? 'yes' + (k === 'accessible' ? ' acc' : '') : 'no'}" title="${r[k] ? '' : 'No '}${esc(label.toLowerCase())}">${fIcon(d)}${r[k] ? esc(label) : 'No ' + esc(label.toLowerCase())}</span>`).join('');
+    `<span class="ft ${r[k] ? 'yes' + (k === 'accessible' ? ' acc' : '') : 'no'}" title="${r[k] ? '' : 'No '}${esc(label.toLowerCase())}">${fIcon(d)}${r[k] ? esc(label) : k === 'accessible' ? 'Not wheelchair accessible' : 'No ' + esc(label.toLowerCase())}</span>`).join('');
   const when = r.updated_at ? new Date(r.updated_at.replace(' ', 'T') + 'Z').toLocaleDateString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', year: 'numeric' }) : '';
   return `<div class="feats">${chips}</div>${r.notes ? `<p class="fnote">${esc(r.notes)}</p>` : ''}${full && when ? `<p class="fwhen">Checked ${esc(when)}</p>` : ''}`;
 }
