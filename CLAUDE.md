@@ -46,6 +46,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - The Public Works call center's transit page: `worker/private/call-center.html` at `/work/call-center/`, with `worker/callcenter/access.js`. `README.md` has the details under "Call Center". Robert asked for it on 16 October 2026: live bus locations, time to next stop, late or on time, and Google search with step-by-step directions are what matter most. Keep those first.
 - Only `@cityoflc.us` emails get in, through Cloudflare Access (one-time code by email, 15-day sessions). The Worker checks the Access token itself and refuses everything until `CALL_CENTER_ACCESS_TEAM` and `CALL_CENTER_ACCESS_AUD` are set. Never add a way around that check.
 - Map and search are Google only (Robert's choice): no OpenStreetMap, and no built-in list of places. Its `live` address must keep refusing `?vans=1` and `?debug=1`.
+- "Stop N has a bench and shelter": upsert into `transit_stop_features` (each feature 1, 0 or NULL for not checked) through the Cloudflare connector, with `updated_by` set to Robert's request and `updated_at` to now. Editors on the page are the addresses in `CALL_CENTER_EDITORS`.
 - After changing it, check it at about 1440 wide, 1024 wide and 390 wide, with `?demo=10:20`.
 
 ## Limiting Factor (unlisted)

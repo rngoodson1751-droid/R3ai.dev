@@ -222,6 +222,26 @@ h2:not(:first-child){margin-top:18px}
 .arrs .nm{flex:1;min-width:0;font-weight:600}
 .arrs .tm{font-family:var(--round);font-weight:900;font-size:1.05rem;white-space:nowrap;font-variant-numeric:tabular-nums}
 .arrs .at{font-size:.78rem;color:var(--ink-3);font-weight:600;display:block}
+.feats{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ft{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;font-weight:700;padding:.16rem .55rem .16rem .38rem;border-radius:99px;background:#e2f4e9;color:#0d5a2c;white-space:nowrap}
+.ft svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ft.acc{background:#dde9fb;color:#0a4ea8}
+.ft.no{background:#f1f3f6;color:#6b7a8c;text-decoration:line-through;text-decoration-thickness:1.5px}
+.ft.none{background:none;color:var(--ink-3);font-weight:600;font-style:italic;padding-left:0}
+.fnote{font-size:.84rem;color:var(--ink-2);margin-top:6px;line-height:1.4}
+.fwhen{font-size:.74rem;color:var(--ink-3);margin-top:3px}
+.iw .feats{margin-top:6px}.iw .fnote{font-size:.8rem}
+.fedit{margin-top:8px;border:1.5px solid var(--blue);border-radius:12px;padding:8px 10px;background:#f7faff}
+.fhead{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line)}
+.frow:first-of-type{border-top:0}
+.fl{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;font-weight:700;min-width:0}
+.fl svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tri{display:flex;gap:2px;padding:2px;border-radius:99px;background:var(--fill);flex-shrink:0}
+.tri button{border:0;background:transparent;border-radius:99px;padding:0 .6rem;min-height:2.1rem;font-size:.8rem;font-weight:700;color:var(--ink-2)}
+.tri button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(10,23,38,.2)}
+.fl2{display:block;font-size:.72rem;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+#fnotes{width:100%;margin-top:4px;border:1.5px solid var(--line-2);border-radius:10px;padding:.5rem .6rem;font-size:.9rem;min-height:2.6rem}
 .facts{list-style:none}
 .facts li{padding:.55rem 0;border-top:1px solid var(--line);font-size:.92rem;line-height:1.48}
 .facts li:first-child{border-top:0}
@@ -242,6 +262,7 @@ h2:not(:first-child){margin-top:18px}
 @media (max-width:760px){
   header{gap:8px;padding-top:max(8px,env(safe-area-inset-top))}
   .brand h1{font-size:1.08rem}.kick{display:block}.sep,.dept{display:none}.logo{height:2.2rem;width:2.2rem}
+  .brand{overflow:hidden}.hr{gap:6px}.pill{font-size:.66rem;padding:.25rem .5rem}
   #clock{font-size:1.05rem}
   .work{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"tabs" "pane";padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));gap:8px}
   #mapwrap{grid-area:pane;display:none}#mapwrap.on{display:block}
@@ -417,7 +438,7 @@ async function poll() {
 function renderAll() {
   renderBoard(); feedPill(); renderAlert(); drawBuses(); renderNotices();
   if (openStop) refreshStopWindow();
-  if (stopShown) renderStopResult(stopShown, true);
+  if (stopShown && !editing) renderStopResult(stopShown, true);   // never while someone is filling in a stop's details
 }
 function feedPill() {
   const n = DATA && DATA.vehicles ? DATA.vehicles.filter(v => v.route).length : 0;
@@ -673,8 +694,8 @@ function focusBus(id) {
 function stopWindowHtml(id) {
   const list = arrivals(id, 5);
   return `<div class="iw"><h3>${esc(stopName(id))}</h3><div class="sub">Stop No. ${esc(id)} &nbsp;${[...STOP_ROUTES[id]].map(r => badge(ROUTES[r])).join(' ')}</div>
-    <ul>${list.length ? list.map(a => `<li>${badge(a.r)}<span class="nm">${a.live ? `Bus ${esc(a.bus)} <span class="tag ${delayClass(a.delay)}">${esc(delayText(a.delay))}</span>` : 'Scheduled'}</span><span class="tm">${esc(etaText(a.sec))}</span></li>`).join('') : '<li class="muted">No more buses here today.</li>'}</ul>
-    <div class="btns"><button class="btn sm" type="button" onclick="useSpot('from','stop:${esc(id)}')">Caller is here</button><button class="btn sm ghost" type="button" onclick="useSpot('to','stop:${esc(id)}')">Going here</button></div></div>`;
+    ${featHtml(id)}<ul>${list.length ? list.map(a => `<li>${badge(a.r)}<span class="nm">${a.live ? `Bus ${esc(a.bus)} <span class="tag ${delayClass(a.delay)}">${esc(delayText(a.delay))}</span>` : 'Scheduled'}</span><span class="tm">${esc(etaText(a.sec))}</span></li>`).join('') : '<li class="muted">No more buses here today.</li>'}</ul>
+    <div class="btns"><button class="btn sm" type="button" onclick="useSpot('from','stop:${esc(id)}')">Caller is here</button><button class="btn sm ghost" type="button" onclick="useSpot('to','stop:${esc(id)}')">Going here</button>${SF.canEdit ? `<button class="btn sm ghost" type="button" onclick="editStop('${esc(id)}')">Edit details</button>` : ''}</div></div>`;
 }
 function stopClick(id) {
   if (pickEnd) return finishPick({ kind: 'stop', id, name: stopName(id), pt: stopLL(id) });
@@ -1006,6 +1027,55 @@ function drawTrip(o) {
   fitPts(pts, 50);
 }
 
+// ---------- what is at each stop: sign pole, bench, shelter, wheelchair access ... (Transit staff record these) ----------
+const FEAT = [
+  ['pole', 'Sign pole', '<path d="M12 22V10"/><rect x="6.5" y="2.5" width="11" height="7.5" rx="1.6"/><path d="M9.5 6.2h5"/>'],
+  ['bench', 'Bench', '<path d="M4 10h16M6 10V6.5h12V10M5 10v3.5h14V10M7 13.5V18M17 13.5V18"/>'],
+  ['shelter', 'Shelter', '<path d="M2.5 8.5 12 4l9.5 4.5"/><path d="M5 8v12M19 8v12M8 16h8"/>'],
+  ['accessible', 'Wheelchair accessible', '<circle cx="11" cy="4" r="1.7"/><path d="M11 7.5v5.5h5l2.2 5"/><path d="M8.6 10.2a5.2 5.2 0 1 0 7 6.6"/>'],
+  ['lighting', 'Lighting', '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8V16h7.2v-2.2A6 6 0 0 0 12 3z"/>'],
+  ['trash', 'Trash can', '<path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 13h10l1-13"/>'],
+  ['bikerack', 'Bike rack', '<circle cx="6" cy="16" r="3.4"/><circle cx="18" cy="16" r="3.4"/><path d="M6 16l3.6-6.5h5.2L18 16M9.6 9.5 12 16M8 7h3"/>'],
+];
+const fIcon = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+let SF = { stops: {}, canEdit: false }, editing = null, draft = {};
+async function loadStops() {
+  try { const res = await fetch('stops', { credentials: 'same-origin', cache: 'no-store' }); if (res.ok) SF = await res.json(); } catch {}
+  if (openStop) refreshStopWindow();
+  if (stopShown && !editing) renderStopResult(stopShown, true);
+}
+// Symbols for what a stop has; "No bench" style crossed-out marks for what it is known not to have; nothing for unchecked.
+function featHtml(id, full) {
+  if (editing === id && full) return editHtml(id);
+  const r = SF.stops[id];
+  if (!r || FEAT.every(([k]) => r[k] == null) && !r.notes) return `<div class="feats"><span class="ft none">Stop details not recorded yet</span></div>`;
+  const chips = FEAT.filter(([k]) => r[k] != null).sort((a, b) => r[b[0]] - r[a[0]]).map(([k, label, d]) =>
+    `<span class="ft ${r[k] ? 'yes' + (k === 'accessible' ? ' acc' : '') : 'no'}" title="${r[k] ? '' : 'No '}${esc(label.toLowerCase())}">${fIcon(d)}${r[k] ? esc(label) : 'No ' + esc(label.toLowerCase())}</span>`).join('');
+  const when = r.updated_at ? new Date(r.updated_at.replace(' ', 'T') + 'Z').toLocaleDateString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', year: 'numeric' }) : '';
+  return `<div class="feats">${chips}</div>${r.notes ? `<p class="fnote">${esc(r.notes)}</p>` : ''}${full && when ? `<p class="fwhen">Checked ${esc(when)}</p>` : ''}`;
+}
+function editHtml(id) {
+  return `<div class="fedit"><div class="fhead">Stop details</div>` + FEAT.map(([k, label, d]) => {
+    const v = draft[k];
+    return `<div class="frow"><span class="fl">${fIcon(d)}${esc(label)}</span><span class="tri">` +
+      [['1', 'Yes', v === 1], ['0', 'No', v === 0], ['x', 'Not sure', v == null]].map(([val, t, on]) => `<button type="button" data-tri="${k}:${val}" aria-pressed="${on}">${t}</button>`).join('') + '</span></div>';
+  }).join('') + `<label class="fl2" for="fnotes">Notes for call takers</label><input id="fnotes" maxlength="240" value="${esc(draft.notes || '')}" placeholder="For example: far side of the intersection, no sidewalk"/>
+    <div class="btns"><button class="btn sm" type="button" data-save>Save</button><button class="btn sm ghost" type="button" data-cancel>Cancel</button></div></div>`;
+}
+async function saveStop() {
+  const id = editing, body = { stop: id, notes: $('fnotes') ? $('fnotes').value : draft.notes };
+  for (const [k] of FEAT) body[k] = draft[k] ?? null;
+  try {
+    const res = await fetch('stops', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || 'Could not save.');
+    SF.stops[id] = { ...body, updated_by: STAFF, updated_at: new Date().toISOString().slice(0, 19).replace('T', ' ') };
+    editing = null; toast('Saved the details for ' + stopName(id) + '.');
+    renderStopResult(stopShown, true); refreshStopWindow();
+  } catch (e) { toast(e.message, 6000); }
+}
+window.editStop = id => { if (info) info.close(); editing = id; draft = { ...(SF.stops[id] || {}) }; setView('stop'); $('q-stop').value = `${stopName(id)} (stop ${id})`; document.querySelector('[data-clr="stop"]').hidden = false; renderStopResult({ kind: 'stop', id, name: stopName(id), pt: stopLL(id) }, true); };
+
 // ---------- next buses at a stop, or near a place ----------
 let stopShown = null;
 searchBox($('q-stop'), $('sugg2'), v => { $('q-stop').value = v.kind === 'stop' ? `${stopName(v.id)} (stop ${v.id})` : v.name; document.querySelector('[data-clr="stop"]').hidden = false; renderStopResult(v); });
@@ -1018,18 +1088,23 @@ function nextDayAt(id) { for (let n = 1; n < 10; n++) { const lt = dayAhead(n), 
 function renderStopResult(v, refresh) {
   stopShown = v;
   let html = '';
-  if (v.kind === 'stop') html = `<div class="stopcard"><h3>${esc(stopName(v.id))}</h3><div class="sub">Stop No. ${esc(v.id)} &nbsp;${[...STOP_ROUTES[v.id]].map(r => badge(ROUTES[r])).join(' ')}</div>${arrList(v.id)}
-    <div class="btns"><button class="btn sm ghost" type="button" data-trip-from="${esc(v.id)}">Trip from this stop</button><button class="btn sm ghost" type="button" data-map="${esc(v.id)}">Show on map</button></div></div>`;
+  if (v.kind === 'stop') html = `<div class="stopcard"><h3>${esc(stopName(v.id))}</h3><div class="sub">Stop No. ${esc(v.id)} &nbsp;${[...STOP_ROUTES[v.id]].map(r => badge(ROUTES[r])).join(' ')}</div>${featHtml(v.id, true)}${arrList(v.id)}
+    <div class="btns"><button class="btn sm ghost" type="button" data-trip-from="${esc(v.id)}">Trip from this stop</button><button class="btn sm ghost" type="button" data-map="${esc(v.id)}">Show on map</button>${SF.canEdit && editing !== v.id ? `<button class="btn sm ghost" type="button" data-edit="${esc(v.id)}">Edit details</button>` : ''}</div></div>`;
   else {
     const near = nearStops(v.pt, 3, 900);
-    html = `<p class="small" style="margin-top:10px">Closest stops to <b>${esc(v.name)}</b>${v.addr ? ', ' + esc(v.addr) : ''}:</p>` + near.map(s => `<div class="stopcard"><h3>${esc(stopName(s.id))}</h3><div class="sub">Stop No. ${esc(s.id)} &middot; ${walkMin(walkSec(s.m))} min walk${walkSec(s.m) > FAR_WALK ? ' (far)' : ''} &nbsp;${[...STOP_ROUTES[s.id]].map(r => badge(ROUTES[r])).join(' ')}</div>${arrList(s.id)}
-      <div class="btns"><button class="btn sm ghost" type="button" data-map="${esc(s.id)}">Show on map</button></div></div>`).join('');
+    html = `<p class="small" style="margin-top:10px">Closest stops to <b>${esc(v.name)}</b>${v.addr ? ', ' + esc(v.addr) : ''}:</p>` + near.map(s => `<div class="stopcard"><h3>${esc(stopName(s.id))}</h3><div class="sub">Stop No. ${esc(s.id)} &middot; ${walkMin(walkSec(s.m))} min walk${walkSec(s.m) > FAR_WALK ? ' (far)' : ''} &nbsp;${[...STOP_ROUTES[s.id]].map(r => badge(ROUTES[r])).join(' ')}</div>${featHtml(s.id, true)}${arrList(s.id)}
+      <div class="btns"><button class="btn sm ghost" type="button" data-map="${esc(s.id)}">Show on map</button>${SF.canEdit && editing !== s.id ? `<button class="btn sm ghost" type="button" data-edit="${esc(s.id)}">Edit details</button>` : ''}</div></div>`).join('');
     if (!refresh && map) fitPts([v.pt, ...near.map(s => stopLL(s.id))], 60);
   }
   $('stopres').innerHTML = html;
   if (!refresh && v.kind === 'stop' && map) { map.panTo({ lat: v.pt[0], lng: v.pt[1] }); if (map.getZoom() < 16) map.setZoom(16); stopClick(v.id); }
 }
 $('stopres').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]'), tri = e.target.closest('[data-tri]'), sv = e.target.closest('[data-save]'), cn = e.target.closest('[data-cancel]');
+  if (ed) { editing = ed.dataset.edit; draft = { ...(SF.stops[editing] || {}) }; renderStopResult(stopShown, true); return; }
+  if (tri) { const [f, v] = tri.dataset.tri.split(':'); draft[f] = v === 'x' ? null : +v; tri.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === tri))); return; }
+  if (cn) { editing = null; renderStopResult(stopShown, true); return; }
+  if (sv) { saveStop(); return; }
   const m = e.target.closest('[data-map]'), t = e.target.closest('[data-trip-from]');
   if (m) { if (PHONE()) setView('map'); if (map) { map.panTo({ lat: stopLL(m.dataset.map)[0], lng: stopLL(m.dataset.map)[1] }); if (map.getZoom() < 16) map.setZoom(16); stopClick(m.dataset.map); } }
   if (t) { const id = t.dataset.tripFrom; setEnd('from', { kind: 'stop', id, name: stopName(id), pt: stopLL(id) }); setView('trip'); $('q-to').focus(); }
@@ -1074,6 +1149,8 @@ $('clock').textContent = clockText(localTime(nowMs()).sec).toUpperCase();
 renderAll();
 poll();
 setInterval(poll, 10000);
+loadStops();
+setInterval(() => { if (!editing) loadStops(); }, 5 * 60e3);
 setInterval(() => { if (Date.now() - dataAt > 14000) renderAll(); }, 15000);   // keep the minutes moving if live data goes quiet
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 if (MAPS_KEY) {

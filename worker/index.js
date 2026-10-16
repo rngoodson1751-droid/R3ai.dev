@@ -16,6 +16,7 @@ import { limitsApi } from './limits/api.js';
 import { placeSearch, googleSearch } from './navigator/search.js';
 import callCenterPage from './private/call-center.html';
 import { staffCheck, refusal } from './callcenter/access.js';
+import { stopFeatures } from './callcenter/stops.js';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -37,11 +38,12 @@ function riderLive(request, env, url, ctx) {
 
 // The call center page. No key in the address: Cloudflare Access signs staff in, and staffCheck() checks the result.
 async function callCenter(request, env, url, ctx, [, sub, slash]) {
-  if (request.method !== 'GET' && request.method !== 'HEAD') return json({ error: 'Not found.' }, 404);
+  if (request.method !== 'GET' && request.method !== 'HEAD' && !(request.method === 'POST' && sub === '/stops')) return json({ error: 'Not found.' }, 404);
   const check = await staffCheck(request, env);
   if (!check.ok) return sub ? json({ error: 'Sign in again.' }, check.status) : refusal(check);
   if (sub === '/live') return riderLive(request, env, url, ctx);
   if (sub === '/api') return googleSearch(request, env, url);
+  if (sub === '/stops') return stopFeatures(request, env, url, check.email);   // what is at each stop; editors can change it
   if (!slash) return Response.redirect(new URL(url.pathname + '/' + url.search, url), 301);
   // The map loads Google's map script in the browser, so it needs a key the browser can see. Best is its own key
   // (GOOGLE_MAPS_BROWSER_KEY) limited to the Maps JavaScript API and to r3ai.dev; until that exists, the server's key is used.
@@ -78,7 +80,7 @@ export default {
     }
     if (url.pathname === '/api/hit') return request.method === 'POST' ? hit(request, env, url) : json({ error: 'Not found.' }, 404);
     if (url.pathname === '/api/ask') return request.method === 'POST' ? ask(request, env, url) : json({ error: 'Use the page at /ask/ to ask a question.' }, 405, { Allow: 'POST' });
-    const cc = url.pathname.match(/^\/work\/call-center(\/live|\/api)?(\/?)$/);
+    const cc = url.pathname.match(/^\/work\/call-center(\/live|\/api|\/stops)?(\/?)$/);
     if (cc) return callCenter(request, env, url, ctx, cc);
     const unlisted = url.pathname.match(/^\/work\/([a-z0-9-]+)\/([a-z0-9]{16,64})(\/live|\/api)?(\/?)$/);
     const reading = request.method === 'GET' || request.method === 'HEAD';
