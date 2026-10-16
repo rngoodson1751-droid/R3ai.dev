@@ -111,15 +111,18 @@ h2:not(:first-child){margin-top:18px}
 .mapbtns button{background:#fff;border:1px solid var(--line-2);border-radius:99px;padding:.4rem .85rem;font-weight:800;font-size:.85rem;box-shadow:var(--shadow);min-height:2.4rem}
 .picking{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.5rem 1rem;font-weight:700;font-size:.9rem;z-index:3;box-shadow:var(--shadow);white-space:nowrap}
 .mk{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
-.bus{position:relative;width:36px;height:36px}
+.bus{position:relative;width:38px;height:38px}
 .bus b{position:absolute;inset:0;border-radius:50%;background:var(--c);color:#fff;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font:900 13px Arial,sans-serif;
   box-shadow:0 0 0 1.5px rgba(10,23,38,.6),0 2px 8px rgba(0,0,0,.4);text-shadow:0 0 2px rgba(0,0,0,.85)}
 .bus i{position:absolute;inset:-8px;transform:rotate(var(--h))}
 .bus i::before{content:"";position:absolute;left:50%;top:0;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom:9px solid var(--c);filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #0a1726)}
 .bus.dim{opacity:.28}
 .bus.hl b{box-shadow:0 0 0 3px var(--blue),0 0 0 7px rgba(10,86,194,.3),0 2px 8px rgba(0,0,0,.4)}
-.stopdot{width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid var(--navy)}
-.stopdot.dim{opacity:.2}
+.stopdot{width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid var(--navy);box-shadow:0 0 0 1px #fff}
+.mk:has(.stopdot)::after{content:"";position:absolute;inset:-9px;border-radius:50%}
+#map.far .stopdot{width:9px;height:9px;border-width:2px}
+.mk.dimmed{opacity:.18}
+.mk:hover .stopdot{transform:scale(1.35)}
 .term{width:20px;height:20px;border-radius:50%;background:#fff;border:5px solid var(--navy);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(10,23,38,.45)}
 .pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:translate(-50%,-100%) rotate(-45deg)!important;background:var(--c);border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
 .pin span{transform:rotate(45deg);font:900 13px Arial,sans-serif;color:#fff}
@@ -543,12 +546,13 @@ function mapReady() {
   // A small HTML marker on the map, for buses, stops and trip pins
   HtmlMarker = class extends G.OverlayView {
     constructor(pos, html, cls, z, onClick, title) { super(); this.pos = pos; this.el = document.createElement('div'); this.el.className = 'mk ' + (cls || ''); this.el.style.zIndex = z || 1; this.el.innerHTML = html; if (title) this.el.title = title;
-      if (onClick) this.el.addEventListener('click', e => { e.stopPropagation(); onClick(); }); }
-    onAdd() { this.getPanes().overlayMouseTarget.appendChild(this.el); }
+      this.click = !!onClick; if (onClick) this.el.addEventListener('click', e => { e.stopPropagation(); onClick(); }); }
+    onAdd() { this.getPanes().overlayMouseTarget.appendChild(this.el); if (this.click) G.OverlayView.preventMapHitsAndGesturesFrom(this.el); }
     draw() { const p = this.getProjection()?.fromLatLngToDivPixel(new G.LatLng(this.pos[0], this.pos[1])); if (p) { this.el.style.left = p.x + 'px'; this.el.style.top = p.y + 'px'; } }
     onRemove() { this.el.remove(); }
-    move(pos) { this.pos = pos; this.draw(); }
-    set(html, title) { if (this.el.innerHTML !== html) this.el.innerHTML = html; if (title) this.el.title = title; }
+    moveTo(pos) { this.pos = pos; this.draw(); }
+    // not named set(): Google's own set() is what setMap() uses underneath
+    update(html, title) { if (this.el.innerHTML !== html) this.el.innerHTML = html; if (title) this.el.title = title; }
   };
   map = new G.Map($('map'), {
     center: { lat: stopLL(TERMINAL)[0], lng: stopLL(TERMINAL)[1] }, zoom: 13, clickableIcons: false, mapTypeControl: false, streetViewControl: false,
@@ -578,12 +582,12 @@ function fitAll() { if (!map) return; const b = new G.LatLngBounds(); for (const
 function fitPts(pts, padding = 40) { if (!map || !pts.length) return; const b = new G.LatLngBounds(); for (const p of pts) b.extend({ lat: p[0], lng: p[1] }); map.fitBounds(b, padding); if (map.getZoom() > 17) map.setZoom(17); }
 function refreshStops() {
   if (!map) return;
-  const close = map.getZoom() >= 15;
+  // every stop is always on the map so call takers can click any of them; small when zoomed out, faded when another route is picked
+  $('map').classList.toggle('far', map.getZoom() < 14);
   for (const id of SERVED) {
     if (id === TERMINAL) continue;
-    const on = selected ? STOP_ROUTES[id].has(selected) : close;
-    if (on && !stopMarks[id].getMap()) stopMarks[id].setMap(map);
-    if (!on && stopMarks[id].getMap()) stopMarks[id].setMap(null);
+    if (!stopMarks[id].getMap()) stopMarks[id].setMap(map);
+    stopMarks[id].el.classList.toggle('dimmed', !!selected && !STOP_ROUTES[id].has(selected));
   }
 }
 function select(id) {
@@ -607,7 +611,7 @@ function drawBuses() {
     const html = `<div class="bus${selected && v.route !== selected ? ' dim' : ''}${hlBus === v.id ? ' hl' : ''}" style="--c:${c};--h:${v.h || 0}deg">${v.h != null && v.s > 1 ? '<i></i>' : ''}<b>${esc(no)}</b></div>`;
     const title = `Bus ${no}${r ? ', ' + routeTitle(r) : ', route not known yet'}`;
     if (!busMarks[v.id]) { busMarks[v.id] = new HtmlMarker([v.lat, v.lon], html, '', 100, () => focusBus(v.id), title); busMarks[v.id].setMap(map); }
-    else { busMarks[v.id].move([v.lat, v.lon]); busMarks[v.id].set(html, title); }
+    else { busMarks[v.id].moveTo([v.lat, v.lon]); busMarks[v.id].update(html, title); }
   }
   for (const id in busMarks) if (!seen.has(id)) { busMarks[id].setMap(null); delete busMarks[id]; }
   if (openBus && busMarks[openBus]) info.setContent(busHtml(openBus));
