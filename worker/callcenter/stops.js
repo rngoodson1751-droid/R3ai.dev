@@ -6,7 +6,7 @@
 // Editors are the addresses listed in the Worker variable CALL_CENTER_EDITORS (comma separated). Everyone else can read.
 import raw from '../transit/network.json';
 
-export const FEATURES = ['pole', 'bench', 'shelter', 'accessible', 'lighting', 'trash', 'bikerack'];
+export const FEATURES = ['pole', 'bench', 'shelter', 'accessible', 'pad', 'lighting', 'trash', 'bikerack'];
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } });
 const editors = env => String(env.CALL_CENTER_EDITORS || '').toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
 

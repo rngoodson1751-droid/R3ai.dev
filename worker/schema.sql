@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS lf_settings (
 -- Each feature is 1 (there), 0 (not there) or NULL (not checked yet). stop is the GTFS stop_id.
 CREATE TABLE IF NOT EXISTS transit_stop_features (
   stop TEXT PRIMARY KEY,
-  pole INTEGER, bench INTEGER, shelter INTEGER, accessible INTEGER, lighting INTEGER, trash INTEGER, bikerack INTEGER,
+  pole INTEGER, bench INTEGER, shelter INTEGER, accessible INTEGER, pad INTEGER, lighting INTEGER, trash INTEGER, bikerack INTEGER,
   notes TEXT,
   updated_by TEXT,
   updated_at TEXT
