@@ -33,6 +33,17 @@ export async function placeSearch(request, env, url) {
   return json(body);
 }
 
+// The call center's search: Google only, never OpenStreetMap (Robert's choice, 16 October 2026). Same answer shape.
+export async function googleSearch(request, env, url) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return json({ error: 'Not found.' }, 404);
+  const q = clean(url.searchParams.get('q')).slice(0, 120);
+  const nocache = { 'cache-control': 'private, no-store' };
+  if (q.length < 2) return json({ results: [] }, 200, nocache);
+  if (!env.GOOGLE_MAPS_KEY) return json({ results: [], error: 'Google search is not set up (GOOGLE_MAPS_KEY).' }, 503, nocache);
+  try { return json({ results: await google(q, env.GOOGLE_MAPS_KEY), source: 'google' }, 200, nocache); }
+  catch (e) { const why = String(e?.message || e).slice(0, 300); console.error('google places', why); return json({ results: [], error: 'Google search did not answer.', google: why }, 502, nocache); }
+}
+
 // Google Places Text Search (New): https://developers.google.com/maps/documentation/places/web-service/text-search
 // The key needs "Places API (New)" allowed, and no website (HTTP referrer) restriction, because this call comes from the
 // server, not from a browser.

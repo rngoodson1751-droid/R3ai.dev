@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#0b2545"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>LC Transit Call Center</title>
+<link rel="icon" href="/favicon.svg"/>
+<style>
+/* LC Transit Call Center: what Public Works call takers need on one screen.
+   The four things that matter most, in order: where each bus is, how long to its next stop, whether it is late,
+   and step-by-step directions from where a caller is to where they want to go.
+   Bright, plain and high contrast for a desk screen all day: near-black on white, a navy header, route colours as the
+   only colour. Wide screens show the bus board, the map and the trip planner side by side; narrower screens use tabs. */
+:root{
+  --ink:#0a1726;--ink-2:#2c3e55;--ink-3:#4f6178;
+  --navy:#0b2545;--blue:#0a56c2;--tint:#e3edfb;--bg:#eaf0f6;
+  --line:rgba(10,23,38,.13);--line-2:rgba(10,23,38,.25);--card:#fff;--fill:rgba(10,23,38,.055);
+  --ok:#0d6b33;--ok-bg:#dcf4e5;--late:#8a4b00;--late-bg:#ffefc4;--vlate:#a3141c;--vlate-bg:#fde1e1;--early:#0a4ea8;--early-bg:#dde9fb;
+  --shadow:0 1px 2px rgba(10,23,38,.06),0 8px 24px rgba(10,23,38,.1);
+  --text:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,system-ui,sans-serif;
+  --round:ui-rounded,'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:var(--text);color:var(--ink);background:var(--bg);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+a{color:var(--blue);font-weight:600}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+noscript{display:block;padding:1rem;background:#ffd95e}
+
+/* ---------- header ---------- */
+header{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:8px max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));background:var(--navy);color:#fff}
+.brand{display:flex;align-items:center;gap:.65rem;min-width:0;flex:1}
+.logo{height:2.4rem;width:2.4rem;border-radius:50%;background:#fff;padding:.1rem;flex-shrink:0}
+.brand h1{font-family:var(--round);font-size:1.2rem;font-weight:900;letter-spacing:.04em;white-space:nowrap}
+.brand p{font-size:.75rem;font-weight:600;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hr{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;font-size:.78rem;font-weight:800;padding:.3rem .7rem;border-radius:99px;white-space:nowrap}
+.pill.live{color:#0a3d1e;background:#bdf0cf}.pill.live::before{content:"";width:.55em;height:.55em;border-radius:50%;background:#14934a;margin-right:.45em;animation:pulse 2s infinite}
+.pill.sched{color:#3b2a00;background:#ffe08a}.pill.sim{color:#3b2a00;background:#ffd0a0}
+@keyframes pulse{50%{opacity:.3}}
+#clock{font-family:var(--round);font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.who{font-size:.76rem;opacity:.85;text-align:right;line-height:1.25;max-width:14rem}
+.who b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who a{color:#fff;opacity:.9;font-weight:600}
+.alert{flex-shrink:0;display:flex;gap:.6rem;background:#ffd95e;color:#1f1500;border-bottom:2px solid #b78100;padding:.5rem 14px;font-size:.92rem;line-height:1.35}
+
+/* ---------- the working area ---------- */
+.work{flex:1;min-height:0;display:grid;gap:10px;padding:10px;
+  grid-template-columns:23.5rem minmax(0,1fr) 28rem;grid-template-rows:auto minmax(0,1fr);grid-template-areas:"buses map tabs" "buses map pane"}
+#p-buses{grid-area:buses}
+#mapwrap{grid-area:map}
+.tabs{grid-area:tabs}
+.pane{grid-area:pane}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.pane{display:none}.pane.on{display:flex}
+.scroll{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 16px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.tabs{display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.tabs button{flex:1;border:0;background:transparent;border-radius:12px;padding:.55rem .3rem;font-weight:800;font-size:.92rem;color:var(--ink-2);min-height:2.75rem}
+.tabs button[aria-selected=true]{background:var(--navy);color:#fff}
+#t-buses,#t-map{display:none}
+#p-buses{display:flex}
+h2{font-family:var(--round);font-size:1.08rem;font-weight:800;margin:2px 2px 8px}
+h2:not(:first-child){margin-top:18px}
+.sub{font-size:.8rem;font-weight:600;color:var(--ink-3)}
+.muted{color:var(--ink-3)}.small{font-size:.84rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:99px;padding:.6rem 1.05rem;font-weight:800;min-height:2.75rem;background:var(--blue);color:#fff;text-decoration:none;font-size:.95rem}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line-2);font-weight:700}
+.btn.sm{min-height:2.3rem;padding:.35rem .8rem;font-size:.86rem}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.note{background:var(--tint);border:1px solid #a9c4ec;border-radius:12px;padding:9px 11px;font-size:.9rem;line-height:1.42;margin-top:10px}
+.note.warn{background:var(--late-bg);border-color:#e3b24c}
+.rb{width:1.65rem;height:1.65rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--round);font-weight:900;font-size:.86rem;color:#fff;flex-shrink:0;vertical-align:middle;
+  box-shadow:0 0 0 1.5px rgba(10,23,38,.3);text-shadow:0 0 2px rgba(10,23,38,.9),0 0 1px rgba(10,23,38,.9)}
+.tag{display:inline-block;font-size:.76rem;font-weight:800;padding:.1rem .48rem;border-radius:7px;white-space:nowrap;vertical-align:1px}
+.tag.ok{color:var(--ok);background:var(--ok-bg)}.tag.late{color:var(--late);background:var(--late-bg)}.tag.vlate{color:var(--vlate);background:var(--vlate-bg)}
+.tag.early{color:var(--early);background:var(--early-bg)}.tag.mute{color:var(--ink-2);background:var(--fill)}
+
+/* ---------- the bus board ---------- */
+.board-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 14px 4px}
+.board-head h2{margin:0}
+.bcard{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-left:6px solid var(--c);border-radius:14px;padding:10px 12px;color:var(--ink)}
+.bcard+.bcard{margin-top:8px}
+.bcard[aria-pressed=true]{outline:2.5px solid var(--blue);outline-offset:-1px}
+.bc-top{display:flex;align-items:center;gap:8px}
+.bc-top b{font-size:.98rem;font-weight:800;flex:1;min-width:0;line-height:1.2}
+.bc-bus{font-size:.86rem;font-weight:700;color:var(--ink-2);margin-top:5px}
+.bc-next{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:6px}
+.bc-next .lbl{font-size:.72rem;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.bc-next .stp{font-weight:800;font-size:1rem;line-height:1.25}
+.bc-next .no{font-size:.78rem;font-weight:600;color:var(--ink-3)}
+.eta{font-family:var(--round);font-weight:900;font-size:1.9rem;line-height:1;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.eta small{display:block;font-family:var(--text);font-size:.7rem;font-weight:700;color:var(--ink-3);margin-top:2px}
+.eta.ok{color:var(--ok)}.eta.late{color:var(--late)}.eta.vlate{color:var(--vlate)}.eta.early{color:var(--early)}.eta.mute{color:var(--ink-2)}
+.bc-foot{font-size:.8rem;color:var(--ink-3);font-weight:600;margin-top:6px;line-height:1.35}
+.bar{height:5px;border-radius:9px;background:var(--fill);margin-top:7px;overflow:hidden}.bar i{display:block;height:100%;background:var(--c);border-radius:9px}
+.grey{margin-top:12px;font-size:.86rem;line-height:1.45}
+.grey li{list-style:none;padding:6px 0;border-top:1px solid var(--line)}
+.grey button{background:none;border:0;padding:0;font-weight:700;color:var(--blue);text-align:left}
+
+/* ---------- map ---------- */
+#mapwrap{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#dfe6ec}
+#map{position:absolute;inset:0}
+.map-msg{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;font-size:.95rem;color:var(--ink-2);line-height:1.5}
+.mapbtns{position:absolute;left:10px;top:10px;display:flex;gap:6px;z-index:2}
+.mapbtns button{background:#fff;border:1px solid var(--line-2);border-radius:99px;padding:.4rem .85rem;font-weight:800;font-size:.85rem;box-shadow:var(--shadow);min-height:2.4rem}
+.picking{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.5rem 1rem;font-weight:700;font-size:.9rem;z-index:3;box-shadow:var(--shadow);white-space:nowrap}
+.mk{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
+.bus{position:relative;width:36px;height:36px}
+.bus b{position:absolute;inset:0;border-radius:50%;background:var(--c);color:#fff;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font:900 13px Arial,sans-serif;
+  box-shadow:0 0 0 1.5px rgba(10,23,38,.6),0 2px 8px rgba(0,0,0,.4);text-shadow:0 0 2px rgba(0,0,0,.85)}
+.bus i{position:absolute;inset:-8px;transform:rotate(var(--h))}
+.bus i::before{content:"";position:absolute;left:50%;top:0;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom:9px solid var(--c);filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #0a1726)}
+.bus.dim{opacity:.28}
+.bus.hl b{box-shadow:0 0 0 3px var(--blue),0 0 0 7px rgba(10,86,194,.3),0 2px 8px rgba(0,0,0,.4)}
+.stopdot{width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid var(--navy)}
+.stopdot.dim{opacity:.2}
+.term{width:20px;height:20px;border-radius:50%;background:#fff;border:5px solid var(--navy);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(10,23,38,.45)}
+.pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:translate(-50%,-100%) rotate(-45deg)!important;background:var(--c);border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
+.pin span{transform:rotate(45deg);font:900 13px Arial,sans-serif;color:#fff}
+.mk.pinwrap{transform:none}
+.iw{font-family:var(--text);color:var(--ink);font-size:.9rem;line-height:1.35;min-width:13rem;max-width:18rem}
+.iw h3{font-family:var(--round);font-size:1.02rem;font-weight:800;margin-bottom:2px}
+.iw ul{list-style:none;margin-top:6px}.iw li{display:flex;align-items:center;gap:7px;padding:5px 0;border-top:1px solid var(--line)}
+.iw .nm{flex:1;min-width:0;font-weight:600;font-size:.86rem}.iw .tm{font-weight:800;white-space:nowrap}
+.iw p{margin-top:4px}
+.iw .btns{margin-top:8px;gap:6px}
+
+/* ---------- search fields ---------- */
+.ends{position:relative;border:1.5px solid var(--line-2);border-radius:16px;background:#fff}
+.end{position:relative;display:flex;align-items:center;gap:.6rem;padding:0 .7rem}
+.end+.end{border-top:1px solid var(--line)}
+.end .dot{width:.85rem;height:.85rem;border-radius:50%;border:3px solid var(--ok);flex-shrink:0}
+.end .dot.b{border-color:#c02626;border-radius:3px}
+.end label{position:absolute;left:2.2rem;top:.32rem;font-size:.68rem;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;pointer-events:none}
+.end input{flex:1;min-width:0;border:0;background:none;padding:1.15rem 2.6rem .5rem 0;font-size:1rem;font-weight:700;outline:none;min-height:3.3rem}
+.end input::placeholder{color:var(--ink-3);font-weight:500}
+.end .clr{position:absolute;right:3.3rem;top:50%;transform:translateY(-50%);border:0;background:none;width:2rem;height:2rem;color:var(--ink-3);font-size:1.25rem}
+.swap{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);width:2.6rem;height:2.6rem;border-radius:50%;border:0;background:var(--fill);display:flex;align-items:center;justify-content:center;z-index:2}
+.swap svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.end:first-child .clr,.end:last-child .clr{right:3.3rem}
+.sugg{position:absolute;left:-1.5px;right:-1.5px;top:100%;margin-top:6px;background:#fff;border:1.5px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px rgba(10,23,38,.22);z-index:20;max-height:min(26rem,60vh);overflow-y:auto}
+.sugg h4{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);padding:9px 12px 4px;display:flex;align-items:center;gap:8px}
+.srow{display:flex;gap:.6rem;align-items:flex-start;width:100%;text-align:left;border:0;background:none;padding:.5rem .75rem;color:var(--ink)}
+.srow+.srow{border-top:1px solid var(--line)}
+.srow[aria-selected=true],.srow:hover{background:var(--tint)}
+.srow .ic{width:1.9rem;height:1.9rem;border-radius:9px;background:var(--fill);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.srow .ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.srow .ic.g{background:#e7f2ff;color:var(--blue)}
+.srow .tx{flex:1;min-width:0}
+.srow b{display:block;font-size:.95rem;font-weight:700;line-height:1.25}
+.srow small{display:block;font-size:.8rem;color:var(--ink-3);font-weight:500;line-height:1.3}
+.srow small.w{color:var(--ok);font-weight:700}.srow small.w.far{color:var(--late)}
+.srow .rs{display:inline-flex;gap:3px;flex-shrink:0}.srow .rs .rb{width:1.3rem;height:1.3rem;font-size:.72rem}
+.credit{font-size:.7rem;color:var(--ink-3);text-align:right;padding:4px 10px 7px}
+.spin{width:14px;height:14px;border-radius:50%;border:2.5px solid rgba(10,86,194,.22);border-top-color:var(--blue);animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.none{padding:12px;font-size:.9rem;color:var(--ink-2)}
+
+/* ---------- trip ---------- */
+.when{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;gap:3px;padding:3px;border-radius:99px;background:var(--fill)}
+.seg button{border:0;background:transparent;border-radius:99px;padding:0 .9rem;font-weight:700;font-size:.9rem;min-height:2.4rem;color:var(--ink-2)}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(10,23,38,.18)}
+.when select,.when input{border:1.5px solid var(--line-2);border-radius:12px;background:#fff;padding:.45rem .6rem;font-weight:700;min-height:2.6rem}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:10px;color:var(--ink)}
+.opt[aria-expanded=true]{border:2px solid var(--blue);padding:10px 12px}
+.opt-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.opt-time{font-family:var(--round);font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums}
+.opt-dur{font-weight:800;color:var(--blue);white-space:nowrap}
+.opt-sum{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:5px;font-size:.86rem;font-weight:600;color:var(--ink-2)}
+.steps{list-style:none;margin-top:10px;border-top:1px solid var(--line);padding-top:4px}
+.steps li{display:grid;grid-template-columns:4.6rem 1.8rem 1fr;gap:6px;padding:8px 0;font-size:.93rem;line-height:1.4;align-items:start}
+.steps li+li{border-top:1px dashed var(--line)}
+.steps .tm{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.steps .ic{display:flex;justify-content:center}
+.walk{width:1.55rem;height:1.55rem;border-radius:50%;background:var(--fill);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 1.5px rgba(10,23,38,.18)}
+.steps small{display:block;color:var(--ink-3);font-size:.8rem;font-weight:500}
+.fare{font-size:.84rem;color:var(--ink-2);margin-top:6px;line-height:1.4}
+.copied{color:var(--ok);font-weight:800;font-size:.86rem;align-self:center}
+.foot{font-size:.8rem;color:var(--ink-3);line-height:1.5;margin-top:14px}
+
+/* ---------- stop and info ---------- */
+.stopcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:10px}
+.stopcard h3{font-family:var(--round);font-size:1.05rem;font-weight:800}
+.arrs{list-style:none;margin-top:6px}
+.arrs li{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:.92rem}
+.arrs .nm{flex:1;min-width:0;font-weight:600}
+.arrs .tm{font-family:var(--round);font-weight:900;font-size:1.05rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.arrs .at{font-size:.78rem;color:var(--ink-3);font-weight:600;display:block}
+.facts{list-style:none}
+.facts li{padding:.55rem 0;border-top:1px solid var(--line);font-size:.92rem;line-height:1.48}
+.facts li:first-child{border-top:0}
+.phones a{display:flex;justify-content:space-between;gap:10px;padding:.55rem 0;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:700;font-size:.93rem}
+.phones a:first-child{border-top:0}
+.phones small{display:block;color:var(--ink-3);font-weight:500;font-size:.8rem}
+.phones .ph{color:var(--blue);white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.65rem 1.1rem;font-weight:600;z-index:100;max-width:92vw;text-align:center;box-shadow:var(--shadow)}
+
+/* ---------- medium screens: the map, with the board and planner in tabs beside it ---------- */
+@media (max-width:1179px){
+  .work{grid-template-columns:minmax(0,1fr) 27rem;grid-template-areas:"map tabs" "map pane"}
+  #p-buses{grid-area:pane;display:none}#p-buses.on{display:flex}
+  #t-buses{display:block}
+  .who{display:none}
+}
+/* ---------- phones: one thing at a time, chosen from the tabs ---------- */
+@media (max-width:760px){
+  header{gap:8px;padding-top:max(8px,env(safe-area-inset-top))}
+  .brand h1{font-size:1.02rem}.brand p{display:none}.logo{height:2.1rem;width:2.1rem}
+  #clock{font-size:1.05rem}
+  .work{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"tabs" "pane";padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));gap:8px}
+  #mapwrap{grid-area:pane;display:none}#mapwrap.on{display:block}
+  #t-map{display:block}
+  .tabs button{font-size:.84rem;padding:.5rem .1rem}
+  .steps li{grid-template-columns:4.1rem 1.7rem 1fr}
+  .eta{font-size:1.6rem}
+}
+@media (prefers-reduced-motion:reduce){.pill.live::before,.spin{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><img class="logo" alt="City of Lake Charles" src="data:image/png;base64,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"/><div><h1>LC TRANSIT</h1><p>Public Works call center &middot; buses, stops and trip directions</p></div></div>
+  <div class="hr"><span class="pill sched" id="feed">Timetable</span><div id="clock" aria-hidden="true">--:--</div><div class="who"><b id="who"></b><a href="/cdn-cgi/access/logout">Sign out</a></div></div>
+</header>
+<div class="alert" id="alert" role="status" hidden></div>
+<noscript>This page needs JavaScript turned on.</noscript>
+<div class="work">
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" id="t-buses" data-v="buses">Buses</button>
+    <button type="button" role="tab" id="t-map" data-v="map">Map</button>
+    <button type="button" role="tab" id="t-trip" data-v="trip">Trip</button>
+    <button type="button" role="tab" id="t-stop" data-v="stop">Stop</button>
+    <button type="button" role="tab" id="t-info" data-v="info">Info</button>
+  </nav>
+
+  <section class="box pane" id="p-buses" aria-label="Where every bus is">
+    <div class="board-head"><h2>Buses now</h2><span class="sub" id="board-sum"></span></div>
+    <div class="scroll" id="board-scroll"><div id="board"></div><ul class="grey" id="greys"></ul><p class="foot" id="board-foot"></p></div>
+  </section>
+
+  <div id="mapwrap" aria-label="Map of routes, stops and live buses">
+    <div id="map"></div>
+    <div class="map-msg" id="map-msg">Loading the map&hellip;</div>
+    <div class="mapbtns"><button type="button" id="m-all">All routes</button></div>
+    <div class="picking" id="picking" hidden></div>
+  </div>
+
+  <section class="box pane" id="p-trip" aria-label="Trip directions">
+    <div class="scroll" id="trip-scroll">
+      <h2>Trip directions</h2>
+      <div class="ends" id="ends">
+        <div class="end" data-end="from"><span class="dot"></span><label for="q-from">Caller is at</label><input id="q-from" type="search" autocomplete="off" spellcheck="false" placeholder="Address, place, business or stop number" aria-autocomplete="list" aria-controls="sugg"/><button class="clr" type="button" data-clr="from" aria-label="Clear" hidden>&times;</button></div>
+        <div class="end" data-end="to"><span class="dot b"></span><label for="q-to">Going to</label><input id="q-to" type="search" autocomplete="off" spellcheck="false" placeholder="Where the caller wants to go" aria-autocomplete="list" aria-controls="sugg"/><button class="clr" type="button" data-clr="to" aria-label="Clear" hidden>&times;</button></div>
+        <button class="swap" id="swap" type="button" aria-label="Swap start and destination"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg></button>
+        <div class="sugg" id="sugg" role="listbox" hidden></div>
+      </div>
+      <div class="when">
+        <div class="seg"><button type="button" id="w-now" aria-pressed="true">Leave now</button><button type="button" id="w-at" aria-pressed="false">Leave at</button></div>
+        <span id="at-wrap" hidden><select id="at-day" aria-label="Day"></select> <input id="at-time" type="time" value="08:00" aria-label="Time"/></span>
+      </div>
+      <div class="btns"><button class="btn" id="go" type="button">Get directions</button><button class="btn ghost" id="pick-map" type="button">Pick on map</button><button class="btn ghost" id="clear" type="button" hidden>Clear</button></div>
+      <div id="results"></div>
+    </div>
+  </section>
+
+  <section class="box pane" id="p-stop" aria-label="Next buses at a stop">
+    <div class="scroll">
+      <h2>Next buses at a stop</h2>
+      <div class="ends"><div class="end" data-end="stop"><span class="dot" style="border-color:var(--navy)"></span><label for="q-stop">Stop or nearby place</label><input id="q-stop" type="search" autocomplete="off" spellcheck="false" placeholder="Stop number, stop name or an address" aria-autocomplete="list" aria-controls="sugg2"/><button class="clr" type="button" data-clr="stop" aria-label="Clear" hidden>&times;</button></div>
+        <div class="sugg" id="sugg2" role="listbox" hidden></div></div>
+      <p class="foot" style="margin-top:8px">A stop shows its next buses. An address or place shows the closest stops to it and their next buses. You can also click any stop on the map.</p>
+      <div id="stopres"></div>
+    </div>
+  </section>
+
+  <section class="box pane" id="p-info" aria-label="Fares, hours and phone numbers">
+    <div class="scroll">
+      <h2>Service days and hours</h2>
+      <ul class="facts" id="facts"></ul>
+      <h2>No service coming up</h2>
+      <ul class="facts" id="closed"></ul>
+      <h2>Notices</h2>
+      <ul class="facts" id="notices"></ul>
+      <h2>Phone numbers</h2>
+      <div class="phones" id="phones"></div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+const NET = "__NETWORK__";
+const MAPS_KEY = "__MAPS_KEY__";
+const STAFF = "__STAFF__";
+const FACTS = [
+  ['Days and hours', 'Monday to Friday. Every route leaves the downtown terminal (1155 Ryan Street) on the hour pattern from 5:45 am, last trip 4:45 pm, with no 12:45 pm trip for the drivers’ lunch. No weekend service.'],
+  ['Each trip', 'Every route is a 45 minute loop from the terminal, so each stop sees its bus about once an hour. Tell callers to be at the stop 5 minutes early.'],
+  ['Fare', '$1.00 one way, exact change (drivers carry no cash). Seniors 65+ and students 50 cents. Riders with a disability, Medicare or Medicaid card, and veterans 25 cents. Children under 3 free. Reduced fares need ID every time.'],
+  ['Transfers', 'Free. Ask the driver when paying. Transfers work at the terminal, for one continuous trip.'],
+  ['Catching the bus', 'Wait at a marked stop and wave as the bus comes. Pull the cord about a block before the stop.'],
+  ['Wheelchairs and bikes', 'Every bus has a wheelchair ramp. The front rack carries two bikes, free.'],
+  ['Bags and food', 'Up to 3 bags the rider can handle. No food or drinks except water and baby bottles. Service animals welcome.'],
+  ['Paratransit', 'Door to door vans for riders whose disability keeps them off the bus, within 3/4 mile of a route, $1.00 each way. Book a day ahead at 337-491-1267.'],
+];
+const PHONES = [
+  ['Lake Charles Transit office', '337-491-1253', '1155 Ryan Street, 8 am to 5 pm weekdays'],
+  ['Paratransit booking', '337-491-1267', '8 am to 4:30 pm weekdays, book a day ahead'],
+  ['City of Lake Charles', '337-491-1200', "City Hall. Mayor's Action Line 337-491-1346"],
+  ['Calcasieu Parish Public Transit', '337-721-4020', 'Rides outside the city limits'],
+  ['211, United Way of SWLA', '211', 'Help finding food, housing and more, 24/7'],
+  ['Lake Charles Police, non-emergency', '337-491-1456', 'Inside the city'],
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const Q = new URLSearchParams(location.search);
+const DEMO = Q.get('demo');   // ?demo=10:20 runs the page as if it were that time today, on simulated buses, for training
+$('who').textContent = typeof STAFF === 'string' ? STAFF : '';
+
+// ---------- time and timetable (the same rules as the bus tracker) ----------
+const TZ = NET.feed.timezone || 'America/Chicago';
+const partsFmt = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hourCycle: 'h23', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+function localTime(ms) {
+  const p = Object.fromEntries(partsFmt.formatToParts(new Date(ms)).map(x => [x.type, x.value]));
+  return { day: p.year + p.month + p.day, dow: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(p.weekday), sec: +p.hour * 3600 + +p.minute * 60 + +p.second, ms };
+}
+let demoShift = 0;
+if (DEMO && /^\d{1,2}:\d\d$/.test(DEMO)) { const [h, m] = DEMO.split(':').map(Number); demoShift = (h * 3600 + m * 60 - localTime(Date.now()).sec) * 1000; }
+const nowMs = () => Date.now() + demoShift;
+const clockText = sec => { sec = ((sec % 86400) + 86400) % 86400; const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + (h < 12 ? ' am' : ' pm'); };
+function runsOn(id, lt) {
+  const s = NET.services[id];
+  if (!s) return false;
+  if (s.added.includes(lt.day)) return true;
+  if (s.removed.includes(lt.day)) return false;
+  return !!s.days[lt.dow] && lt.day >= s.start && lt.day <= s.end;
+}
+const tripsOn = (r, lt) => r.trips.filter(x => runsOn(x[2], lt)).map(x => [x[0], r.patterns[x[1]]]);
+const ROUTES = Object.fromEntries(NET.routes.map(r => [r.id, r]));
+const STOP_ROUTES = {};
+for (const r of NET.routes) for (const p of r.patterns) p.forEach((s, i) => { if (!(i === p.length - 1 && s[0] === p[0][0])) (STOP_ROUTES[s[0]] ||= new Set()).add(r.id); });
+const SERVED = Object.keys(STOP_ROUTES);
+const stopName = id => NET.stops[id] ? NET.stops[id][0] : 'Stop ' + id;
+const stopLL = id => [NET.stops[id][1], NET.stops[id][2]];
+const badge = r => `<span class="rb" style="background:${esc(r.color)}" title="${esc(r.name)}">${esc(r.id)}</span>`;
+const routeTitle = r => 'Route ' + r.id + ' ' + r.short;
+const busNo = id => String(id).split('-').pop();     // the tracker says "0609-47"; staff say Bus 47
+const TERMINAL = NET.stops['201'] ? '201' : NET.routes[0].patterns[0][0][0];
+const WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+// The local day n days from now (taken at noon, so clock changes never matter)
+function dayAhead(n) { const lt = localTime(nowMs()); return localTime(nowMs() + (12 * 3600 - lt.sec) * 1000 + n * 86400e3); }
+const dateText = lt => new Date(lt.ms).toLocaleDateString('en-US', { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric' });
+const dayWord = (lt, n) => n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : WEEKDAY[lt.dow];
+const runsAny = lt => NET.routes.some(r => tripsOn(r, lt).length);
+
+// ---------- distance and walking ----------
+function meters(a, b) { const R = 6371e3, r = Math.PI / 180, dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r; const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }
+const WALK = 1.25, DETOUR = 1.3;                        // m/s, and streets run longer than a straight line
+const walkSec = m => Math.round(m * DETOUR / WALK);
+const walkMin = s => Math.max(1, Math.round(s / 60));
+const FAR_WALK = 20 * 60;                               // past this a walk to the bus is a lot to ask
+function nearStops(pt, n, within) {
+  const all = SERVED.map(id => ({ id, m: meters(pt, stopLL(id)) })).sort((a, b) => a.m - b.m);
+  const close = all.filter(s => s.m <= within).slice(0, n);
+  return close.length ? close : all.slice(0, Math.min(n, 3));
+}
+
+// ---------- live data ----------
+let DATA = null, dataAt = 0, failed = 0;
+const LATE = 180, EARLY = -120;     // seconds off the timetable before a bus is called late or early
+const liveBus = id => DATA && DATA.vehicles && DATA.vehicles.find(v => v.route === id);
+async function poll() {
+  try {
+    const res = await fetch('live' + (demoShift ? '?at=' + Math.round(nowMs()) : ''), { cache: 'no-store', credentials: 'same-origin' });
+    if (res.status === 401 || res.status === 403) { toast('Your sign-in has run out. Reload the page to sign in again.', 15000); throw new Error('signin'); }
+    if (!res.ok) throw new Error(res.status);
+    DATA = await res.json(); dataAt = Date.now(); failed = 0;
+  } catch (e) { if (++failed >= 3 || Date.now() - dataAt > 60e3) DATA = null; }
+  renderAll();
+}
+function renderAll() {
+  renderBoard(); feedPill(); renderAlert(); drawBuses(); renderNotices();
+  if (openStop) refreshStopWindow();
+  if (stopShown) renderStopResult(stopShown, true);
+}
+function feedPill() {
+  const n = DATA && DATA.vehicles ? DATA.vehicles.filter(v => v.route).length : 0;
+  let cls = 'pill sched', text = 'Timetable only';
+  if (DATA && DATA.source === 'sim') { cls = 'pill sim'; text = 'Practice data'; }
+  else if (DATA && !DATA.error) { cls = 'pill live'; text = n + (n === 1 ? ' bus live' : ' buses live'); }
+  $('feed').className = cls; $('feed').textContent = text;
+}
+function renderAlert() {
+  const a = DATA && DATA.alerts ? DATA.alerts.filter(x => x.kind === 'alert') : [];
+  $('alert').hidden = !a.length;
+  if (a.length) $('alert').innerHTML = '<span aria-hidden="true">&#9888;</span><span>' + a.map(x => `<b>${esc(x.title)}</b> ${esc(x.body)}`).join(' &middot; ') + '</span>';
+}
+const delayText = d => d == null ? '' : d >= LATE ? `${Math.round(d / 60)} min late` : d <= EARLY ? `${Math.round(-d / 60)} min early` : 'On time';
+const delayClass = d => d == null ? 'mute' : d >= 600 ? 'vlate' : d >= LATE ? 'late' : d <= EARLY ? 'early' : 'ok';
+const etaText = s => s < 45 ? 'Now' : s < 3600 ? Math.round(s / 60) + ' min' : clockText(localTime(nowMs()).sec + s);
+const ageText = s => s == null ? '' : s < 90 ? `${s} sec ago` : `${Math.round(s / 60)} min ago`;
+
+// Where along a pattern a bus is: the stop it last passed and the next one it reaches
+function distAt(pattern, off) {
+  if (off <= 0) return pattern[0][1];
+  for (let i = 1; i < pattern.length; i++) { const a = pattern[i - 1], b = pattern[i]; if (off <= b[2]) return b[2] > a[2] ? a[1] + (b[1] - a[1]) * (off - a[2]) / (b[2] - a[2]) : b[1]; }
+  return pattern[pattern.length - 1][1];
+}
+// What a route is doing right now. kind: live, layover, detour, sched (timetable, no tracked bus), wait, ended, none.
+function routeStatus(r) {
+  const lt = localTime(nowMs()), trips = tripsOn(r, lt), v = liveBus(r.id);
+  if (v && v.state === 'detour' && (v.d == null || v.trip == null)) return { kind: 'detour', v };
+  if (v && v.d != null) {
+    if (v.state === 'layover' && v.trip != null) return { kind: 'layover', v, at: v.trip, eta: v.trip - lt.sec, delay: v.delay };
+    if (v.state === 'on' || v.state === 'detour') {
+      const trip = trips.find(x => x[0] === v.trip) || trips[0], pattern = trip ? trip[1] : r.patterns[0];
+      const k = Math.max(0, pattern.findIndex(p => p[1] > v.d + 20)), stop = pattern[k] || pattern[pattern.length - 1], prev = k > 0 ? pattern[k - 1] : null;
+      const eta = v.trip != null && v.delay != null ? v.trip + stop[2] + v.delay - lt.sec : (stop[1] - v.d) / 8;
+      const last = pattern[pattern.length - 1], end = v.trip != null && v.delay != null ? v.trip + last[2] + v.delay - lt.sec : (last[1] - v.d) / 8;
+      return { kind: 'live', detour: v.state === 'detour', v, stop: stop[0], prev: prev && prev[0], eta: Math.max(0, eta), end: Math.max(0, end), loop: last[0] === pattern[0][0], endStop: last[0], delay: v.delay, prog: v.d / r.length };
+    }
+  }
+  if (!trips.length) return { kind: 'none' };
+  for (const [start, pattern] of trips) {
+    const end = start + pattern[pattern.length - 1][2];
+    if (lt.sec < start) return { kind: 'wait', at: start };
+    if (lt.sec <= end) { const k = pattern.findIndex(p => start + p[2] > lt.sec), stop = pattern[k] || pattern[pattern.length - 1]; return { kind: 'sched', stop: stop[0], prev: k > 0 ? pattern[k - 1][0] : null, eta: start + stop[2] - lt.sec, end: end - lt.sec, endStop: pattern[pattern.length - 1][0], loop: pattern[pattern.length - 1][0] === pattern[0][0], prog: distAt(pattern, lt.sec - start) / r.length }; }
+  }
+  return { kind: 'ended' };
+}
+// The next buses at a stop across every route serving it: timetable times, moved by the live bus's lateness
+function arrivals(stopId, n, lt = localTime(nowMs())) {
+  const out = [], today = lt.day === localTime(nowMs()).day;
+  for (const id of STOP_ROUTES[stopId] || []) {
+    const r = ROUTES[id], trips = tripsOn(r, lt), v = today ? liveBus(id) : null, tracked = v && v.trip != null && v.delay != null && (v.state === 'on' || v.state === 'layover');
+    trips.forEach(([start, pattern], k) => {
+      pattern.forEach((s, i) => {
+        if (s[0] !== stopId || (i === pattern.length - 1 && s[0] === pattern[0][0])) return;   // the loop's return to the terminal is not a departure
+        let sec = start + s[2], live = false, delay = null, bus = null;
+        if (tracked) {
+          if (start < v.trip) return;
+          if (start === v.trip) { if (v.state === 'on' && s[1] <= v.d + 20) return; sec += v.delay; live = true; delay = v.delay; bus = busNo(v.id); }
+          else { const ci = trips.findIndex(x => x[0] === v.trip), cur = trips[ci], slack = cur && trips[ci + 1] ? trips[ci + 1][0] - (cur[0] + cur[1][cur[1].length - 1][2]) : 0;
+            if (k === ci + 1) { const carry = Math.max(0, v.delay - slack); sec += carry; delay = carry; live = true; bus = busNo(v.id); } }
+        }
+        if (sec >= lt.sec - 30) out.push({ r, sec: sec - lt.sec, at: sec, live, delay, bus, sched: start + s[2] });
+      });
+    });
+  }
+  return out.sort((a, b) => a.sec - b.sec).slice(0, n);
+}
+// How late the live bus is for one particular trip (seconds), or null when that trip has no tracked bus
+function liveDelay(routeId, start) {
+  const v = liveBus(routeId);
+  if (!v || v.trip == null || v.delay == null || !(v.state === 'on' || v.state === 'layover')) return null;
+  return v.trip === start ? v.delay : null;
+}
+
+// ---------- the bus board: where each bus is, its next stop, and whether it is late ----------
+function renderBoard() {
+  const lt = localTime(nowMs());
+  let live = 0, late = 0;
+  $('board').innerHTML = NET.routes.map(r => {
+    const s = routeStatus(r), sel = selected === r.id;
+    let tag = '', bus = '', lbl = 'Next stop', stp = '', no = '', eta = '', etaCls = 'mute', etaSub = '', foot = '', prog = null;
+    if (s.kind === 'live') {
+      live++; if (s.delay >= LATE) late++;
+      tag = s.detour ? '<span class="tag vlate">Detour</span>' : s.delay == null ? '<span class="tag mute">Live</span>' : `<span class="tag ${delayClass(s.delay)}">${esc(delayText(s.delay))}</span>`;
+      bus = `<b>Bus ${esc(busNo(s.v.id))}</b> &middot; ${s.prev ? 'passed ' + esc(stopName(s.prev)) : 'leaving the terminal'}${s.v.s > 1 ? ` &middot; ${Math.round(s.v.s * 2.23694)} mph` : ' &middot; stopped'}`;
+      stp = esc(stopName(s.stop)); no = 'Stop No. ' + esc(s.stop);
+      eta = s.eta < 45 ? 'Now' : Math.round(s.eta / 60); etaSub = s.eta < 45 ? 'arriving' : 'min'; etaCls = s.detour ? 'vlate' : delayClass(s.delay);
+      foot = `${s.loop ? 'Back at the terminal' : 'End of the line at ' + esc(stopName(s.endStop))} about ${clockText(lt.sec + s.end)} &middot; position ${esc(ageText(s.v.age))}`;
+      prog = s.prog;
+    } else if (s.kind === 'layover') {
+      live++;
+      tag = `<span class="tag ${delayClass(s.delay)}">At terminal</span>`;
+      bus = `<b>Bus ${esc(busNo(s.v.id))}</b> &middot; waiting at the downtown terminal`;
+      lbl = 'Leaves the terminal'; stp = clockText(s.at); no = s.delay >= LATE ? `Running ${Math.round(s.delay / 60)} min behind` : 'On schedule';
+      eta = Math.max(0, Math.round(s.eta / 60)); etaSub = 'min'; etaCls = delayClass(s.delay); prog = 0;
+      foot = 'Position ' + esc(ageText(s.v.age));
+    } else if (s.kind === 'detour') {
+      live++;
+      tag = '<span class="tag vlate">Off route</span>';
+      bus = `<b>Bus ${esc(busNo(s.v.id))}</b> &middot; off its usual route, next stop not known`;
+      lbl = 'Near'; const n = nearStops([s.v.lat, s.v.lon], 1, 5000)[0]; stp = esc(stopName(n.id)); no = 'Stop No. ' + esc(n.id);
+      foot = 'Position ' + esc(ageText(s.v.age));
+    } else if (s.kind === 'sched') {
+      tag = '<span class="tag mute">No live bus</span>';
+      bus = DATA && !DATA.error ? 'No tracked bus on this route right now. Times below are from the timetable.' : 'Live positions are not coming in. Times are from the timetable.';
+      stp = esc(stopName(s.stop)); no = 'Stop No. ' + esc(s.stop) + ' (scheduled)';
+      eta = s.eta < 45 ? 'Now' : Math.round(s.eta / 60); etaSub = 'min, sched.'; prog = s.prog;
+    } else if (s.kind === 'wait') {
+      tag = '<span class="tag mute">Not yet</span>'; lbl = 'First trip leaves the terminal'; stp = clockText(s.at); no = '';
+    } else {
+      tag = `<span class="tag mute">${s.kind === 'ended' ? 'Done today' : 'No service'}</span>`;
+      const next = nextServiceText(r); lbl = 'Next trip'; stp = esc(next);
+    }
+    return `<button type="button" class="bcard" data-r="${esc(r.id)}" aria-pressed="${sel}" style="--c:${esc(r.color)}">
+      <div class="bc-top">${badge(r)}<b>${esc(routeTitle(r))}</b>${tag}</div>
+      ${bus ? `<div class="bc-bus">${bus}</div>` : ''}
+      <div class="bc-next"><div><div class="lbl">${esc(lbl)}</div><div class="stp">${stp}</div>${no ? `<div class="no">${no}</div>` : ''}</div>${eta !== '' ? `<div class="eta ${etaCls}">${esc(eta)}<small>${esc(etaSub)}</small></div>` : ''}</div>
+      ${prog != null ? `<div class="bar"><i style="width:${Math.round(Math.min(1, Math.max(0, prog)) * 100)}%"></i></div>` : ''}
+      ${foot ? `<div class="bc-foot">${foot}</div>` : ''}</button>`;
+  }).join('');
+  $('board-sum').textContent = DATA && !DATA.error ? `${live} live${late ? ` · ${late} late` : ''}` : 'Timetable only';
+  // buses moving with no route yet: pulling out, heading to lunch, or going back to the facility
+  const greys = DATA && DATA.vehicles ? DATA.vehicles.filter(v => !v.route && v.lat != null) : [];
+  $('greys').innerHTML = greys.length ? '<li class="sub" style="border-top:0">Moving, route not known yet (pulling out, lunch, or going back to the facility)</li>' + greys.map(v => {
+    const n = nearStops([v.lat, v.lon], 1, 5000)[0];
+    return `<li><button type="button" data-bus="${esc(v.id)}">Bus ${esc(busNo(v.id))}</button> near ${esc(stopName(n.id))} &middot; ${esc(ageText(v.age))}</li>`;
+  }).join('') : '';
+  $('board-foot').textContent = DATA && DATA.error ? 'The bus trackers are not answering right now, so every time on this page is from the timetable.' : 'On time means within 2 minutes early to 3 minutes late. Click a route to show it on the map.';
+}
+function nextServiceText(r) {
+  for (let n = 1; n < 10; n++) { const lt = dayAhead(n), t = tripsOn(r, lt); if (t.length) return `${dayWord(lt, n)} at ${clockText(t[0][0])}`; }
+  return 'Not scheduled';
+}
+$('board').addEventListener('click', e => {
+  const b = e.target.closest('[data-r]'); if (!b) return;
+  const id = b.dataset.r;
+  select(selected === id ? null : id);
+  const v = liveBus(id);
+  if (selected && v && v.lat != null) focusBus(v.id);
+});
+$('greys').addEventListener('click', e => { const b = e.target.closest('[data-bus]'); if (b) focusBus(b.dataset.bus); });
+
+// ---------- map (Google Maps) ----------
+// Everything that touches the map waits for Google's script. The board and the trip planner work without it.
+let map = null, G = null, HtmlMarker = null, info = null, selected = null, openStop = null;
+const lines = {}, edges = {}, stopMarks = {}, busMarks = {};
+let tripShapes = [], pickEnd = null;
+window.gm_authFailure = () => { $('map-msg').hidden = false; $('map-msg').textContent = 'Google Maps refused the key. Check that the key allows the Maps JavaScript API and the r3ai.dev website.'; };
+function mapReady() {
+  G = google.maps;
+  $('map-msg').hidden = true;
+  // A small HTML marker on the map, for buses, stops and trip pins
+  HtmlMarker = class extends G.OverlayView {
+    constructor(pos, html, cls, z, onClick, title) { super(); this.pos = pos; this.el = document.createElement('div'); this.el.className = 'mk ' + (cls || ''); this.el.style.zIndex = z || 1; this.el.innerHTML = html; if (title) this.el.title = title;
+      if (onClick) this.el.addEventListener('click', e => { e.stopPropagation(); onClick(); }); }
+    onAdd() { this.getPanes().overlayMouseTarget.appendChild(this.el); }
+    draw() { const p = this.getProjection()?.fromLatLngToDivPixel(new G.LatLng(this.pos[0], this.pos[1])); if (p) { this.el.style.left = p.x + 'px'; this.el.style.top = p.y + 'px'; } }
+    onRemove() { this.el.remove(); }
+    move(pos) { this.pos = pos; this.draw(); }
+    set(html, title) { if (this.el.innerHTML !== html) this.el.innerHTML = html; if (title) this.el.title = title; }
+  };
+  map = new G.Map($('map'), {
+    center: { lat: stopLL(TERMINAL)[0], lng: stopLL(TERMINAL)[1] }, zoom: 13, clickableIcons: false, mapTypeControl: false, streetViewControl: false,
+    fullscreenControl: true, gestureHandling: 'greedy',
+    // turned down so the five route colours stand out; businesses hidden because staff search for them instead
+    styles: [{ stylers: [{ saturation: -45 }] }, { featureType: 'poi.business', stylers: [{ visibility: 'off' }] }, { featureType: 'transit', stylers: [{ visibility: 'off' }] }],
+  });
+  info = new G.InfoWindow({ maxWidth: 300 });
+  info.addListener('closeclick', () => { openStop = null; });
+  const darker = (hex, f) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * f).toString(16).padStart(2, '0')).join('');
+  for (const r of NET.routes) {
+    const path = r.shape.map(p => ({ lat: p[0], lng: p[1] }));
+    edges[r.id] = new G.Polyline({ map, path, strokeColor: /^#[0-9a-f]{6}$/i.test(r.color) ? darker(r.color, .6) : '#0a1726', strokeWeight: 8, strokeOpacity: 1, clickable: false, zIndex: 1 });
+    lines[r.id] = new G.Polyline({ map, path, strokeColor: r.color, strokeWeight: 5, strokeOpacity: 1, zIndex: 2,
+      icons: [{ icon: { path: G.SymbolPath.FORWARD_OPEN_ARROW, scale: 2.2, strokeColor: '#fff', strokeWeight: 2 }, offset: '40px', repeat: '220px' }] });
+    lines[r.id].addListener('click', () => select(selected === r.id ? null : r.id));
+  }
+  for (const id of SERVED) stopMarks[id] = new HtmlMarker(stopLL(id), id === TERMINAL ? '<div class="term"></div>' : '<div class="stopdot"></div>', '', id === TERMINAL ? 50 : 5, () => stopClick(id), `${stopName(id)} (No. ${id})`);
+  stopMarks[TERMINAL].setMap(map);
+  map.addListener('zoom_changed', refreshStops);
+  map.addListener('click', e => mapClick([e.latLng.lat(), e.latLng.lng()]));
+  if ($('map').offsetWidth) { framed = true; fitAll(); }
+  drawBuses(); refreshStops();
+  if (lastPlan && shown != null) drawTrip(lastPlan.found[shown]);
+}
+function fitAll() { if (!map) return; const b = new G.LatLngBounds(); for (const r of NET.routes) for (const p of r.shape) b.extend({ lat: p[0], lng: p[1] }); map.fitBounds(b, 20); }
+function fitPts(pts, padding = 40) { if (!map || !pts.length) return; const b = new G.LatLngBounds(); for (const p of pts) b.extend({ lat: p[0], lng: p[1] }); map.fitBounds(b, padding); if (map.getZoom() > 17) map.setZoom(17); }
+function refreshStops() {
+  if (!map) return;
+  const close = map.getZoom() >= 15;
+  for (const id of SERVED) {
+    if (id === TERMINAL) continue;
+    const on = selected ? STOP_ROUTES[id].has(selected) : close;
+    if (on && !stopMarks[id].getMap()) stopMarks[id].setMap(map);
+    if (!on && stopMarks[id].getMap()) stopMarks[id].setMap(null);
+  }
+}
+function select(id) {
+  selected = id;
+  if (map) {
+    for (const r of NET.routes) { const on = !id || r.id === id; lines[r.id].setOptions({ strokeOpacity: on ? 1 : .18, zIndex: on && id ? 4 : 2 }); edges[r.id].setOptions({ strokeOpacity: on ? 1 : 0 }); }
+    if (id) fitPts(ROUTES[id].shape.map(p => [p[0], p[1]]), 30); else fitAll();
+    refreshStops();
+  }
+  drawBuses(); renderBoard();
+}
+$('m-all').addEventListener('click', () => { clearTripMap(); select(null); });
+
+function drawBuses() {
+  if (!map) return;
+  const seen = new Set();
+  for (const v of (DATA && DATA.vehicles) || []) {
+    if (v.lat == null) continue;
+    seen.add(v.id);
+    const r = ROUTES[v.route], c = r ? r.color : '#6b778c', no = busNo(v.id);
+    const html = `<div class="bus${selected && v.route !== selected ? ' dim' : ''}${hlBus === v.id ? ' hl' : ''}" style="--c:${c};--h:${v.h || 0}deg">${v.h != null && v.s > 1 ? '<i></i>' : ''}<b>${esc(no)}</b></div>`;
+    const title = `Bus ${no}${r ? ', ' + routeTitle(r) : ', route not known yet'}`;
+    if (!busMarks[v.id]) { busMarks[v.id] = new HtmlMarker([v.lat, v.lon], html, '', 100, () => focusBus(v.id), title); busMarks[v.id].setMap(map); }
+    else { busMarks[v.id].move([v.lat, v.lon]); busMarks[v.id].set(html, title); }
+  }
+  for (const id in busMarks) if (!seen.has(id)) { busMarks[id].setMap(null); delete busMarks[id]; }
+  if (openBus && busMarks[openBus]) info.setContent(busHtml(openBus));
+}
+let hlBus = null, openBus = null;
+function busHtml(id) {
+  const v = DATA && DATA.vehicles && DATA.vehicles.find(x => x.id === id);
+  if (!v) return '<div class="iw">This bus is no longer reporting.</div>';
+  const r = ROUTES[v.route], s = r ? routeStatus(r) : null;
+  let h = `<div class="iw"><h3>Bus ${esc(busNo(v.id))}</h3><div class="sub">${r ? badge(r) + ' ' + esc(routeTitle(r)) : 'Route not known yet'}</div>`;
+  if (s && s.kind === 'live') h += `<p><b>${s.detour ? 'On a detour' : esc(delayText(s.delay) || 'Live')}</b></p><p>Next stop: <b>${esc(stopName(s.stop))}</b> (No. ${esc(s.stop)}), ${esc(etaText(s.eta))}</p>`;
+  else if (s && s.kind === 'layover') h += `<p>At the terminal. Leaves ${clockText(s.at)}.</p>`;
+  else if (s && s.kind === 'detour') h += '<p>Off its usual route.</p>';
+  else { const n = nearStops([v.lat, v.lon], 1, 5000)[0]; h += `<p>Near ${esc(stopName(n.id))} (No. ${esc(n.id)})</p>`; }
+  return h + `<p class="small muted">${v.s > 1 ? Math.round(v.s * 2.23694) + ' mph' : 'Stopped'} &middot; position ${esc(ageText(v.age))}</p></div>`;
+}
+function focusBus(id) {
+  const v = DATA && DATA.vehicles && DATA.vehicles.find(x => x.id === id);
+  if (!v) return;
+  hlBus = id; setTimeout(() => { if (hlBus === id) { hlBus = null; drawBuses(); } }, 6000);
+  if (PHONE()) setView('map');
+  if (!map) return;
+  map.panTo({ lat: v.lat, lng: v.lon }); if (map.getZoom() < 15) map.setZoom(15);
+  openBus = id; openStop = null;
+  info.setContent(busHtml(id)); info.setPosition({ lat: v.lat, lng: v.lon }); info.open({ map });
+  drawBuses();
+}
+
+// a stop on the map: its next buses, or while picking a trip end, that stop is the answer
+function stopWindowHtml(id) {
+  const list = arrivals(id, 5);
+  return `<div class="iw"><h3>${esc(stopName(id))}</h3><div class="sub">Stop No. ${esc(id)} &nbsp;${[...STOP_ROUTES[id]].map(r => badge(ROUTES[r])).join(' ')}</div>
+    <ul>${list.length ? list.map(a => `<li>${badge(a.r)}<span class="nm">${a.live ? `Bus ${esc(a.bus)} <span class="tag ${delayClass(a.delay)}">${esc(delayText(a.delay))}</span>` : 'Scheduled'}</span><span class="tm">${esc(etaText(a.sec))}</span></li>`).join('') : '<li class="muted">No more buses here today.</li>'}</ul>
+    <div class="btns"><button class="btn sm" type="button" onclick="useSpot('from','stop:${esc(id)}')">Caller is here</button><button class="btn sm ghost" type="button" onclick="useSpot('to','stop:${esc(id)}')">Going here</button></div></div>`;
+}
+function stopClick(id) {
+  if (pickEnd) return finishPick({ kind: 'stop', id, name: stopName(id), pt: stopLL(id) });
+  openStop = id; openBus = null;
+  if (!map) return;
+  info.setContent(stopWindowHtml(id)); info.setPosition({ lat: stopLL(id)[0], lng: stopLL(id)[1] }); info.open({ map });
+}
+function refreshStopWindow() { if (map && openStop && info.getMap()) info.setContent(stopWindowHtml(openStop)); }
+let clickPt = null;
+function mapClick(pt) {
+  clickPt = pt;
+  const n = nearStops(pt, 1, 5000)[0];
+  const spot = { kind: 'pt', name: 'Point on the map near ' + stopName(n.id), pt };
+  if (pickEnd) return finishPick(spot);
+  openStop = null; openBus = null;
+  info.setContent(`<div class="iw"><h3>This spot</h3><p>Nearest stop: <b>${esc(stopName(n.id))}</b> (No. ${esc(n.id)}), ${walkMin(walkSec(n.m))} min walk</p><div class="btns"><button class="btn sm" type="button" onclick="useSpot('from','tap')">Caller is here</button><button class="btn sm ghost" type="button" onclick="useSpot('to','tap')">Going here</button></div></div>`);
+  info.setPosition({ lat: pt[0], lng: pt[1] }); info.open({ map });
+}
+window.useSpot = (end, what) => {
+  if (info) info.close();
+  let v;
+  if (what === 'tap') { const n = nearStops(clickPt, 1, 5000)[0]; v = { kind: 'pt', name: 'Point on the map near ' + stopName(n.id), pt: clickPt }; }
+  else { const id = what.slice(5); v = { kind: 'stop', id, name: stopName(id), pt: stopLL(id) }; }
+  setEnd(end, v); setView('trip');
+  if (ends.from && ends.to) plan();
+};
+$('pick-map').addEventListener('click', () => startPick(!ends.from ? 'from' : 'to'));
+function startPick(end) {
+  pickEnd = end;
+  $('picking').hidden = false;
+  $('picking').textContent = end === 'from' ? 'Click the map where the caller is' : 'Click the map where the caller is going';
+  if (PHONE()) setView('map');
+}
+function finishPick(v) {
+  const end = pickEnd; pickEnd = null; $('picking').hidden = true;
+  setEnd(end, v); setView('trip');
+  if (ends.from && ends.to) plan(); else if (end === 'from') $('q-to').focus();
+}
+
+// ---------- search: bus stops from the timetable, and anything else from Google ----------
+const SVG = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const GLYPH = { stop: SVG('<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21v-4M16 21v-4"/>'), place: SVG('<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>') };
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+function stopMatches(text) {
+  const t = norm(text).replace(/^(stop|bus stop|no|number)\s*/, ''), words = t.split(' ').filter(Boolean);
+  if (!words.length) return [];
+  const out = [];
+  for (const id of SERVED) {
+    const nm = norm(stopName(id));
+    let score = 0;
+    if (id === t) score = 100;
+    else if (/^\d+$/.test(t) && id.startsWith(t)) score = 60;
+    else if (words.every(w => nm.includes(w))) score = nm.startsWith(words[0]) ? 40 : 25;
+    if (score) out.push({ id, score });
+  }
+  return out.sort((a, b) => b.score - a.score || stopName(a.id).localeCompare(stopName(b.id))).slice(0, 6);
+}
+// how a place sits against the bus network: the nearest stop and the walk to it
+function walkNote(pt) { const s = nearStops(pt, 1, 5000)[0], w = walkSec(s.m); return { s, w, far: w > FAR_WALK, text: `${walkMin(w)} min walk from ${stopName(s.id)}${w > FAR_WALK ? ': far from any bus' : ''}` }; }
+const searchCache = new Map();
+async function googleFind(text) {
+  const k = norm(text);
+  if (searchCache.has(k)) return searchCache.get(k);
+  const res = await fetch('api?q=' + encodeURIComponent(text), { credentials: 'same-origin' });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || 'Search did not answer.');
+  searchCache.set(k, body.results || []);
+  return body.results || [];
+}
+// One search box (input) with its suggestion list (box). onPick(value) gets {kind, name, pt, id?, addr?}.
+function searchBox(input, box, onPick) {
+  let items = [], active = -1, timer = 0, seq = 0;
+  const close = () => { box.hidden = true; active = -1; input.setAttribute('aria-expanded', 'false'); };
+  const rowHtml = (v, i) => {
+    if (v.kind === 'stop') return `<button type="button" class="srow" role="option" data-i="${i}" aria-selected="${i === active}"><span class="ic">${GLYPH.stop}</span><span class="tx"><b>${esc(stopName(v.id))}</b><small>Bus stop No. ${esc(v.id)}</small></span><span class="rs">${[...STOP_ROUTES[v.id]].map(r => badge(ROUTES[r])).join('')}</span></button>`;
+    const w = walkNote(v.pt);
+    return `<button type="button" class="srow" role="option" data-i="${i}" aria-selected="${i === active}"><span class="ic g">${GLYPH.place}</span><span class="tx"><b>${esc(v.name)}</b><small>${esc([v.kind2, v.addr].filter(Boolean).join(' · '))}</small><small class="w${w.far ? ' far' : ''}">${esc(w.text)}</small></span></button>`;
+  };
+  function paint(stops, places, state) {
+    items = [...stops, ...places];
+    let h = '';
+    if (stops.length) h += '<h4>Bus stops</h4>' + stops.map((v, i) => rowHtml(v, i)).join('');
+    if (state === 'busy') h += '<h4><span class="spin"></span>Searching Google&hellip;</h4>';
+    else if (places.length) h += '<h4>Places and addresses</h4>' + places.map((v, i) => rowHtml(v, stops.length + i)).join('') + '<div class="credit">Results from Google</div>';
+    else if (state && state !== 'short') h += `<div class="none">${esc(state)}</div>`;
+    box.innerHTML = h; box.hidden = !h; input.setAttribute('aria-expanded', String(!!h));
+  }
+  input.addEventListener('input', () => {
+    const text = input.value.trim(), my = ++seq;
+    clearTimeout(timer); active = -1;
+    if (!text) { close(); return; }
+    const stops = stopMatches(text).map(s => ({ kind: 'stop', id: s.id, name: stopName(s.id), pt: stopLL(s.id) }));
+    if (text.length < 3 || /^\d{1,3}$/.test(text)) { paint(stops, [], 'short'); return; }
+    paint(stops, [], 'busy');
+    timer = setTimeout(async () => {
+      try {
+        const found = await googleFind(text);
+        if (my !== seq) return;
+        const places = found.map(g => ({ kind: 'place', name: g.name, addr: g.addr, kind2: g.kind, pt: [g.lat, g.lon] }));
+        paint(stops, places, places.length ? '' : 'Google found nothing in Lake Charles by that name. Try the street address.');
+      } catch (e) { if (my === seq) paint(stops, [], e.message); }
+    }, 280);
+  });
+  input.addEventListener('keydown', e => {
+    if (box.hidden || !items.length) { if (e.key === 'Enter') { e.preventDefault(); input.dispatchEvent(new Event('input')); } return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      box.querySelectorAll('.srow').forEach(el => el.setAttribute('aria-selected', String(+el.dataset.i === active)));
+      box.querySelector(`[data-i="${active}"]`)?.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') { e.preventDefault(); const v = items[active < 0 ? 0 : active]; if (v) { close(); onPick(v); } }
+    else if (e.key === 'Escape') close();
+  });
+  box.addEventListener('mousedown', e => e.preventDefault());   // keep the input focused while clicking a row
+  box.addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) { const v = items[+b.dataset.i]; close(); onPick(v); } });
+  input.addEventListener('blur', () => setTimeout(close, 150));
+  input.addEventListener('focus', () => { if (input.value.trim() && !items.length) input.dispatchEvent(new Event('input')); });
+  return { close };
+}
+
+// ---------- trip planner (City Navigator's planner: walk, one bus or two with a change, walk) ----------
+const ends = { from: null, to: null };
+function setEnd(end, v) {
+  ends[end] = v;
+  const input = $('q-' + end);
+  input.value = v ? (v.kind === 'stop' ? `${stopName(v.id)} (stop ${v.id})` : v.name + (v.addr ? ', ' + v.addr : '')) : '';
+  document.querySelector(`[data-clr="${end}"]`).hidden = !v;
+}
+searchBox($('q-from'), $('sugg'), v => { setEnd('from', v); if (ends.to) plan(); else $('q-to').focus(); });
+searchBox($('q-to'), $('sugg'), v => { setEnd('to', v); if (ends.from) plan(); else $('q-from').focus(); });
+for (const end of ['from', 'to']) $('q-' + end).addEventListener('input', () => { if (ends[end]) { ends[end] = null; document.querySelector(`[data-clr="${end}"]`).hidden = true; } });
+document.querySelectorAll('[data-clr]').forEach(b => b.addEventListener('click', () => { const end = b.dataset.clr; if (end === 'stop') { $('q-stop').value = ''; b.hidden = true; stopShown = null; $('stopres').innerHTML = ''; return; } setEnd(end, null); $('q-' + end).focus(); }));
+$('swap').addEventListener('click', () => { const f = ends.from, t = ends.to; setEnd('from', t); setEnd('to', f); if (ends.from && ends.to) plan(); });
+let when = 'now';
+$('w-now').onclick = () => { when = 'now'; $('w-now').setAttribute('aria-pressed', 'true'); $('w-at').setAttribute('aria-pressed', 'false'); $('at-wrap').hidden = true; if (lastPlan) plan(); };
+$('w-at').onclick = () => { when = 'at'; $('w-at').setAttribute('aria-pressed', 'true'); $('w-now').setAttribute('aria-pressed', 'false'); $('at-wrap').hidden = false; };
+$('at-day').innerHTML = Array.from({ length: 8 }, (_, n) => { const lt = dayAhead(n); return `<option value="${n}">${n < 2 ? dayWord(lt, n) : dateText(lt)}${runsAny(lt) ? '' : ' (no buses)'}</option>`; }).join('');
+for (const id of ['at-day', 'at-time']) $(id).addEventListener('change', () => { if (when === 'at' && ends.from && ends.to) plan(); });
+$('go').addEventListener('click', () => {
+  if (!ends.from) { $('q-from').focus(); toast('Search for where the caller is first.'); return; }
+  if (!ends.to) { $('q-to').focus(); toast('Search for where the caller is going.'); return; }
+  plan();
+});
+$('clear').addEventListener('click', () => { setEnd('from', null); setEnd('to', null); $('results').innerHTML = ''; $('clear').hidden = true; lastPlan = null; clearTripMap(); $('q-from').focus(); });
+
+// Every way to make the trip on day lt, leaving no earlier than leave (seconds after midnight): ride once, or ride
+// twice with a change at a stop both routes serve. Keeps the best three.
+function rides(lt, fromV, toV, leave) {
+  const out = [];
+  // a stop counts as a place too: the caller's own stop has no walk, and a stop a short walk away may be quicker
+  const O = nearStops(fromV.pt, 6, 1000), D = nearStops(toV.pt, 6, 1000);
+  const oWalk = Object.fromEntries(O.map(s => [s.id, walkSec(s.m)])), dWalk = Object.fromEntries(D.map(s => [s.id, walkSec(s.m)]));
+  const trips = Object.fromEntries(NET.routes.map(r => [r.id, tripsOn(r, lt)]));
+  const boards = [];
+  for (const r of NET.routes) for (const [start, pattern] of trips[r.id]) pattern.forEach((s, i) => {
+    if (i === pattern.length - 1 || !(s[0] in oWalk)) return;
+    const dep = start + s[2];
+    if (dep >= leave + oWalk[s[0]]) boards.push({ r, start, pattern, i, dep });
+  });
+  for (const b of boards) {
+    for (let j = b.i + 1; j < b.pattern.length; j++) {
+      const s = b.pattern[j];
+      if (s[0] in dWalk) out.push({ legs: [{ r: b.r, start: b.start, pattern: b.pattern, i: b.i, j }], arrive: b.start + s[2] + dWalk[s[0]] });
+    }
+    for (let a = b.i + 1; a < b.pattern.length; a++) {
+      const x = b.pattern[a][0], arrX = b.start + b.pattern[a][2];
+      for (const r2 of NET.routes) for (const [start2, p2] of trips[r2.id]) {
+        if (r2.id === b.r.id && start2 === b.start) continue;
+        p2.forEach((s2, k) => {
+          if (s2[0] !== x || k === p2.length - 1) return;
+          if (start2 + s2[2] < arrX + (r2.id === b.r.id ? 0 : 120)) return;   // two minutes to change buses
+          for (let j = k + 1; j < p2.length; j++) if (p2[j][0] in dWalk)
+            out.push({ legs: [{ r: b.r, start: b.start, pattern: b.pattern, i: b.i, j: a }, { r: r2, start: start2, pattern: p2, i: k, j }], arrive: start2 + p2[j][2] + dWalk[p2[j][0]] });
+        });
+      }
+    }
+  }
+  for (const o of out) {
+    const f = o.legs[0], l = o.legs[o.legs.length - 1];
+    o.board = f.start + f.pattern[f.i][2];
+    o.walk1 = oWalk[f.pattern[f.i][0]]; o.walk2 = dWalk[l.pattern[l.j][0]];
+    o.leave = o.board - o.walk1;
+  }
+  out.sort((a, b) => a.arrive - b.arrive || b.leave - a.leave || (a.walk1 + a.walk2) - (b.walk1 + b.walk2) || a.legs.length - b.legs.length);
+  const seen = new Set(), best = [];
+  for (const o of out) {
+    const key = o.legs.map(l => l.r.id).join('>') + '@' + o.legs[0].start;
+    if (seen.has(key) || seen.has('arr' + o.arrive)) continue;
+    seen.add(key); seen.add('arr' + o.arrive);
+    if (best.some(k => k.arrive <= o.arrive && k.leave >= o.leave)) continue;   // leaves earlier yet arrives no sooner
+    best.push(o);
+    if (best.length === 3) break;
+  }
+  return best;
+}
+let lastPlan = null, shown = null;
+function plan() {
+  const from = ends.from, to = ends.to;
+  if (!from || !to) return;
+  const direct = meters(from.pt, to.pt), walkOnly = walkSec(direct);
+  const startDay = when === 'at' ? +$('at-day').value : 0;
+  const atSec = when === 'at' ? (() => { const [h, m] = ($('at-time').value || '08:00').split(':').map(Number); return h * 3600 + m * 60; })() : null;
+  let found = [], dayN = startDay, lt = null;
+  for (let n = startDay; n < startDay + 8 && !found.length; n++) {
+    lt = n === 0 ? localTime(nowMs()) : dayAhead(n);
+    const leave = n === startDay ? (atSec ?? localTime(nowMs()).sec) : 0;
+    found = rides(lt, from, to, leave);
+    dayN = n;
+  }
+  if (walkOnly <= 20 * 60) found = found.filter(o => o.arrive - o.leave < walkOnly);   // a bus slower than walking is no help
+  lastPlan = { from, to, found, lt, dayN, today: dayN === 0 };
+  const fw = from.kind === 'stop' ? null : walkNote(from.pt), tw = to.kind === 'stop' ? null : walkNote(to.pt);
+  let html = '';
+  if (walkOnly <= 25 * 60) html += `<div class="note">It is about a <b>${walkMin(walkOnly)} minute walk</b> (${(direct * DETOUR / 1609).toFixed(1)} miles). <a href="${gmaps(from.pt, to.pt, 'walking')}" target="_blank" rel="noopener">Walking directions</a></div>`;
+  if (fw && fw.far) html += `<div class="note warn">The caller's starting point is far from bus service: the nearest stop, ${esc(stopName(fw.s.id))}, is about a ${walkMin(fw.w)} minute walk. Paratransit (337-491-1267) may be an option if they qualify.</div>`;
+  if (tw && tw.far) html += `<div class="note warn">The destination is far from bus service: the nearest stop, ${esc(stopName(tw.s.id))}, is about a ${walkMin(tw.w)} minute walk.</div>`;
+  if (!found.length && walkOnly > 25 * 60) html += '<div class="note warn">No bus trip found within a week. Try a stop or a place closer to a route.</div>';
+  if (found.length && dayN !== startDay) html += `<div class="note warn">${startDay === 0 && runsAny(localTime(nowMs())) ? 'No more buses today can make this trip' : `Buses do not run ${startDay === 0 ? 'today' : 'that day'}`}. These are for <b>${esc(dayWord(lt, dayN))}, ${esc(dateText(lt))}</b>.</div>`;
+  html += found.map((o, k) => optHtml(o, k)).join('');
+  if (found.length) html += `<p class="foot">Times are from the City's timetable${lastPlan.today && DATA && !DATA.error ? ', moved for the live bus where one is tracked' : ''}. Tell the caller to be at the stop 5 minutes early: buses come about once an hour.</p>`;
+  $('results').innerHTML = html;
+  $('clear').hidden = false;
+  shown = null;
+  if (found.length) showOpt(0); else clearTripMap();
+  const sc = $('trip-scroll'), res = $('results');
+  requestAnimationFrame(() => sc.scrollTo({ top: res.offsetTop - 8, behavior: 'smooth' }));
+}
+function gmaps(a, b, mode) { return `https://www.google.com/maps/dir/?api=1&origin=${a[0]},${a[1]}&destination=${b[0]},${b[1]}&travelmode=${mode}`; }
+const ICON = {
+  walk: SVG('<circle cx="13" cy="4" r="1.8"/><path d="M10 21l2-6 3 3v3M8 12l2-4 4 1 2 3 2 1M12 15l-1-5"/>').replace('<svg', '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"'),
+  change: SVG('<path d="M4 8h13l-3-3M20 16H7l3 3"/>').replace('<svg', '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"'),
+  off: SVG('<path d="M12 4v13M6 12l6 6 6-6"/>').replace('<svg', '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"'),
+};
+// The steps of one way to make the trip, each as screen html and as plain words to read out or paste
+function tripSteps(o) {
+  const { from, to, today } = lastPlan, steps = [];
+  const f = o.legs[0], firstStop = f.pattern[f.i][0];
+  const fromName = from.kind === 'stop' ? 'the stop' : from.name;
+  if (from.kind === 'stop' && o.walk1 < 60) steps.push({ tm: o.board - 300, ic: `<span class="walk">${ICON.walk}</span>`, html: `Be at <b>${esc(stopName(firstStop))}</b> by ${clockText(o.board - 300)}<small>Stop No. ${esc(firstStop)}. Five minutes early, in case the bus is early.</small>`, text: `Be at ${stopName(firstStop)} (stop ${firstStop}) by ${clockText(o.board - 300)}.` });
+  else steps.push({ tm: o.leave, ic: `<span class="walk">${ICON.walk}</span>`, html: `Walk ${walkMin(o.walk1)} min from ${esc(fromName)} to <b>${esc(stopName(firstStop))}</b><small>Stop No. ${esc(firstStop)}${o.walk1 > 60 ? ` &middot; <a href="${gmaps(from.pt, stopLL(firstStop), 'walking')}" target="_blank" rel="noopener">walking directions</a>` : ''}</small>`, text: `Leave ${fromName} by ${clockText(o.leave - 300)} and walk about ${walkMin(o.walk1)} min to ${stopName(firstStop)} (stop ${firstStop}). Be there 5 minutes early.` });
+  o.legs.forEach((l, n) => {
+    const on = l.pattern[l.i], off = l.pattern[l.j], dep = l.start + on[2], arr = l.start + off[2];
+    const d = today ? liveDelay(l.r.id, l.start) : null, v = d != null ? liveBus(l.r.id) : null;
+    const live = d != null ? ` <span class="tag ${delayClass(d)}">Bus ${esc(busNo(v.id))} &middot; ${esc(delayText(d))}</span>` : '';
+    const liveTxt = d != null ? ` Bus ${busNo(v.id)} is ${delayText(d).toLowerCase()} right now.` : '';
+    const nstops = l.j - l.i, mins = Math.round((arr - dep) / 60);
+    if (n > 0) steps.push({ tm: null, ic: `<span class="walk">${ICON.change}</span>`, html: `Change buses at <b>${esc(stopName(on[0]))}</b><small>Ask for a free transfer when paying on the first bus.</small>`, text: `Change buses at ${stopName(on[0])}. Ask for a free transfer when paying on the first bus.` });
+    steps.push({ tm: dep + (d || 0), ic: badge(l.r), html: `Board <b>${esc(routeTitle(l.r))}</b>${live}<small>Scheduled ${clockText(dep)} &middot; ride ${nstops} stop${nstops === 1 ? '' : 's'}, about ${mins} min</small>`, text: `${clockText(dep + (d || 0))}: board ${routeTitle(l.r)}.${liveTxt} Ride ${nstops} stop${nstops === 1 ? '' : 's'}, about ${mins} min.` });
+    steps.push({ tm: arr + (d || 0), ic: `<span class="walk">${ICON.off}</span>`, html: `Get off at <b>${esc(stopName(off[0]))}</b><small>Stop No. ${esc(off[0])}. ${l.j === l.pattern.length - 1 ? 'End of the line.' : 'Pull the cord about a block before.'}</small>`, text: `${clockText(arr + (d || 0))}: get off at ${stopName(off[0])} (stop ${off[0]}).${l.j === l.pattern.length - 1 ? '' : ' Pull the cord about a block before.'}` });
+  });
+  const last = o.legs[o.legs.length - 1], lastStop = last.pattern[last.j][0];
+  if (to.kind === 'stop' && o.walk2 < 60) steps.push({ tm: o.arrive, ic: `<span class="walk">${ICON.walk}</span>`, html: `Arrive at <b>${esc(to.name)}</b>`, text: `Arrive about ${clockText(o.arrive)}.` });
+  else steps.push({ tm: o.arrive, ic: `<span class="walk">${ICON.walk}</span>`, html: `Walk ${walkMin(o.walk2)} min to <b>${esc(to.name)}</b>${to.addr ? `<small>${esc(to.addr)}</small>` : ''}${o.walk2 > 60 ? `<small><a href="${gmaps(stopLL(lastStop), to.pt, 'walking')}" target="_blank" rel="noopener">walking directions</a></small>` : ''}`, text: `Walk about ${walkMin(o.walk2)} min to ${to.name}${to.addr ? ', ' + to.addr : ''}. Arrive about ${clockText(o.arrive)}.` });
+  return steps;
+}
+const FARE = 'Fare: $1.00 exact change (drivers carry no cash). Seniors 65+ and students 50 cents, riders with a disability, Medicare or Medicaid card, and veterans 25 cents, with ID.';
+function optHtml(o, k) {
+  const { today } = lastPlan, lt = localTime(nowMs());
+  const leaveIn = today ? o.leave - lt.sec : null;
+  const head = leaveIn != null && leaveIn < 3600 ? (leaveIn <= 60 ? 'Leave now' : `Leave in ${Math.round(leaveIn / 60)} min`) : `Leave ${clockText(o.leave)}`;
+  const steps = tripSteps(o);
+  return `<div class="opt" role="button" tabindex="0" aria-expanded="false" data-k="${k}">
+    <div class="opt-top"><span class="opt-time">${clockText(o.leave)} &rarr; ${clockText(o.arrive)}</span><span class="opt-dur">${Math.round((o.arrive - o.leave) / 60)} min</span></div>
+    <div class="opt-sum">${esc(head)} &middot; ${o.legs.map(l => badge(l.r)).join(' &rsaquo; ')} &middot; ${walkMin(o.walk1 + o.walk2)} min walking</div>
+    <div class="more" hidden>
+      <ol class="steps">${steps.map(s => `<li><span class="tm">${s.tm == null ? '' : clockText(s.tm)}</span><span class="ic">${s.ic}</span><span>${s.html}</span></li>`).join('')}</ol>
+      <div class="fare">${esc(FARE)}${o.legs.length > 1 ? ' The transfer is free.' : ''}</div>
+      <div class="btns"><button class="btn sm" type="button" data-copy="${k}">Copy directions</button><a class="btn sm ghost" href="${gmaps(lastPlan.from.pt, lastPlan.to.pt, 'transit')}" target="_blank" rel="noopener">Open in Google Maps</a><span class="copied" hidden>Copied</span></div>
+    </div></div>`;
+}
+function tripText(o) {
+  const { from, to, lt, dayN } = lastPlan;
+  const lines = [`Bus directions: ${from.kind === 'stop' ? stopName(from.id) + ' (stop ' + from.id + ')' : from.name} to ${to.kind === 'stop' ? stopName(to.id) + ' (stop ' + to.id + ')' : to.name}`,
+    `${dayWord(lt, dayN)}, ${dateText(lt)}`, ''];
+  tripSteps(o).forEach((s, i) => lines.push(`${i + 1}. ${s.text}`));
+  lines.push('', FARE + (o.legs.length > 1 ? ' The transfer is free.' : ''), 'Lake Charles Transit: 337-491-1253');
+  return lines.join('\n');
+}
+function showOpt(k) {
+  if (!lastPlan || !lastPlan.found[k]) return;
+  shown = k;
+  document.querySelectorAll('.opt').forEach(el => { const on = +el.dataset.k === k; el.setAttribute('aria-expanded', String(on)); el.querySelector('.more').hidden = !on; });
+  drawTrip(lastPlan.found[k]);
+}
+$('results').addEventListener('click', async e => {
+  if (e.target.closest('a')) return;
+  const c = e.target.closest('[data-copy]');
+  if (c) {
+    e.stopPropagation();
+    const text = tripText(lastPlan.found[+c.dataset.copy]);
+    try { await navigator.clipboard.writeText(text); } catch { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+    const ok = c.parentNode.querySelector('.copied'); ok.hidden = false; setTimeout(() => { ok.hidden = true; }, 2500);
+    return;
+  }
+  const o = e.target.closest('.opt'); if (o && o.getAttribute('aria-expanded') !== 'true') showOpt(+o.dataset.k);
+});
+$('results').addEventListener('keydown', e => { const o = e.target.closest('.opt'); if (o && e.target === o && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); showOpt(+o.dataset.k); } });
+
+function clearTripMap() { for (const s of tripShapes) s.setMap(null); tripShapes = []; if (map) for (const r of NET.routes) { lines[r.id].setOptions({ strokeOpacity: !selected || r.id === selected ? 1 : .18 }); edges[r.id].setOptions({ strokeOpacity: !selected || r.id === selected ? 1 : 0 }); } }
+function drawTrip(o) {
+  if (!map || !o) return;
+  clearTripMap();
+  for (const r of NET.routes) { const on = o.legs.some(l => l.r.id === r.id); lines[r.id].setOptions({ strokeOpacity: on ? 1 : .18 }); edges[r.id].setOptions({ strokeOpacity: on ? 1 : 0 }); }
+  const dots = { path: 'M 0,-1 0,1', strokeOpacity: 1, strokeColor: '#0a1726', scale: 3.5 };
+  const walkLine = (a, b) => tripShapes.push(new G.Polyline({ map, path: [{ lat: a[0], lng: a[1] }, { lat: b[0], lng: b[1] }], strokeOpacity: 0, icons: [{ icon: dots, offset: '0', repeat: '12px' }], zIndex: 6, clickable: false }));
+  const pts = [lastPlan.from.pt, lastPlan.to.pt];
+  const f = o.legs[0], l = o.legs[o.legs.length - 1];
+  walkLine(lastPlan.from.pt, stopLL(f.pattern[f.i][0]));
+  for (const leg of o.legs) {
+    const d0 = leg.pattern[leg.i][1], d1 = leg.pattern[leg.j][1], a = leg.pattern[leg.i][0], b = leg.pattern[leg.j][0];
+    const ll = [stopLL(a), ...leg.r.shape.filter(p => p[2] > d0 && p[2] < d1).map(p => [p[0], p[1]]), stopLL(b)];
+    const path = ll.map(p => ({ lat: p[0], lng: p[1] }));
+    tripShapes.push(new G.Polyline({ map, path, strokeColor: '#fff', strokeWeight: 12, strokeOpacity: .95, zIndex: 7, clickable: false }));
+    tripShapes.push(new G.Polyline({ map, path, strokeColor: leg.r.color, strokeWeight: 7, zIndex: 8, clickable: false }));
+    for (const id of [a, b]) { const m = new HtmlMarker(stopLL(id), '<div class="stopdot"></div>', '', 60, () => stopClick(id), `${stopName(id)} (No. ${id})`); m.setMap(map); tripShapes.push(m); }
+    pts.push(...ll);
+  }
+  walkLine(stopLL(l.pattern[l.j][0]), lastPlan.to.pt);
+  for (const [pt, c, t] of [[lastPlan.from.pt, '#0f6b36', 'A'], [lastPlan.to.pt, '#c02626', 'B']]) { const m = new HtmlMarker(pt, `<div class="pin" style="--c:${c}"><span>${t}</span></div>`, 'pinwrap', 90); m.setMap(map); tripShapes.push(m); }
+  fitPts(pts, 50);
+}
+
+// ---------- next buses at a stop, or near a place ----------
+let stopShown = null;
+searchBox($('q-stop'), $('sugg2'), v => { $('q-stop').value = v.kind === 'stop' ? `${stopName(v.id)} (stop ${v.id})` : v.name; document.querySelector('[data-clr="stop"]').hidden = false; renderStopResult(v); });
+function arrList(id) {
+  const list = arrivals(id, 6);
+  if (!list.length) { const nx = nextDayAt(id); return `<p class="small muted" style="margin-top:6px">No more buses here today.${nx ? ' Next: ' + esc(nx) + '.' : ''}</p>`; }
+  return '<ul class="arrs">' + list.map(a => `<li>${badge(a.r)}<span class="nm">${esc(routeTitle(a.r))}<span class="at">${a.live ? `Bus ${esc(a.bus)} <span class="tag ${delayClass(a.delay)}">${esc(delayText(a.delay))}</span>` : 'Scheduled'} &middot; ${clockText(a.at)}</span></span><span class="tm">${esc(etaText(a.sec))}</span></li>`).join('') + '</ul>';
+}
+function nextDayAt(id) { for (let n = 1; n < 10; n++) { const lt = dayAhead(n), a = arrivals(id, 1, { ...lt, sec: 0 }); if (a.length) return `${dayWord(lt, n)} at ${clockText(a[0].at)}`; } return ''; }
+function renderStopResult(v, refresh) {
+  stopShown = v;
+  let html = '';
+  if (v.kind === 'stop') html = `<div class="stopcard"><h3>${esc(stopName(v.id))}</h3><div class="sub">Stop No. ${esc(v.id)} &nbsp;${[...STOP_ROUTES[v.id]].map(r => badge(ROUTES[r])).join(' ')}</div>${arrList(v.id)}
+    <div class="btns"><button class="btn sm ghost" type="button" data-trip-from="${esc(v.id)}">Trip from this stop</button><button class="btn sm ghost" type="button" data-map="${esc(v.id)}">Show on map</button></div></div>`;
+  else {
+    const near = nearStops(v.pt, 3, 900);
+    html = `<p class="small" style="margin-top:10px">Closest stops to <b>${esc(v.name)}</b>${v.addr ? ', ' + esc(v.addr) : ''}:</p>` + near.map(s => `<div class="stopcard"><h3>${esc(stopName(s.id))}</h3><div class="sub">Stop No. ${esc(s.id)} &middot; ${walkMin(walkSec(s.m))} min walk${walkSec(s.m) > FAR_WALK ? ' (far)' : ''} &nbsp;${[...STOP_ROUTES[s.id]].map(r => badge(ROUTES[r])).join(' ')}</div>${arrList(s.id)}
+      <div class="btns"><button class="btn sm ghost" type="button" data-map="${esc(s.id)}">Show on map</button></div></div>`).join('');
+    if (!refresh && map) fitPts([v.pt, ...near.map(s => stopLL(s.id))], 60);
+  }
+  $('stopres').innerHTML = html;
+  if (!refresh && v.kind === 'stop' && map) { map.panTo({ lat: v.pt[0], lng: v.pt[1] }); if (map.getZoom() < 16) map.setZoom(16); stopClick(v.id); }
+}
+$('stopres').addEventListener('click', e => {
+  const m = e.target.closest('[data-map]'), t = e.target.closest('[data-trip-from]');
+  if (m) { if (PHONE()) setView('map'); if (map) { map.panTo({ lat: stopLL(m.dataset.map)[0], lng: stopLL(m.dataset.map)[1] }); if (map.getZoom() < 16) map.setZoom(16); stopClick(m.dataset.map); } }
+  if (t) { const id = t.dataset.tripFrom; setEnd('from', { kind: 'stop', id, name: stopName(id), pt: stopLL(id) }); setView('trip'); $('q-to').focus(); }
+});
+
+// ---------- info ----------
+$('facts').innerHTML = FACTS.map(f => `<li><b>${esc(f[0])}.</b> ${esc(f[1])}</li>`).join('');
+$('phones').innerHTML = PHONES.map(p => `<a href="tel:${esc(p[1].replace(/[^\d]/g, ''))}"><span>${esc(p[0])}<small>${esc(p[2])}</small></span><span class="ph">${esc(p[1])}</span></a>`).join('');
+// weekdays in the next three months with no buses, read from the timetable itself (holidays)
+(function closedDays() {
+  const out = [];
+  for (let n = 0; n < 92; n++) { const lt = dayAhead(n); if (lt.dow < 5 && !runsAny(lt)) out.push(dateText(lt)); }
+  $('closed').innerHTML = out.length ? out.map(d => `<li>${esc(d)}</li>`).join('') : '<li>No weekday closures in the next three months.</li>';
+})();
+function renderNotices() {
+  const a = DATA && DATA.alerts ? DATA.alerts : [];
+  $('notices').innerHTML = a.length ? a.map(x => `<li><b>${esc(x.title)}.</b> ${esc(x.body)}</li>`).join('') : '<li class="muted">No alerts or notices posted.</li>';
+}
+
+// ---------- views ----------
+const wideMQ = matchMedia('(min-width:1180px)'), phoneMQ = matchMedia('(max-width:760px)');
+const PHONE = () => phoneMQ.matches;
+let view = 'trip', framed = false;
+function setView(v) {
+  if (v === 'buses' && wideMQ.matches) v = 'trip';
+  if (v === 'map' && !PHONE()) v = view === 'map' ? 'trip' : view;
+  view = v;
+  for (const b of document.querySelectorAll('.tabs [data-v]')) b.setAttribute('aria-selected', String(b.dataset.v === v));
+  for (const id of ['p-buses', 'p-trip', 'p-stop', 'p-info']) $(id).classList.toggle('on', id === 'p-' + v);
+  $('mapwrap').classList.toggle('on', v === 'map');
+  if (map && v === 'map' && !framed) setTimeout(() => { framed = true; if (lastPlan && shown != null) drawTrip(lastPlan.found[shown]); else fitAll(); }, 60);
+}
+document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) setView(b.dataset.v); });
+for (const mq of [wideMQ, phoneMQ]) mq.addEventListener('change', () => setView(view));
+setView(wideMQ.matches ? 'trip' : 'buses');
+
+// ---------- clock, toast, start ----------
+let toastT = 0;
+function toast(m, ms = 4000) { const t = $('toast'); clearTimeout(toastT); t.textContent = m; t.hidden = !m; if (m) toastT = setTimeout(() => { t.hidden = true; }, ms); }
+setInterval(() => { $('clock').textContent = clockText(localTime(nowMs()).sec).toUpperCase(); }, 1000);
+$('clock').textContent = clockText(localTime(nowMs()).sec).toUpperCase();
+renderAll();
+poll();
+setInterval(poll, 10000);
+setInterval(() => { if (Date.now() - dataAt > 14000) renderAll(); }, 15000);   // keep the minutes moving if live data goes quiet
+document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+if (MAPS_KEY) {
+  window.ccMapReady = mapReady;
+  const s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(MAPS_KEY) + '&v=weekly&loading=async&callback=ccMapReady';
+  s.async = true;
+  s.onerror = () => { $('map-msg').textContent = 'The Google map could not load. The bus board and directions still work.'; };
+  document.head.appendChild(s);
+} else $('map-msg').textContent = 'The map needs a Google Maps key (GOOGLE_MAPS_BROWSER_KEY). The bus board and directions still work.';
+</script>
+</body>
+</html>
