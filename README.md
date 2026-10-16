@@ -123,6 +123,8 @@ The lobby display is a live bus tracker. Its page is `worker/private/lobby-displ
 - Paratransit vans (Geotab only, named `609-002` to `609-008`: a single-digit unit after `00`) are never treated as buses, so they stay off the lobby display even if Zonar is down. Their positions are served at `<page address>/live?vans=1` only to a request carrying the secret `PARA_FEED_KEY` in an `x-para-feed` header; the Para-Transit app (para.r3ai.dev) calls it over a private service binding. Set `PARA_FEED_KEY` as a Worker secret here and the same value on the `paratransit-app` Worker. Without it the address answers "not found".
 - `<page address>/live?debug=1` lists every bus, what each tracker last said about it, which one is being used, and why the bus is or is not on the map. It is the first place to look when a bus is missing.
 
+On desktops, laptops and the lobby TV the five route cards share the sidebar's height, so all five always show without scrolling; each card is a size container whose type scales with its height, so no information is dropped.
+
 Page settings go on the end of the link: `?lobby=1` for the lobby TV (no buttons; adds the weather, notices and phone-code panel), `?demo=10:20` to see it at that time of day with simulated buses and a sample alert (this works whether or not Zonar is connected), `?lang=es` for Spanish.
 
 Alerts and notices are rows in the `transit_alerts` table of the `r3ai-requests` database (layout in `worker/schema.sql`). An `alert` shows in the banner across the top; a `notice` shows in the lobby panel and the ticker. Times are UTC.
