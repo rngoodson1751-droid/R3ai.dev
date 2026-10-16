@@ -33,15 +33,70 @@ export async function placeSearch(request, env, url) {
   return json(body);
 }
 
-// The call center's search: Google only, never OpenStreetMap (Robert's choice, 16 October 2026). Same answer shape.
+// The call center's search: Google only, never OpenStreetMap (Robert's choice, 16 October 2026).
+//   <page>/api?q=text   suggestions: Google's address autocomplete (house addresses, even half typed) together with
+//                       its place search (businesses and named places). Autocomplete answers carry an "id" and no
+//                       position yet; the page asks for it when one is picked:
+//   <page>/api?id=ID    one place's position and address (Place Details)
 export async function googleSearch(request, env, url) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return json({ error: 'Not found.' }, 404);
-  const q = clean(url.searchParams.get('q')).slice(0, 120);
   const nocache = { 'cache-control': 'private, no-store' };
-  if (q.length < 2) return json({ results: [] }, 200, nocache);
   if (!env.GOOGLE_MAPS_KEY) return json({ results: [], error: 'Google search is not set up (GOOGLE_MAPS_KEY).' }, 503, nocache);
-  try { return json({ results: await google(q, env.GOOGLE_MAPS_KEY), source: 'google' }, 200, nocache); }
-  catch (e) { const why = String(e?.message || e).slice(0, 300); console.error('google places', why); return json({ results: [], error: 'Google search did not answer.', google: why }, 502, nocache); }
+  const id = clean(url.searchParams.get('id'));
+  if (id) {
+    if (!/^[A-Za-z0-9_-]{10,300}$/.test(id)) return json({ error: 'Not found.' }, 404, nocache);
+    try { return json({ place: await details(id, env.GOOGLE_MAPS_KEY) }, 200, nocache); }
+    catch (e) { const why = String(e?.message || e).slice(0, 300); console.error('google details', why); return json({ error: 'Google did not answer.', google: why }, 502, nocache); }
+  }
+  const q = clean(url.searchParams.get('q')).slice(0, 120);
+  if (q.length < 2) return json({ results: [] }, 200, nocache);
+  const [auto, text] = await Promise.allSettled([autocomplete(q, env.GOOGLE_MAPS_KEY), google(q, env.GOOGLE_MAPS_KEY)]);
+  if (auto.status === 'rejected' && text.status === 'rejected') {
+    const why = String(text.reason?.message || text.reason).slice(0, 300); console.error('google search', why);
+    return json({ results: [], error: 'Google search did not answer.', google: why }, 502, nocache);
+  }
+  const a = auto.status === 'fulfilled' ? auto.value : [], t = text.status === 'fulfilled' ? text.value : [];
+  // An address typed with its house number reads best as addresses first; a name reads best as places first.
+  const first = /^\d/.test(q) ? [...a, ...t] : [...t, ...a];
+  const seen = new Set(), results = [];
+  for (const r of first) {
+    const k = (r.name + '|' + String(r.addr).split(',')[0]).toLowerCase().replace(/[^a-z0-9|]/g, '');
+    if (seen.has(k)) continue;
+    seen.add(k); results.push(r);
+  }
+  return json({ results: results.slice(0, 15), source: 'google' }, 200, nocache);
+}
+
+// Place Autocomplete (New): https://developers.google.com/maps/documentation/places/web-service/place-autocomplete
+async function autocomplete(q, key) {
+  const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'X-Goog-Api-Key': key },
+    body: JSON.stringify({ input: q, languageCode: 'en', includedRegionCodes: ['us'],
+      locationRestriction: { rectangle: { low: { latitude: BOX[1], longitude: BOX[0] }, high: { latitude: BOX[3], longitude: BOX[2] } } } }),
+    signal: AbortSignal.timeout(4000),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Google autocomplete answered ${res.status}: ${data.error?.message || 'no reason given'}`);
+  return (data.suggestions || []).map(s => s.placePrediction).filter(Boolean).map(p => {
+    const types = p.types || [], house = types.some(t => /street_address|premise|subpremise|route|street_number/.test(t));
+    return { id: p.placeId, name: clean(p.structuredFormat?.mainText?.text || p.text?.text), addr: clean(p.structuredFormat?.secondaryText?.text).replace(/, (LA|Louisiana)( \d{5})?(, USA)?$/, ''),
+      kind: house ? 'Address' : '' };
+  }).filter(r => r.id && r.name);
+}
+
+// Place Details (New): where an autocomplete answer is
+async function details(id, key) {
+  const res = await fetch('https://places.googleapis.com/v1/places/' + encodeURIComponent(id), {
+    headers: { 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'displayName,shortFormattedAddress,formattedAddress,location' },
+    signal: AbortSignal.timeout(4000),
+  });
+  const p = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Google details answered ${res.status}: ${p.error?.message || 'no reason given'}`);
+  const lat = p.location?.latitude, lon = p.location?.longitude;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error('no position');
+  const addr = clean(p.shortFormattedAddress || p.formattedAddress).replace(/, (LA|Louisiana)( \d{5})?(, USA)?$/, '');
+  return { name: clean(p.displayName?.text) || addr.split(',')[0], addr, lat: +lat.toFixed(6), lon: +lon.toFixed(6) };
 }
 
 // Google Places Text Search (New): https://developers.google.com/maps/documentation/places/web-service/text-search
@@ -60,7 +115,8 @@ async function google(q, key) {
   if (!res.ok) throw new Error(`Google answered ${res.status}: ${data.error?.message || 'no reason given'}`);
   return (data.places || []).filter(p => p.businessStatus !== 'CLOSED_PERMANENTLY').map(p => {
     const lat = p.location?.latitude, lon = p.location?.longitude;
-    return { name: clean(p.displayName?.text), addr: clean(p.shortFormattedAddress || p.formattedAddress).replace(/, (LA|Louisiana)( \d{5})?(, USA)?$/, ''),
+    const fa = clean(p.shortFormattedAddress || p.formattedAddress);
+    return { name: clean(p.displayName?.text) || fa.split(',')[0], addr: clean(p.shortFormattedAddress || p.formattedAddress).replace(/, (LA|Louisiana)( \d{5})?(, USA)?$/, ''),
       kind: clean(p.primaryTypeDisplayName?.text), lat: +(+lat).toFixed(6), lon: +(+lon).toFixed(6) };
   }).filter(r => r.name && Number.isFinite(r.lat) && inBox(r.lat, r.lon));
 }
