@@ -124,6 +124,10 @@
       {
         "label": "Choose tonight's dinner",
         "href": "/chefs-choice/"
+      },
+      {
+        "label": "Read the write-up",
+        "href": "/blog/chefs-choice/"
       }
     ]
   },
