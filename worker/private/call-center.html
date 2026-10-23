@@ -132,7 +132,10 @@ h2:not(:first-child){margin-top:18px}
 /* ---------- map ---------- */
 #mapwrap{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#dfe6ec}
 #map{position:absolute;inset:0}
-.map-msg{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;font-size:.95rem;color:var(--ink-2);line-height:1.5}
+.map-msg{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;text-align:center;font-size:.95rem;color:var(--ink-2);line-height:1.5}
+.map-msg.err{background:#eaf0f6;color:var(--ink)}
+.map-msg.err b{display:block;font-size:1.05rem;margin-bottom:6px}
+.map-msg.err code{display:inline-block;margin-top:8px;font-size:.8rem;background:#fff;border:1px solid var(--line-2);border-radius:6px;padding:2px 7px;color:var(--ink-2)}
 .mapbtns{position:absolute;left:10px;top:10px;display:flex;gap:6px;z-index:2}
 .mapbtns button{background:#fff;border:1px solid var(--line-2);border-radius:99px;padding:.4rem .85rem;font-weight:800;font-size:.85rem;box-shadow:var(--shadow);min-height:2.4rem}
 .picking{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.5rem 1rem;font-weight:700;font-size:.9rem;z-index:3;box-shadow:var(--shadow);white-space:nowrap}
@@ -590,7 +593,31 @@ $('greys').addEventListener('click', e => { const b = e.target.closest('[data-bu
 let map = null, G = null, HtmlMarker = null, info = null, selected = null, openStop = null;
 const lines = {}, edges = {}, stopMarks = {}, busMarks = {};
 let tripShapes = [], pickEnd = null;
-window.gm_authFailure = () => { $('map-msg').hidden = false; $('map-msg').textContent = 'Google Maps refused the key. Check that the key allows the Maps JavaScript API and the r3ai.dev website.'; };
+// When Google refuses to draw the map it only says why in the browser console, so the reason is caught here and
+// shown in the map area in plain words, with what to change. The bus board and directions keep working either way.
+const MAP_FIX = {
+  ApiNotActivatedMapError: 'The Maps JavaScript API is not turned on for this key\'s Google Cloud project. Enable "Maps JavaScript API" in Google Cloud.',
+  ApiTargetBlockedMapError: 'The key is limited to other Google APIs. In the key\'s API restrictions, add "Maps JavaScript API".',
+  RefererNotAllowedMapError: 'The key does not allow this website. In the key\'s website restrictions, add https://r3ai.dev/*',
+  BillingNotEnabledMapError: 'Billing is not turned on for the key\'s Google Cloud project.',
+  InvalidKeyMapError: 'Google does not recognize the key. Check the GOOGLE_MAPS_BROWSER_KEY value in Cloudflare.',
+  ExpiredKeyMapError: 'The key has expired or was deleted. Create a new one in Google Cloud.',
+  MissingKeyMapError: 'No key reached Google. Check the GOOGLE_MAPS_BROWSER_KEY value in Cloudflare.',
+  OverQuotaMapError: 'The key has used up its daily map allowance in Google Cloud.',
+};
+let mapProblem = null;
+function mapError(code) {
+  if (mapProblem && code === 'auth') return;
+  mapProblem = code;
+  const m = $('map-msg');
+  m.hidden = false; m.className = 'map-msg err';
+  m.innerHTML = `<div><b>The Google map could not load</b>${esc(MAP_FIX[code] || 'Google refused the map key. Check that the key allows the Maps JavaScript API and the website https://r3ai.dev/*.')}<br>The bus board, stops and directions still work.<br><code>${esc(code === 'auth' ? 'Google key refused' : code)}</code></div>`;
+}
+window.gm_authFailure = () => mapError('auth');
+for (const kind of ['error', 'warn']) {
+  const orig = console[kind];
+  console[kind] = function (...a) { const m = String(a[0] ?? '').match(/Google Maps JavaScript API (?:error|warning): (\w+)/); if (m && /MapError$/.test(m[1])) mapError(m[1]); return orig.apply(console, a); };
+}
 function mapReady() {
   G = google.maps;
   $('map-msg').hidden = true;
@@ -1160,9 +1187,12 @@ if (MAPS_KEY) {
   const s = document.createElement('script');
   s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(MAPS_KEY) + '&v=weekly&loading=async&callback=ccMapReady';
   s.async = true;
-  s.onerror = () => { $('map-msg').textContent = 'The Google map could not load. The bus board and directions still work.'; };
+  s.onerror = () => mapError('ScriptBlocked');
+  MAP_FIX.ScriptBlocked = 'This computer could not reach Google Maps. A firewall or content filter on the City network may be blocking maps.googleapis.com.';
+  MAP_FIX.Timeout = 'Google Maps did not answer in time. Reload the page; if it keeps happening, a City network filter may be slowing or blocking maps.googleapis.com.';
+  setTimeout(() => { if (!map && !mapProblem) mapError('Timeout'); }, 20000);
   document.head.appendChild(s);
-} else $('map-msg').textContent = 'The map needs a Google Maps key (GOOGLE_MAPS_BROWSER_KEY). The bus board and directions still work.';
+} else mapError('MissingKeyMapError');
 </script>
 </body>
 </html>
