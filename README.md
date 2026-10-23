@@ -59,6 +59,8 @@ To open a chapter directly while working on it, add `?c=4` to the address (0 to 
 
 ## Other pages
 
+- `/chefs-choice/` is Chef's Choice, a dinner picker with 100 recipes. The recipes live in `tools/chefs-choice/meals-1.mjs` to `meals-4.mjs`. After changing them, run `node tools/chefs-choice/build.mjs`, which rewrites `static/chefs-choice/index.html`, then `node build.mjs`.
+
 - `/start/` is the Start here page. Its five posts are the `START` list in `build.mjs`.
 - `/demos/` lists four working demos with made-up data: the dispatch board, the procurement wizard, the live bus map and the bus stop sign. Their code is in `src/demos/`. The map and the sign share one made-up bus system in `src/demos/sim.js`.
 - `/ask/` is Ask the site. The Worker finds the posts that best match the question and has a Cloudflare Workers AI model answer from those posts only. It runs on the free daily allowance, so when that runs out it says so and stops until the next day. Limits are at the top of `worker/index.js`: eight questions an hour per visitor and 100 a day in total.

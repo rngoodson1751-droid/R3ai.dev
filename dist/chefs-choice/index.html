@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chef's Choice · R Cubed</title>
+<meta name="description" content="One hundred dinners with full recipes. Press the button and the house picks tonight's dish.">
+<link rel="canonical" href="https://r3ai.dev/chefs-choice/">
+<meta property="og:title" content="Chef's Choice">
+<meta property="og:description" content="One hundred dinners with full recipes. Press the button and the house picks tonight's dish.">
+<meta property="og:image" content="https://r3ai.dev/og/default.jpg">
+<meta name="theme-color" content="#0f2e28">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Chef's Choice. One page, no libraries. Its own supper-club look, not the site's glass style. */
+:root {
+  --room: #0f2e28; --room-2: #164a45; --mist: #b9d3c8;
+  --paper: #eef4ef; --ink: #1c2b3a; --ink-soft: #4b5d6a;
+  --brass: #c4a35a; --brass-ink: #7d6328;
+  --display: 'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif;
+  --body: 'Jost', 'Futura', 'Avenir Next', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; min-height: 100vh; color: var(--mist); font: 400 1.0625rem/1.6 var(--body);
+  background: radial-gradient(120% 80% at 50% -10%, var(--room-2), var(--room) 60%) fixed, var(--room);
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; border-radius: 4px; }
+.wrap { width: min(100% - 32px, 60rem); margin-inline: auto; }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; font-size: .95rem; }
+.top a { text-decoration: none; opacity: .8; }
+.top a:hover { opacity: 1; }
+.top .home b { font-family: var(--display); font-weight: 500; font-size: 1.2rem; }
+
+.masthead { text-align: center; padding: 2.5rem 0 1.75rem; }
+.masthead h1 { margin: 0; font: italic 500 clamp(3.2rem, 11vw, 6.5rem)/.95 var(--display); color: var(--paper); letter-spacing: -.02em; font-variation-settings: 'opsz' 96; }
+.masthead .orn { display: block; width: 7.5rem; height: 14px; margin: 1.1rem auto; color: var(--brass); }
+.masthead p { margin: 0 auto; max-width: 30rem; font-size: 1.08rem; color: var(--mist); text-wrap: balance; }
+
+.controls { display: none; text-align: center; margin: 1.25rem 0 1.75rem; }
+.js .controls { display: block; }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; border: 0; padding: 0; margin: 0 0 .85rem; }
+.chips legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.chips label { position: relative; }
+.chips input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chips span { display: inline-block; padding: .38rem .95rem; border-radius: 999px; border: 1px solid rgb(185 211 200 / .35); font-size: .95rem; transition: background .2s, color .2s, border-color .2s; }
+.chips input:checked + span { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.chips input:focus-visible + span { outline: 2px solid var(--brass); outline-offset: 2px; }
+.quick { display: inline-flex; gap: .5rem; align-items: center; font-size: .95rem; cursor: pointer; margin-bottom: 1.4rem; }
+.quick input { accent-color: var(--brass); width: 1.05rem; height: 1.05rem; }
+.choose {
+  font: 500 1.15rem/1 var(--body); letter-spacing: .01em; color: var(--room);
+  background: linear-gradient(180deg, #d8bc76, var(--brass)); border: 0; border-radius: 999px;
+  padding: 1.05rem 2.1rem; min-height: 3.3rem; cursor: pointer;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .18) inset, 0 14px 30px -14px rgb(0 0 0 / .7);
+  transition: transform .15s;
+}
+.choose:hover { transform: translateY(-1px); }
+.choose:active { transform: translateY(1px); }
+.pool { display: block; margin-top: .7rem; font-size: .88rem; opacity: .75; }
+
+/* The menu card */
+.card {
+  position: relative; display: none; margin: 0 auto 3.5rem; max-width: 52rem;
+  background: var(--paper); color: var(--ink); border-radius: 6px;
+  padding: clamp(1.6rem, 5vw, 3.4rem) clamp(1.25rem, 5vw, 3.6rem) clamp(1.6rem, 4vw, 2.6rem);
+  box-shadow: 0 40px 80px -40px rgb(0 0 0 / .8), 0 2px 0 rgb(255 255 255 / .5) inset;
+}
+.card.on { display: block; }
+.card { scroll-margin-top: 16px; }
+.card::before, .card::after { content: ''; position: absolute; pointer-events: none; border: 1px solid var(--brass); border-radius: 3px; }
+.card::before { inset: 10px; }
+.card::after { inset: 14px; border-width: .5px; opacity: .7; }
+.card .kind { margin: 0; text-align: center; font: italic 400 1.05rem/1.3 var(--display); color: var(--brass-ink); }
+.card h2 {
+  margin: .35rem 0 0; text-align: center; font: 500 clamp(2.2rem, 7.5vw, 4rem)/1.02 var(--display);
+  letter-spacing: -.015em; text-wrap: balance; min-height: 2.1em; display: grid; place-items: center;
+  font-variation-settings: 'opsz' 96;
+}
+.card.riffle h2 { color: var(--ink-soft); filter: blur(.4px); }
+.card .rx { transition: opacity .35s; }
+.card.riffle .rx { opacity: 0; }
+.dek { margin: .6rem auto 0; max-width: 34rem; text-align: center; font: italic 400 1.2rem/1.45 var(--display); color: var(--ink); text-wrap: balance; }
+.facts { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem .75rem; margin: 1rem 0 0; font-size: .95rem; color: var(--ink-soft); }
+.facts span + span::before { content: ''; display: inline-block; width: 4px; height: 4px; margin: 0 .75rem 0 0; vertical-align: .22em; background: var(--brass); transform: rotate(45deg); }
+.cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 2.4rem; margin-top: 2rem; padding-top: 1.8rem; border-top: 1px solid rgb(196 163 90 / .55); }
+h4 { margin: 0 0 .7rem; font: italic 500 1.35rem/1.2 var(--display); }
+.ing ul { list-style: none; margin: 0; padding: 0; }
+.ing li { padding: .42rem 0; border-bottom: 1px dotted rgb(28 43 58 / .22); line-height: 1.4; }
+.how ol { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+.how li { counter-increment: s; position: relative; padding-left: 2.4rem; margin-bottom: 1rem; line-height: 1.55; max-width: 34rem; }
+.how li::before { content: counter(s); position: absolute; left: 0; top: -.1rem; font: italic 500 1.5rem/1 var(--display); color: var(--brass-ink); }
+.card-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1px solid rgb(196 163 90 / .55); }
+.card-actions button { font: 500 .98rem/1 var(--body); color: var(--ink); background: transparent; border: 1px solid rgb(28 43 58 / .3); border-radius: 999px; padding: .7rem 1.15rem; min-height: 2.75rem; cursor: pointer; }
+.card-actions button:hover { border-color: var(--ink); }
+.card-actions .again { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* The full menu */
+.full { padding: 1rem 0 4rem; }
+.full > h2 { margin: 0 0 .3rem; text-align: center; font: italic 500 clamp(2rem, 6vw, 3rem)/1.1 var(--display); color: var(--paper); }
+.full > p { margin: 0 auto 2.2rem; text-align: center; max-width: 30rem; opacity: .8; }
+.toc { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem 1.2rem; margin: 0 0 2.5rem; font-size: .95rem; }
+.toc a { text-decoration: none; border-bottom: 1px solid rgb(196 163 90 / .5); }
+.course { max-width: 44rem; margin: 0 auto 2.8rem; }
+.course h3 { margin: 0 0 .6rem; padding-bottom: .5rem; border-bottom: 1px solid rgb(196 163 90 / .55); font: italic 500 1.75rem/1.2 var(--display); color: var(--paper); display: flex; justify-content: space-between; align-items: baseline; }
+.course h3 small { font: 400 .9rem var(--body); color: var(--brass); }
+.dish summary { display: flex; align-items: baseline; gap: .5rem; padding: .6rem 0; cursor: pointer; list-style: none; }
+.dish summary::-webkit-details-marker { display: none; }
+.dn { font: 500 1.12rem/1.3 var(--display); color: var(--paper); }
+.dots { flex: 1; min-width: 1rem; border-bottom: 1px dotted rgb(185 211 200 / .4); transform: translateY(-.3em); }
+.dm { font-size: .9rem; opacity: .75; white-space: nowrap; }
+.dish summary:hover .dn { color: #fff; text-decoration: underline; text-decoration-color: var(--brass); text-underline-offset: 4px; }
+.dish[open] summary .dn { color: var(--brass); }
+.dish .rx { background: var(--paper); color: var(--ink); border-radius: 6px; padding: 1.4rem clamp(1rem, 4vw, 2rem); margin: .3rem 0 1.2rem; }
+.dish .rx .dek { text-align: left; margin-left: 0; }
+.dish .rx .facts { justify-content: flex-start; }
+.dish .rx .cols { margin-top: 1.2rem; padding-top: 1.2rem; }
+.foot { text-align: center; padding: 0 0 3rem; font-size: .9rem; opacity: .7; }
+
+@media (max-width: 700px) {
+  .cols { grid-template-columns: 1fr; gap: 1.6rem; }
+  .dc { display: none; }
+  .card::before { inset: 7px; } .card::after { inset: 10px; }
+}
+
+@media print {
+  @page { margin: .6in; }
+  body { background: #fff; color: #000; }
+  .top, .masthead, .controls, .full, .foot, .card-actions { display: none !important; }
+  .card { display: block !important; box-shadow: none; padding: .3in; max-width: none; }
+  .card.riffle .rx { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.className = 'js'; document.body.className = 'js';</script>
+<div class="wrap">
+<nav class="top" aria-label="Site"><a class="home" href="/home/"><b>R Cubed</b> at home</a><a href="#menu">Full menu</a></nav>
+
+<header class="masthead">
+<h1>Chef's Choice</h1>
+<svg class="orn" viewBox="0 0 120 14" aria-hidden="true"><path d="M0 7h46M74 7h46" stroke="currentColor" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="none" stroke="currentColor"/><circle cx="60" cy="7" r="1.6" fill="currentColor"/></svg>
+<p>One hundred dinners from our kitchen, each with its recipe. Can't decide? Let the house choose.</p>
+</header>
+
+<div class="controls">
+<fieldset class="chips"><legend>What are you in the mood for?</legend>
+<label><input type="radio" name="k" value="" checked><span>Anything</span></label>
+<label><input type="radio" name="k" value="Poultry"><span>Poultry</span></label>
+<label><input type="radio" name="k" value="Beef"><span>Beef</span></label>
+<label><input type="radio" name="k" value="Pork"><span>Pork</span></label>
+<label><input type="radio" name="k" value="Lamb"><span>Lamb</span></label>
+<label><input type="radio" name="k" value="Seafood"><span>Seafood</span></label>
+<label><input type="radio" name="k" value="Vegetarian"><span>Vegetarian</span></label>
+</fieldset>
+<label class="quick"><input type="checkbox" id="quick"> On the table in 45 minutes or less</label><br>
+<button class="choose" id="choose" type="button">Choose tonight's dinner</button>
+<span class="pool" id="pool" aria-live="polite"></span>
+</div>
+
+<article class="card" id="card" aria-live="polite" aria-busy="false">
+<p class="kind" id="kind"></p>
+<h2 id="name"></h2>
+<div class="rx" id="rx"></div>
+<div class="card-actions">
+<button class="again" type="button" id="again">Choose again</button>
+<button type="button" id="print">Print recipe</button>
+<button type="button" id="share">Copy link</button>
+</div>
+</article>
+</div>
+
+<main class="full wrap" id="menu">
+<h2>The full menu</h2>
+<p>Every dish in the house. Open any one to read its recipe.</p>
+<nav class="toc" aria-label="Courses"><a href="#course-poultry">Poultry</a><a href="#course-beef">Beef</a><a href="#course-pork">Pork</a><a href="#course-lamb">Lamb</a><a href="#course-seafood">From the water</a><a href="#course-vegetarian">From the garden</a></nav>
+<section class="course" id="course-poultry">
+<h3>Poultry <small>22</small></h3>
+<details class="dish" id="arroz-con-pollo" data-k="Poultry" data-t="70">
+<summary><span class="dn">Arroz con Pollo</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Latin American, </span>1 hr 10 min</span></summary>
+<div class="rx">
+<p class="dek">Saffron-golden rice cooked in one pot with chicken, peppers and peas.</p>
+<p class="facts"><span>Latin American</span><span>Serves 6</span><span>1 hr 10 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb bone-in chicken thighs</li><li>2 tbsp olive oil</li><li>1 onion and 1 red bell pepper, diced</li><li>4 cloves garlic, minced</li><li>2 cups long-grain rice</li><li>1 tsp each cumin and oregano</li><li>Pinch of saffron or 1 packet sazón</li><li>½ cup tomato sauce</li><li>3½ cups chicken stock</li><li>1 cup frozen peas</li><li>Olives and cilantro to finish</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season and brown the chicken in the oil in a wide pot. Set aside.</li><li>Cook the onion and pepper 6 minutes, then the garlic for 1 minute.</li><li>Stir in the rice, spices and saffron to toast for 2 minutes.</li><li>Add the tomato sauce and stock, nestle in the chicken and bring to a boil. Cover and cook on low 25 minutes.</li><li>Scatter the peas on top, cover 5 minutes off the heat, then fluff and finish with olives and cilantro.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="butter-chicken" data-k="Poultry" data-t="55">
+<summary><span class="dn">Butter Chicken</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Indian, </span>55 min</span></summary>
+<div class="rx">
+<p class="dek">Murgh makhani: tender chicken in a mild, velvety tomato butter sauce.</p>
+<p class="facts"><span>Indian</span><span>Serves 4</span><span>55 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb chicken thighs, cubed</li><li>½ cup yogurt</li><li>2 tsp garam masala, divided</li><li>1 tsp each turmeric, chili powder and salt</li><li>4 tbsp butter</li><li>1 onion, finely chopped</li><li>1 tbsp each grated ginger and garlic</li><li>1 can (14 oz) crushed tomatoes</li><li>¾ cup heavy cream</li><li>1 tsp dried fenugreek leaves (kasuri methi), crushed</li><li>1 tsp sugar</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Marinate the chicken in the yogurt, 1 tsp garam masala, turmeric, chili and salt for 30 minutes.</li><li>Sear the chicken in 1 tbsp butter in batches until browned. Set aside.</li><li>Melt the remaining butter and cook the onion 8 minutes. Add the ginger and garlic for 1 minute.</li><li>Add the tomatoes and simmer 15 minutes, then blend smooth if you like.</li><li>Stir in the cream, sugar, fenugreek and the remaining garam masala. Add the chicken and simmer 10 minutes. Serve with rice and naan.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-and-andouille-gumbo" data-k="Poultry" data-t="180">
+<summary><span class="dn">Chicken and Andouille Gumbo</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cajun, </span>3 hr</span></summary>
+<div class="rx">
+<p class="dek">A dark roux gumbo with smoked andouille, the trinity and plenty of filé.</p>
+<p class="facts"><span>Cajun</span><span>Serves 8</span><span>3 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>¾ cup vegetable oil</li><li>¾ cup flour</li><li>2 onions, chopped</li><li>1 green bell pepper, chopped</li><li>3 ribs celery, chopped</li><li>4 cloves garlic, minced</li><li>2 lb boneless chicken thighs, cut into pieces</li><li>1 lb andouille sausage, sliced</li><li>2 quarts chicken stock</li><li>2 bay leaves</li><li>1 tsp Cajun seasoning, plus more to taste</li><li>Green onions, parsley, filé powder and white rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season and brown the chicken and sausage in a heavy pot, then set them aside.</li><li>Add the oil and flour and stir constantly over medium heat for 30 to 45 minutes until the roux is the color of dark chocolate.</li><li>Add the onion, pepper and celery and stir 8 minutes until soft, then add the garlic.</li><li>Whisk in the stock a little at a time. Add the bay leaves, seasoning, chicken and sausage.</li><li>Simmer uncovered for 1½ hours, skimming the oil from the top now and then.</li><li>Taste and season, then stir in green onions and parsley. Serve over rice with filé at the table.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-cacciatore" data-k="Poultry" data-t="75">
+<summary><span class="dn">Chicken Cacciatore</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">The hunter's braise of chicken, peppers, olives and rosemary in tomato.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>8 bone-in chicken thighs</li><li>2 tbsp olive oil</li><li>1 onion, sliced</li><li>1 red and 1 yellow bell pepper, sliced</li><li>8 oz mushrooms, sliced</li><li>4 cloves garlic, sliced</li><li>½ cup dry red wine</li><li>1 can (28 oz) crushed tomatoes</li><li>½ cup black olives</li><li>2 sprigs rosemary</li><li>Salt, pepper and chile flakes</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the chicken and brown it skin side down in the oil, 6 minutes, then turn for 2 minutes and set aside.</li><li>Cook the onion, peppers and mushrooms 8 minutes until soft. Add the garlic and chile for 1 minute.</li><li>Add the wine and let it bubble away by half.</li><li>Stir in the tomatoes, olives and rosemary and nestle the chicken in skin side up.</li><li>Simmer partly covered 35 to 40 minutes until tender. Serve with polenta, pasta or bread.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-enchiladas-verdes" data-k="Poultry" data-t="60">
+<summary><span class="dn">Chicken Enchiladas Verdes</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mexican, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Rolled tortillas filled with chicken and cheese under a tangy tomatillo salsa.</p>
+<p class="facts"><span>Mexican</span><span>Serves 6</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb tomatillos, husked</li><li>1 onion, quartered</li><li>2 jalapeños</li><li>3 cloves garlic</li><li>1 cup cilantro</li><li>3 cups shredded cooked chicken</li><li>2 cups Monterey Jack, shredded</li><li>12 corn tortillas</li><li>½ cup sour cream</li><li>Salt, lime and sliced radish to finish</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Broil the tomatillos, onion, jalapeños and garlic until blistered, about 8 minutes. Blend with the cilantro, salt and a splash of water.</li><li>Heat the oven to 375°F. Mix the chicken with 1 cup of the salsa and half the cheese.</li><li>Warm the tortillas so they bend, fill each with the chicken and roll them seam down into a baking dish.</li><li>Pour the remaining salsa over and top with the rest of the cheese.</li><li>Bake 20 minutes until bubbling. Finish with sour cream, radish and a squeeze of lime.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-fricassee" data-k="Poultry" data-t="60">
+<summary><span class="dn">Chicken Fricassée</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">A gentle braise in white wine and cream with mushrooms and tarragon.</p>
+<p class="facts"><span>French</span><span>Serves 4</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>8 bone-in chicken thighs</li><li>3 tbsp butter</li><li>1 onion, finely chopped</li><li>8 oz button mushrooms, quartered</li><li>2 tbsp flour</li><li>½ cup dry white wine</li><li>1½ cups chicken stock</li><li>½ cup crème fraîche or heavy cream</li><li>1 tbsp chopped tarragon</li><li>Squeeze of lemon, salt and white pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the chicken and cook it in the butter over medium heat until lightly golden but not deeply browned. Set aside.</li><li>Cook the onion and mushrooms 6 minutes, then stir in the flour for 1 minute.</li><li>Add the wine and stock and bring to a simmer, scraping the pan.</li><li>Return the chicken, cover and simmer gently 30 minutes.</li><li>Stir in the crème fraîche and tarragon, simmer 5 minutes, and finish with lemon. Serve with rice or buttered noodles.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-marsala" data-k="Poultry" data-t="35">
+<summary><span class="dn">Chicken Marsala</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Seared cutlets with mushrooms in a sweet, silky Marsala wine sauce.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 thin chicken cutlets</li><li>⅓ cup flour, seasoned</li><li>3 tbsp olive oil</li><li>3 tbsp butter, divided</li><li>8 oz mushrooms, sliced</li><li>1 shallot, minced</li><li>2 cloves garlic, minced</li><li>¾ cup dry Marsala</li><li>¾ cup chicken stock</li><li>¼ cup heavy cream (optional)</li><li>Parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Dredge the cutlets in the flour. Brown them in the oil and 1 tbsp butter, about 3 minutes a side, and set aside.</li><li>Add the mushrooms to the pan and cook until browned, about 6 minutes. Add the shallot and garlic for 1 minute.</li><li>Pour in the Marsala and reduce by half, then add the stock and simmer 5 minutes.</li><li>Stir in the cream if using and the remaining butter.</li><li>Return the chicken to warm through and garnish with parsley.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-parmesan" data-k="Poultry" data-t="50">
+<summary><span class="dn">Chicken Parmesan</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian American, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Crisp breaded cutlets under marinara and bubbling mozzarella.</p>
+<p class="facts"><span>Italian American</span><span>Serves 4</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 large chicken breasts, halved into cutlets</li><li>½ cup flour</li><li>2 eggs, beaten</li><li>1½ cups panko mixed with ½ cup grated Parmesan</li><li>Oil for shallow frying</li><li>2 cups marinara sauce</li><li>8 oz fresh mozzarella, sliced</li><li>Basil and spaghetti to serve</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Pound the cutlets to ½ inch and season with salt.</li><li>Coat them in flour, then egg, then the panko mixture, pressing to stick.</li><li>Shallow fry in ¼ inch of oil over medium high, 3 minutes a side, until golden. Drain.</li><li>Heat the broiler. Spoon marinara over each cutlet and top with mozzarella.</li><li>Broil 3 to 4 minutes until bubbly. Top with basil and serve with spaghetti.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-piccata" data-k="Poultry" data-t="30">
+<summary><span class="dn">Chicken Piccata</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Thin cutlets in a bright lemon, caper and white wine butter.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 large boneless chicken breasts, halved into thin cutlets</li><li>½ cup flour, seasoned with salt and pepper</li><li>3 tbsp olive oil</li><li>4 tbsp butter, divided</li><li>3 cloves garlic, minced</li><li>½ cup dry white wine</li><li>¾ cup chicken stock</li><li>¼ cup lemon juice</li><li>3 tbsp capers, rinsed</li><li>2 tbsp chopped parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Pound the cutlets to an even ¼ inch and dredge them in the seasoned flour, shaking off the extra.</li><li>Heat the oil and 1 tbsp butter in a large skillet over medium high. Cook the cutlets 3 minutes a side until golden, then set them aside.</li><li>Lower the heat, add the garlic for 30 seconds, then pour in the wine and scrape up the browned bits. Let it reduce by half.</li><li>Add the stock, lemon juice and capers and simmer 4 minutes.</li><li>Turn off the heat and swirl in the remaining butter until glossy. Return the chicken, spoon the sauce over and finish with parsley. Serve over angel hair or with green beans.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-pot-pie" data-k="Poultry" data-t="75">
+<summary><span class="dn">Chicken Pot Pie</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">American, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">A creamy chicken and vegetable filling under a flaky golden crust.</p>
+<p class="facts"><span>American</span><span>Serves 6</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 sheet puff pastry or a single pie crust</li><li>4 tbsp butter</li><li>1 onion, diced</li><li>2 carrots, diced</li><li>2 ribs celery, diced</li><li>⅓ cup flour</li><li>2 cups chicken stock</li><li>¾ cup milk</li><li>3 cups cooked chicken, diced</li><li>1 cup frozen peas</li><li>1 tsp thyme</li><li>1 egg, beaten</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 400°F. Melt the butter and cook the onion, carrots and celery 8 minutes.</li><li>Stir in the flour for 1 minute, then whisk in the stock and milk. Simmer until thick, about 5 minutes.</li><li>Add the chicken, peas and thyme and season well.</li><li>Pour into a deep pie dish, cover with the pastry, crimp the edges and cut a few vents. Brush with egg.</li><li>Bake 30 to 35 minutes until deep golden. Rest 10 minutes before serving.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-saltimbocca" data-k="Poultry" data-t="25">
+<summary><span class="dn">Chicken Saltimbocca</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Cutlets wrapped in prosciutto and sage, finished in a white wine pan sauce.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 thin chicken cutlets</li><li>4 slices prosciutto</li><li>8 fresh sage leaves</li><li>¼ cup flour</li><li>2 tbsp olive oil</li><li>3 tbsp butter, divided</li><li>½ cup dry white wine</li><li>½ cup chicken stock</li><li>Lemon wedges</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Lay 2 sage leaves on each cutlet, cover with prosciutto and press it on. Dust lightly with flour.</li><li>Cook prosciutto side down in the oil and 1 tbsp butter for 3 minutes until crisp, then turn for 2 to 3 minutes.</li><li>Set the chicken aside and add the wine, scraping the pan, then the stock. Reduce by half.</li><li>Swirl in the remaining butter.</li><li>Spoon the sauce over the chicken and serve with lemon and roasted potatoes.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-shawarma-plates" data-k="Poultry" data-t="50">
+<summary><span class="dn">Chicken Shawarma Plates</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Middle Eastern, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Warmly spiced roasted chicken with garlic sauce, pickles and rice.</p>
+<p class="facts"><span>Middle Eastern</span><span>Serves 4</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb chicken thighs</li><li>¼ cup olive oil</li><li>Juice of 1 lemon</li><li>4 cloves garlic, minced</li><li>2 tsp cumin</li><li>2 tsp paprika</li><li>1 tsp each turmeric, coriander and cinnamon</li><li>1 tsp salt</li><li>1 cup Greek yogurt with 1 grated garlic clove and lemon</li><li>Cucumber, tomato, red onion, pickles and rice or pita</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the oil, lemon, garlic, spices and salt and coat the chicken. Marinate at least 1 hour.</li><li>Heat the oven to 425°F and spread the chicken on a sheet pan with a sliced red onion.</li><li>Roast 25 to 30 minutes, then broil 2 minutes to char the edges.</li><li>Rest and slice thinly.</li><li>Serve over rice or in pita with the yogurt sauce, chopped vegetables and pickles.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chicken-tikka-masala" data-k="Poultry" data-t="60">
+<summary><span class="dn">Chicken Tikka Masala</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Indian, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Charred, yogurt-marinated chicken in a creamy spiced tomato sauce.</p>
+<p class="facts"><span>Indian</span><span>Serves 4</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb boneless chicken thighs, in bite-size pieces</li><li>1 cup plain yogurt</li><li>1 tbsp each lemon juice, garam masala and grated ginger</li><li>2 tsp each cumin, paprika and salt</li><li>3 tbsp butter or ghee</li><li>1 large onion, finely chopped</li><li>4 cloves garlic, minced</li><li>1 green chile, minced</li><li>1 can (15 oz) tomato sauce</li><li>1 cup heavy cream</li><li>Cilantro, basmati rice and naan to serve</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the yogurt, lemon juice, half the spices and half the salt. Coat the chicken and marinate at least 30 minutes.</li><li>Broil the chicken on a sheet pan close to the heat for 10 to 12 minutes until charred at the edges.</li><li>Melt the butter in a large pan and cook the onion 8 minutes until soft and golden. Add the garlic, ginger, chile and the remaining spices and stir 1 minute.</li><li>Add the tomato sauce and simmer 10 minutes, then stir in the cream.</li><li>Add the chicken and its juices and simmer 10 minutes more. Finish with cilantro and serve with rice and naan.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="coq-au-vin" data-k="Poultry" data-t="150">
+<summary><span class="dn">Coq au Vin</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>2 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Chicken braised slowly in red Burgundy with mushrooms, pearl onions and lardons.</p>
+<p class="facts"><span>French</span><span>Serves 6</span><span>2 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>8 bone-in chicken thighs and drumsticks</li><li>6 oz thick bacon, cut into lardons</li><li>1 lb cremini mushrooms, quartered</li><li>1 cup pearl onions, peeled</li><li>2 carrots, sliced</li><li>4 cloves garlic, smashed</li><li>2 tbsp tomato paste</li><li>3 tbsp flour</li><li>1 bottle (750 ml) dry red wine, such as Pinot Noir</li><li>1 cup chicken stock</li><li>4 sprigs thyme and 2 bay leaves</li><li>2 tbsp butter</li><li>Salt, pepper and parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the chicken well. In a Dutch oven, cook the bacon until crisp and set it aside.</li><li>Brown the chicken skin side down in the bacon fat in batches, about 5 minutes a side. Set aside.</li><li>Cook the carrots, garlic and tomato paste 3 minutes, sprinkle in the flour and stir 1 minute.</li><li>Pour in the wine and stock, add the herbs, bacon and chicken, and bring to a simmer. Cover and braise at 325°F for 1½ hours.</li><li>Meanwhile brown the mushrooms and pearl onions in the butter. Stir them into the pot for the last 20 minutes.</li><li>Skim the fat, taste for salt and finish with parsley. Serve with mashed potatoes or crusty bread.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="duck-breast-with-cherry-port-sauce" data-k="Poultry" data-t="40">
+<summary><span class="dn">Duck Breast with Cherry Port Sauce</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Crisp-skinned duck, rosy in the middle, with a glossy cherry and port reduction.</p>
+<p class="facts"><span>French</span><span>Serves 2</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 duck breasts</li><li>Salt and pepper</li><li>1 shallot, minced</li><li>½ cup ruby port</li><li>½ cup chicken stock</li><li>1 cup pitted cherries, fresh or frozen</li><li>1 tsp balsamic vinegar</li><li>1 sprig thyme</li><li>1 tbsp cold butter</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Score the skin in a crosshatch without cutting the meat and season well.</li><li>Start skin side down in a cold skillet over medium low heat and render 12 to 15 minutes until crisp.</li><li>Turn and cook 2 to 4 minutes to 135°F for medium rare. Rest 10 minutes.</li><li>Pour off all but 1 tbsp fat. Cook the shallot 1 minute, add the port, stock, cherries, balsamic and thyme and reduce by half.</li><li>Swirl in the butter, slice the duck and spoon the sauce over.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="greek-lemon-chicken-and-potatoes" data-k="Poultry" data-t="75">
+<summary><span class="dn">Greek Lemon Chicken and Potatoes</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Greek, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">Oregano-scented thighs roasted with lemony potatoes that soak up every drop.</p>
+<p class="facts"><span>Greek</span><span>Serves 4</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>8 bone-in chicken thighs</li><li>2 lb Yukon Gold potatoes, in wedges</li><li>⅓ cup olive oil</li><li>Juice of 2 lemons</li><li>6 cloves garlic, minced</li><li>1 tbsp dried oregano</li><li>1 cup chicken stock</li><li>Salt, pepper and feta to finish</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 425°F. Whisk the oil, lemon juice, garlic, oregano, salt and pepper.</li><li>Toss the chicken and potatoes in the mixture and arrange in a roasting pan, chicken skin side up.</li><li>Pour the stock around the potatoes.</li><li>Roast 55 to 60 minutes, basting once, until the skin is crisp and the potatoes tender.</li><li>Crumble feta over the top and serve with a Greek salad.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="jamaican-jerk-chicken" data-k="Poultry" data-t="75">
+<summary><span class="dn">Jamaican Jerk Chicken</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Caribbean, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">Fiery, smoky chicken marinated in Scotch bonnet, allspice and thyme.</p>
+<p class="facts"><span>Caribbean</span><span>Serves 6</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>3 lb chicken legs and thighs</li><li>6 green onions</li><li>1 to 2 Scotch bonnet peppers, seeded</li><li>4 cloves garlic</li><li>1 tbsp fresh thyme</li><li>1 tbsp ground allspice</li><li>1 tsp cinnamon and ½ tsp nutmeg</li><li>¼ cup soy sauce</li><li>2 tbsp brown sugar</li><li>Juice of 2 limes</li><li>2 tbsp vegetable oil</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Blend everything except the chicken into a paste. Wear gloves when handling the peppers.</li><li>Slash the chicken to the bone and rub the marinade in. Refrigerate at least 4 hours or overnight.</li><li>Grill over medium indirect heat with the lid closed for 35 to 45 minutes, turning, until 175°F at the bone.</li><li>Move over direct heat for the last few minutes to char the skin.</li><li>Serve with rice and peas, fried plantains and lime wedges.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="korean-gochujang-chicken" data-k="Poultry" data-t="40">
+<summary><span class="dn">Korean Gochujang Chicken</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Korean, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Sticky, spicy-sweet glazed thighs with sesame and scallions.</p>
+<p class="facts"><span>Korean</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb boneless chicken thighs</li><li>3 tbsp gochujang</li><li>2 tbsp soy sauce</li><li>2 tbsp honey</li><li>1 tbsp rice vinegar</li><li>1 tbsp sesame oil</li><li>3 cloves garlic and 1 tbsp ginger, grated</li><li>1 tbsp vegetable oil</li><li>Toasted sesame seeds, sliced scallions and rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Whisk the gochujang, soy, honey, vinegar, sesame oil, garlic and ginger.</li><li>Toss the chicken in a third of the sauce and let it sit 15 minutes.</li><li>Sear in the vegetable oil over medium high, 5 minutes a side, until cooked through.</li><li>Pour in the rest of the sauce and toss for 2 minutes until sticky.</li><li>Slice and serve over rice with sesame seeds and scallions.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="lemongrass-chicken-banh-mi-bowls" data-k="Poultry" data-t="45">
+<summary><span class="dn">Lemongrass Chicken Banh Mi Bowls</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Vietnamese, </span>45 min</span></summary>
+<div class="rx">
+<p class="dek">Caramelized lemongrass chicken over rice with quick pickles and sriracha mayo.</p>
+<p class="facts"><span>Vietnamese</span><span>Serves 4</span><span>45 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb chicken thighs</li><li>2 stalks lemongrass, finely minced</li><li>3 cloves garlic, minced</li><li>2 tbsp fish sauce</li><li>2 tbsp brown sugar</li><li>1 tbsp soy sauce</li><li>1 carrot and ½ daikon, cut in matchsticks</li><li>½ cup rice vinegar and 2 tbsp sugar for pickling</li><li>1 cucumber, sliced</li><li>⅓ cup mayonnaise with 1 tbsp sriracha</li><li>Cilantro, jalapeño and cooked rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the lemongrass, garlic, fish sauce, brown sugar and soy and marinate the chicken 30 minutes.</li><li>Stir the vinegar and sugar with a pinch of salt until dissolved and pour it over the carrot and daikon.</li><li>Grill or pan sear the chicken over medium high, 5 to 6 minutes a side, until caramelized.</li><li>Rest and slice the chicken.</li><li>Build bowls of rice, chicken, pickles, cucumber and jalapeño. Drizzle with sriracha mayo and top with cilantro.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="moroccan-chicken-tagine" data-k="Poultry" data-t="80">
+<summary><span class="dn">Moroccan Chicken Tagine</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Moroccan, </span>1 hr 20 min</span></summary>
+<div class="rx">
+<p class="dek">Chicken braised with preserved lemon, green olives and warm spices.</p>
+<p class="facts"><span>Moroccan</span><span>Serves 4</span><span>1 hr 20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>8 bone-in chicken thighs</li><li>2 tbsp olive oil</li><li>2 onions, sliced</li><li>4 cloves garlic, minced</li><li>1 tbsp grated ginger</li><li>1 tsp each cumin, coriander and paprika</li><li>½ tsp each turmeric and cinnamon</li><li>Pinch of saffron in 1½ cups warm stock</li><li>1 preserved lemon, rind sliced</li><li>1 cup green olives</li><li>Cilantro and parsley</li><li>Couscous to serve</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the chicken and brown it in the oil. Set aside.</li><li>Cook the onions 10 minutes until soft, then add the garlic, ginger and spices for 1 minute.</li><li>Add the saffron stock and return the chicken.</li><li>Cover and simmer 35 minutes. Add the preserved lemon and olives and cook 10 minutes uncovered.</li><li>Finish with the herbs and serve over couscous.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="roast-chicken-with-lemon-and-herbs" data-k="Poultry" data-t="100">
+<summary><span class="dn">Roast Chicken with Lemon and Herbs</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>1 hr 40 min</span></summary>
+<div class="rx">
+<p class="dek">A golden whole bird roasted over potatoes with lemon, garlic and thyme.</p>
+<p class="facts"><span>French</span><span>Serves 4</span><span>1 hr 40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 whole chicken, about 4 lb</li><li>2 lb small potatoes, halved</li><li>1 lemon, halved</li><li>1 head garlic, halved crosswise</li><li>1 bunch thyme</li><li>4 tbsp softened butter</li><li>2 tbsp olive oil</li><li>Kosher salt and black pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Pat the chicken very dry and salt it generously inside and out, ideally the night before.</li><li>Heat the oven to 425°F. Toss the potatoes with oil, salt and pepper in a roasting pan.</li><li>Rub the butter under and over the skin. Stuff the cavity with the lemon, garlic and most of the thyme and tie the legs.</li><li>Set the chicken on the potatoes and roast 70 to 80 minutes, until the thigh reads 165°F.</li><li>Rest 15 minutes before carving. Squeeze the roasted lemon over the potatoes and serve with the pan juices.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="thai-green-curry-with-chicken" data-k="Poultry" data-t="35">
+<summary><span class="dn">Thai Green Curry with Chicken</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Thai, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Fragrant coconut curry with chicken, Thai basil and crisp vegetables.</p>
+<p class="facts"><span>Thai</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb chicken thighs, sliced</li><li>3 tbsp green curry paste</li><li>2 cans (13.5 oz) coconut milk</li><li>1 tbsp vegetable oil</li><li>1 cup green beans, cut</li><li>1 red bell pepper, sliced</li><li>1 small zucchini or Thai eggplant, cut</li><li>2 tbsp fish sauce</li><li>1 tbsp brown sugar</li><li>4 makrut lime leaves (optional)</li><li>1 cup Thai basil leaves</li><li>Jasmine rice and lime wedges</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oil in a wok, add the curry paste and fry 1 minute until fragrant.</li><li>Add half a can of the thick coconut cream and cook 3 minutes until the oil separates.</li><li>Add the chicken and stir to coat, then add the rest of the coconut milk and the lime leaves.</li><li>Simmer 8 minutes, then add the vegetables and cook 5 minutes more.</li><li>Season with fish sauce and sugar, stir in the basil and serve over jasmine rice with lime.</li></ol></section>
+</div></div>
+</details>
+</section>
+<section class="course" id="course-beef">
+<h3>Beef <small>16</small></h3>
+<details class="dish" id="beef-and-broccoli" data-k="Beef" data-t="30">
+<summary><span class="dn">Beef and Broccoli</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Chinese American, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Velvety flank steak and crisp broccoli in a glossy oyster sauce.</p>
+<p class="facts"><span>Chinese American</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb flank steak, thinly sliced against the grain</li><li>1 tbsp cornstarch plus 1 tsp for the sauce</li><li>2 tbsp soy sauce, divided</li><li>1 lb broccoli florets</li><li>3 tbsp oyster sauce</li><li>1 tbsp brown sugar</li><li>½ cup beef stock</li><li>1 tsp sesame oil</li><li>3 cloves garlic and 1 tbsp ginger, minced</li><li>2 tbsp vegetable oil</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Toss the beef with 1 tbsp cornstarch and 1 tbsp soy and let it sit 15 minutes.</li><li>Whisk the oyster sauce, remaining soy, sugar, stock, sesame oil and 1 tsp cornstarch.</li><li>Blanch the broccoli 1 minute and drain.</li><li>Sear the beef in a very hot wok in the oil, 2 minutes, and remove. Add the garlic and ginger for 30 seconds.</li><li>Return the beef and broccoli, pour in the sauce and toss until thick and glossy. Serve over rice.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="beef-bourguignon" data-k="Beef" data-t="210">
+<summary><span class="dn">Beef Bourguignon</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>3 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Chuck slowly braised in red wine with bacon, mushrooms and pearl onions.</p>
+<p class="facts"><span>French</span><span>Serves 6</span><span>3 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>3 lb beef chuck, in 2-inch cubes</li><li>6 oz bacon, in lardons</li><li>2 carrots, sliced</li><li>1 onion, chopped</li><li>3 cloves garlic, minced</li><li>2 tbsp tomato paste</li><li>3 tbsp flour</li><li>1 bottle (750 ml) dry red wine</li><li>2 cups beef stock</li><li>Thyme and 2 bay leaves</li><li>1 lb mushrooms, quartered</li><li>1½ cups pearl onions</li><li>3 tbsp butter</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Crisp the bacon in a Dutch oven and set it aside. Pat the beef dry, season and brown it in batches in the fat.</li><li>Cook the carrots and onion 6 minutes, add the garlic and tomato paste, then sprinkle in the flour.</li><li>Add the wine, stock, herbs, beef and bacon. Bring to a simmer, cover and braise at 325°F for 2½ to 3 hours.</li><li>Brown the mushrooms and pearl onions in the butter and add them for the last 30 minutes.</li><li>Skim the fat, check the seasoning and serve over mashed potatoes or egg noodles.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="beef-pho" data-k="Beef" data-t="240">
+<summary><span class="dn">Beef Pho</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Vietnamese, </span>4 hr</span></summary>
+<div class="rx">
+<p class="dek">Star anise and charred ginger broth with rice noodles and rare beef.</p>
+<p class="facts"><span>Vietnamese</span><span>Serves 6</span><span>4 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>3 lb beef soup bones and 1 lb brisket</li><li>1 large onion and a 4-inch piece of ginger, halved</li><li>5 star anise, 1 cinnamon stick, 4 cloves, 1 tbsp coriander seed</li><li>¼ cup fish sauce</li><li>1 tbsp sugar</li><li>1 lb flat rice noodles</li><li>½ lb sirloin, sliced paper thin</li><li>Bean sprouts, Thai basil, cilantro, lime, jalapeño, hoisin and sriracha</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Char the onion and ginger under the broiler or over a flame until blackened in spots.</li><li>Parboil the bones 5 minutes, drain and rinse. Cover with 4 quarts fresh water, add the brisket, onion and ginger, and simmer gently.</li><li>Toast the spices in a dry pan, tie them in cheesecloth and add them. Simmer 3 hours, skimming. Remove the brisket after 1½ hours.</li><li>Strain the broth and season with fish sauce and sugar.</li><li>Fill bowls with noodles, sliced brisket and raw sirloin, and ladle the boiling broth over. Serve with the herbs and sauces.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="beef-stroganoff" data-k="Beef" data-t="35">
+<summary><span class="dn">Beef Stroganoff</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Russian, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Seared beef and mushrooms in a tangy sour cream sauce over buttered noodles.</p>
+<p class="facts"><span>Russian</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb sirloin, sliced into thin strips</li><li>3 tbsp butter, divided</li><li>1 tbsp oil</li><li>1 onion, thinly sliced</li><li>12 oz mushrooms, sliced</li><li>2 cloves garlic</li><li>2 tbsp flour</li><li>1½ cups beef stock</li><li>1 tbsp Dijon mustard</li><li>¾ cup sour cream</li><li>12 oz egg noodles</li><li>Dill or parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the beef and sear it quickly in the oil and 1 tbsp butter over high heat in batches. Set aside.</li><li>Melt the rest of the butter and cook the onion and mushrooms 8 minutes until browned. Add the garlic.</li><li>Stir in the flour, then the stock and mustard, and simmer 5 minutes until thickened.</li><li>Lower the heat, stir in the sour cream and return the beef. Warm through without boiling.</li><li>Serve over the cooked noodles with fresh herbs.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="beef-wellington" data-k="Beef" data-t="150">
+<summary><span class="dn">Beef Wellington</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">British, </span>2 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Center-cut tenderloin wrapped in mushroom duxelles, prosciutto and puff pastry.</p>
+<p class="facts"><span>British</span><span>Serves 6</span><span>2 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb center-cut beef tenderloin</li><li>2 tbsp oil</li><li>2 tbsp Dijon mustard</li><li>1½ lb mushrooms, finely chopped</li><li>2 shallots and 2 cloves garlic, minced</li><li>2 tbsp butter</li><li>1 tsp thyme leaves</li><li>8 slices prosciutto</li><li>1 sheet puff pastry, about 14 oz</li><li>2 egg yolks, beaten</li><li>Flaky salt</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season and sear the beef on all sides in the oil. Brush with mustard and cool.</li><li>Cook the mushrooms, shallots, garlic and thyme in the butter until all the liquid is gone, about 15 minutes. Cool completely.</li><li>Lay the prosciutto overlapping on plastic wrap, spread the duxelles over it, set the beef on top and roll it tight. Chill 30 minutes.</li><li>Unwrap, roll it in the pastry, seal the seams and brush with egg yolk. Chill 15 minutes and score the top.</li><li>Bake at 425°F for 35 to 40 minutes, to 125°F inside for medium rare. Rest 10 minutes before slicing.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="bulgogi" data-k="Beef" data-t="30">
+<summary><span class="dn">Bulgogi</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Korean, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Thin-sliced ribeye in a sweet soy and pear marinade, seared fast.</p>
+<p class="facts"><span>Korean</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb ribeye, sliced paper thin</li><li>½ Asian pear, grated</li><li>⅓ cup soy sauce</li><li>2 tbsp brown sugar</li><li>1 tbsp sesame oil</li><li>4 cloves garlic and 1 tbsp ginger, grated</li><li>3 green onions, sliced</li><li>1 onion, thinly sliced</li><li>Sesame seeds, rice, lettuce leaves and kimchi</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Freeze the beef 30 minutes to make it easy to slice thinly.</li><li>Mix the pear, soy, sugar, sesame oil, garlic and ginger. Marinate the beef and onion at least 30 minutes.</li><li>Heat a heavy pan very hot and sear the beef in batches, 2 to 3 minutes, until caramelized.</li><li>Toss with the green onions and sesame seeds.</li><li>Serve with rice, lettuce wraps and kimchi.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="carne-asada-tacos" data-k="Beef" data-t="40">
+<summary><span class="dn">Carne Asada Tacos</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mexican, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Citrus-marinated skirt steak, charred and sliced into warm corn tortillas.</p>
+<p class="facts"><span>Mexican</span><span>Serves 6</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb skirt or flank steak</li><li>Juice of 2 oranges and 2 limes</li><li>4 cloves garlic, minced</li><li>1 jalapeño, minced</li><li>½ cup cilantro, chopped</li><li>2 tbsp olive oil</li><li>1 tsp each cumin and chili powder</li><li>1 tsp salt</li><li>Corn tortillas, white onion, cilantro, salsa and lime</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the citrus, garlic, jalapeño, cilantro, oil and spices. Marinate the steak 1 to 4 hours.</li><li>Heat a grill or cast iron pan to very hot.</li><li>Pat the steak dry and cook 3 to 4 minutes a side for medium.</li><li>Rest 10 minutes, then slice thinly against the grain and chop.</li><li>Serve in warmed tortillas with diced onion, cilantro, salsa and lime.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="classic-pot-roast" data-k="Beef" data-t="240">
+<summary><span class="dn">Classic Pot Roast</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">American, </span>4 hr</span></summary>
+<div class="rx">
+<p class="dek">Sunday chuck roast braised with carrots, potatoes and onions until spoon tender.</p>
+<p class="facts"><span>American</span><span>Serves 6</span><span>4 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>3 to 4 lb chuck roast</li><li>Salt and pepper</li><li>2 tbsp oil</li><li>2 onions, in wedges</li><li>4 cloves garlic</li><li>2 tbsp tomato paste</li><li>1 cup red wine</li><li>2 cups beef stock</li><li>1 tbsp Worcestershire sauce</li><li>4 sprigs thyme and 2 rosemary</li><li>1 lb carrots, in chunks</li><li>1½ lb small potatoes</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the roast generously and sear it on all sides in the oil, about 10 minutes.</li><li>Add the onions, garlic and tomato paste for 2 minutes, then the wine, stock and Worcestershire.</li><li>Add the herbs, cover and braise at 300°F for 2½ hours.</li><li>Add the carrots and potatoes around the roast and cook 1 hour more until everything is tender.</li><li>Rest the roast, then slice or pull it apart. Thicken the juices if you like and spoon them over.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="grillades-and-grits" data-k="Beef" data-t="120">
+<summary><span class="dn">Grillades and Grits</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Creole, </span>2 hr</span></summary>
+<div class="rx">
+<p class="dek">A New Orleans brunch classic: braised round steak in Creole gravy over cheese grits.</p>
+<p class="facts"><span>Creole</span><span>Serves 6</span><span>2 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb beef round steak, in pieces, pounded thin</li><li>½ cup flour seasoned with Creole seasoning</li><li>¼ cup oil</li><li>1 onion, 1 bell pepper and 2 ribs celery, chopped</li><li>4 cloves garlic</li><li>1 can (14 oz) diced tomatoes</li><li>2 cups beef stock</li><li>1 tbsp Worcestershire sauce</li><li>Thyme, bay leaf and hot sauce</li><li>1 cup stone-ground grits</li><li>1 cup sharp cheddar and 2 tbsp butter</li><li>Green onions</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Dredge the beef in the seasoned flour and brown it in the oil. Set aside. Stir 2 tbsp of the flour into the fat to make a brown roux.</li><li>Add the trinity and cook 8 minutes, then the garlic.</li><li>Add the tomatoes, stock, Worcestershire, herbs and the beef. Cover and simmer 1½ hours until tender.</li><li>Meanwhile cook the grits in 4 cups salted water, stirring, about 25 minutes. Stir in the butter and cheese.</li><li>Season the grillades with hot sauce and spoon them over the grits with green onions.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="picadillo" data-k="Beef" data-t="40">
+<summary><span class="dn">Picadillo</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cuban, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Ground beef with tomato, olives and raisins, sweet and briny.</p>
+<p class="facts"><span>Cuban</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb ground beef</li><li>1 tbsp olive oil</li><li>1 onion and 1 green bell pepper, diced</li><li>4 cloves garlic</li><li>1 tsp cumin</li><li>1 tsp oregano</li><li>1 can (8 oz) tomato sauce</li><li>⅓ cup green olives, sliced</li><li>¼ cup raisins</li><li>1 tbsp capers</li><li>¼ cup dry white wine</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the onion and pepper in the oil 6 minutes, then the garlic and spices for 1 minute.</li><li>Add the beef and brown it, breaking it up. Drain any extra fat.</li><li>Add the wine and let it cook off.</li><li>Stir in the tomato sauce, olives, raisins and capers and simmer 15 minutes.</li><li>Season and serve with white rice, black beans and fried plantains.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="ropa-vieja" data-k="Beef" data-t="210">
+<summary><span class="dn">Ropa Vieja</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cuban, </span>3 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Shredded flank steak simmered with peppers, onions, olives and tomato.</p>
+<p class="facts"><span>Cuban</span><span>Serves 6</span><span>3 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2½ lb flank steak</li><li>2 tbsp olive oil</li><li>1 onion, sliced</li><li>1 red and 1 green bell pepper, sliced</li><li>5 cloves garlic, minced</li><li>2 tsp cumin</li><li>1 tsp oregano</li><li>1 tsp paprika</li><li>1 can (15 oz) tomato sauce</li><li>1 cup beef stock</li><li>½ cup dry white wine</li><li>½ cup green olives</li><li>2 bay leaves</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the steak, cut it into a few pieces and brown it in the oil. Set aside.</li><li>Cook the onion and peppers 8 minutes, then the garlic and spices for 1 minute.</li><li>Add the wine, tomato sauce, stock and bay leaves, and return the beef.</li><li>Cover and simmer on low for 2½ to 3 hours until it shreds easily.</li><li>Shred the meat with two forks, stir in the olives and simmer 10 minutes. Serve with rice, black beans and plantains.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="short-rib-ragu-with-pappardelle" data-k="Beef" data-t="210">
+<summary><span class="dn">Short Rib Ragù with Pappardelle</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>3 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Red wine braised short ribs pulled into a rich sauce for wide ribbons of pasta.</p>
+<p class="facts"><span>Italian</span><span>Serves 6</span><span>3 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>3 lb bone-in short ribs</li><li>2 tbsp olive oil</li><li>1 onion, 1 carrot and 1 rib celery, finely diced</li><li>4 cloves garlic</li><li>2 tbsp tomato paste</li><li>1½ cups dry red wine</li><li>1 can (28 oz) crushed tomatoes</li><li>1 cup beef stock</li><li>Rosemary and bay leaf</li><li>1 lb pappardelle</li><li>Parmesan</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season and brown the short ribs well in the oil. Set aside.</li><li>Cook the vegetables 8 minutes, add the garlic and tomato paste, then the wine, and reduce by half.</li><li>Add the tomatoes, stock, herbs and ribs. Cover and braise at 325°F for 3 hours.</li><li>Pull the meat from the bones, shred it and return it to the sauce. Skim the fat and simmer to thicken.</li><li>Toss with the cooked pappardelle and a splash of pasta water. Finish with Parmesan.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="smash-burgers" data-k="Beef" data-t="25">
+<summary><span class="dn">Smash Burgers</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">American, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Crisp-edged double patties with melted American cheese and house sauce.</p>
+<p class="facts"><span>American</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb 80/20 ground beef, in 8 balls</li><li>8 slices American cheese</li><li>4 potato buns, toasted</li><li>1 onion, very thinly sliced</li><li>⅓ cup mayonnaise, 2 tbsp ketchup, 1 tbsp chopped pickles, 1 tsp mustard</li><li>Pickles and shredded lettuce</li><li>Salt and pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the mayonnaise, ketchup, pickles and mustard for the sauce.</li><li>Heat a cast iron pan or griddle until very hot.</li><li>Place a ball of beef with a few onion slices on top and smash it flat with a heavy spatula. Season.</li><li>Cook 2 minutes until deeply crusted, scrape and flip, add cheese and cook 1 minute.</li><li>Stack two patties on each sauced bun with pickles and lettuce.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="steak-au-poivre" data-k="Beef" data-t="30">
+<summary><span class="dn">Steak au Poivre</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Pepper-crusted strip steaks with a flamed cognac and cream pan sauce.</p>
+<p class="facts"><span>French</span><span>Serves 2</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 strip or filet steaks, 1¼ inches thick</li><li>2 tbsp black peppercorns, coarsely crushed</li><li>Kosher salt</li><li>1 tbsp vegetable oil</li><li>2 tbsp butter</li><li>1 shallot, minced</li><li>⅓ cup cognac or brandy</li><li>½ cup beef stock</li><li>½ cup heavy cream</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Salt the steaks and press the crushed pepper firmly onto both sides. Let them sit 20 minutes.</li><li>Sear in the oil over high heat, 4 minutes a side for medium rare. Rest on a plate.</li><li>Lower the heat, add the butter and shallot and cook 1 minute.</li><li>Off the heat, add the cognac. Return to the heat and carefully let it flame or simmer off, then add the stock and reduce by half.</li><li>Stir in the cream and simmer until it coats a spoon. Pour over the steaks and serve with frites or a green salad.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="steak-frites" data-k="Beef" data-t="60">
+<summary><span class="dn">Steak Frites</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Bistro-seared ribeye with twice-fried potatoes and maître d' butter.</p>
+<p class="facts"><span>French</span><span>Serves 2</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 ribeye steaks</li><li>2 large russet potatoes, cut into fries</li><li>Oil for frying</li><li>4 tbsp softened butter</li><li>1 tbsp chopped parsley</li><li>1 tsp lemon juice</li><li>1 small garlic clove, grated</li><li>Flaky salt and pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the butter, parsley, lemon and garlic, roll it into a log and chill.</li><li>Soak the fries in cold water 30 minutes, then dry thoroughly.</li><li>Fry at 300°F for 5 minutes until pale and soft. Drain. Raise the oil to 375°F.</li><li>Sear the salted steaks in a hot pan, 4 to 5 minutes a side for medium rare, and rest them.</li><li>Fry the potatoes again 3 minutes until crisp and salt them. Top each steak with a slice of the butter.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="swedish-meatballs" data-k="Beef" data-t="50">
+<summary><span class="dn">Swedish Meatballs</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Swedish, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Tender beef and pork meatballs in a creamy brown gravy with lingonberry.</p>
+<p class="facts"><span>Swedish</span><span>Serves 4</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb ground beef and ½ lb ground pork</li><li>½ cup breadcrumbs soaked in ⅓ cup milk</li><li>1 egg</li><li>½ onion, grated</li><li>¼ tsp each allspice and nutmeg</li><li>4 tbsp butter, divided</li><li>3 tbsp flour</li><li>2 cups beef stock</li><li>½ cup heavy cream</li><li>1 tsp Worcestershire sauce</li><li>Lingonberry jam and egg noodles or mashed potatoes</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the meats, soaked crumbs, egg, onion, spices and 1 tsp salt. Roll into 1-inch balls.</li><li>Brown the meatballs in 2 tbsp butter, about 8 minutes, and set aside.</li><li>Melt the remaining butter, whisk in the flour and cook 1 minute.</li><li>Whisk in the stock, cream and Worcestershire and simmer until thick.</li><li>Return the meatballs and simmer 8 minutes. Serve with noodles or mash and lingonberry jam.</li></ol></section>
+</div></div>
+</details>
+</section>
+<section class="course" id="course-pork">
+<h3>Pork <small>8</small></h3>
+<details class="dish" id="cajun-smothered-pork-chops" data-k="Pork" data-t="70">
+<summary><span class="dn">Cajun Smothered Pork Chops</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cajun, </span>1 hr 10 min</span></summary>
+<div class="rx">
+<p class="dek">Bone-in chops simmered in a peppery onion gravy until tender.</p>
+<p class="facts"><span>Cajun</span><span>Serves 4</span><span>1 hr 10 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 bone-in pork chops, 1 inch thick</li><li>2 tsp Cajun seasoning</li><li>¼ cup flour</li><li>3 tbsp oil</li><li>2 onions, sliced</li><li>1 bell pepper, sliced</li><li>3 cloves garlic</li><li>2 cups chicken stock</li><li>1 tsp Worcestershire sauce</li><li>Green onions and rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the chops, dredge in flour and brown in the oil, 4 minutes a side. Set aside.</li><li>Stir 2 tbsp of the leftover flour into the fat and cook to a peanut butter colored roux.</li><li>Add the onions and pepper and cook 10 minutes until soft, then the garlic.</li><li>Whisk in the stock and Worcestershire, return the chops, cover and simmer 40 minutes.</li><li>Season and serve over rice with green onions.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="carnitas" data-k="Pork" data-t="210">
+<summary><span class="dn">Carnitas</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mexican, </span>3 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Pork shoulder braised with orange and spices, then crisped in its own fat.</p>
+<p class="facts"><span>Mexican</span><span>Serves 8</span><span>3 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 lb boneless pork shoulder, in 2-inch chunks</li><li>1 tbsp salt</li><li>1 tsp each cumin and oregano</li><li>1 onion, quartered</li><li>6 cloves garlic</li><li>1 orange, juiced, with the halves</li><li>1 cinnamon stick and 2 bay leaves</li><li>1 cup water or beer</li><li>Tortillas, onion, cilantro, salsa verde and lime</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Rub the pork with the salt and spices and put it in a Dutch oven.</li><li>Add the onion, garlic, orange juice and halves, cinnamon, bay and liquid.</li><li>Cover and cook at 325°F for 3 hours until very tender.</li><li>Shred the meat, discarding the aromatics. Spread it on a sheet pan and drizzle with some of the fat and juices.</li><li>Broil 5 to 8 minutes, until the edges are crisp. Serve in tortillas with the toppings.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="char-siu-pork" data-k="Pork" data-t="90">
+<summary><span class="dn">Char Siu Pork</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cantonese, </span>1 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Honey-lacquered barbecue pork shoulder, sweet and smoky, sliced over rice.</p>
+<p class="facts"><span>Cantonese</span><span>Serves 6</span><span>1 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb pork shoulder, in long strips 2 inches thick</li><li>¼ cup hoisin sauce</li><li>3 tbsp honey, plus 2 tbsp for glazing</li><li>2 tbsp soy sauce</li><li>1 tbsp Shaoxing wine</li><li>1 tsp five-spice powder</li><li>3 cloves garlic, grated</li><li>Red food coloring (optional)</li><li>Rice and bok choy</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the hoisin, honey, soy, wine, five-spice and garlic. Marinate the pork overnight.</li><li>Heat the oven to 375°F and set the pork on a rack over a foil-lined pan with water in it.</li><li>Roast 25 minutes, turn and baste with the marinade, then roast 20 minutes more.</li><li>Brush with honey and broil 2 to 3 minutes a side until lacquered and charred at the edges.</li><li>Rest, slice and serve over rice with steamed bok choy.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="pork-ramen-with-soft-eggs" data-k="Pork" data-t="60">
+<summary><span class="dn">Pork Ramen with Soft Eggs</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Japanese, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Miso-sesame broth, springy noodles, crisp pork belly and jammy eggs.</p>
+<p class="facts"><span>Japanese</span><span>Serves 4</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb pork belly, sliced, or ground pork</li><li>4 eggs</li><li>6 cups chicken stock</li><li>3 tbsp white miso</li><li>2 tbsp tahini or sesame paste</li><li>2 tbsp soy sauce</li><li>1 tbsp each grated ginger and garlic</li><li>1 tsp chile oil</li><li>4 portions fresh ramen noodles</li><li>Green onions, corn, nori and bean sprouts</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Boil the eggs 6½ minutes, chill in ice water, peel and marinate in a splash of soy and water.</li><li>Crisp the pork in a pan over medium heat with a little soy at the end.</li><li>Cook the ginger and garlic in 1 tbsp of the pork fat, add the stock and simmer 10 minutes.</li><li>Whisk in the miso, tahini and soy off the boil.</li><li>Cook the noodles, divide among bowls, ladle the broth over and top with pork, halved eggs, chile oil and the garnishes.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="pork-schnitzel-with-lemon" data-k="Pork" data-t="30">
+<summary><span class="dn">Pork Schnitzel with Lemon</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">German, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Thin, golden cutlets fried crisp and served with lemon and parsley potatoes.</p>
+<p class="facts"><span>German</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 boneless pork chops, pounded to ¼ inch</li><li>Salt and pepper</li><li>½ cup flour</li><li>2 eggs, beaten with 2 tbsp milk</li><li>1½ cups fine breadcrumbs</li><li>Oil and butter for frying</li><li>Lemon wedges</li><li>1½ lb small potatoes, boiled and tossed with butter and parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the cutlets and dredge in flour, egg and breadcrumbs. Do not press the crumbs on; they should puff.</li><li>Heat ½ inch of oil with a knob of butter to 350°F.</li><li>Fry 2 to 3 minutes a side, swirling the pan so the oil washes over the top.</li><li>Drain on paper towels and salt lightly.</li><li>Serve right away with lemon and the parsley potatoes.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="pork-tenderloin-with-apples-and-cider" data-k="Pork" data-t="40">
+<summary><span class="dn">Pork Tenderloin with Apples and Cider</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">American, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Seared tenderloin roasted with apples, shallots and a cider mustard sauce.</p>
+<p class="facts"><span>American</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 pork tenderloins, about 1 lb each</li><li>1 tbsp oil</li><li>2 tbsp butter</li><li>2 apples, in wedges</li><li>2 shallots, sliced</li><li>1 cup apple cider</li><li>1 tbsp whole grain mustard</li><li>½ cup chicken stock</li><li>Thyme</li><li>Salt and pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 400°F. Season the pork and sear it in the oil on all sides in an ovenproof skillet.</li><li>Add the butter, apples and shallots around the pork with a few sprigs of thyme.</li><li>Roast 15 to 18 minutes, to 145°F. Rest the pork on a board.</li><li>Put the pan back on the heat, add the cider, mustard and stock and boil until reduced by half.</li><li>Slice the pork and serve with the apples and sauce.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="red-beans-and-rice" data-k="Pork" data-t="210">
+<summary><span class="dn">Red Beans and Rice</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Creole, </span>3 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Monday supper the Louisiana way: creamy red beans with smoked sausage.</p>
+<p class="facts"><span>Creole</span><span>Serves 8</span><span>3 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb dried red kidney beans, soaked overnight</li><li>1 lb smoked sausage, sliced</li><li>1 ham hock or 8 oz tasso</li><li>1 onion, 1 bell pepper and 3 ribs celery, chopped</li><li>5 cloves garlic</li><li>2 bay leaves</li><li>1 tsp thyme</li><li>1 tsp Creole seasoning</li><li>Hot sauce</li><li>White rice and green onions</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Brown the sausage in a heavy pot and set it aside.</li><li>Cook the trinity in the fat 8 minutes, then the garlic.</li><li>Add the drained beans, ham hock, herbs, seasoning and water to cover by 2 inches.</li><li>Simmer 2½ to 3 hours, stirring now and then, until the beans are soft. Mash some against the side of the pot to make it creamy.</li><li>Return the sausage for 20 minutes, season with salt and hot sauce, and serve over rice with green onions.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="tonkatsu" data-k="Pork" data-t="35">
+<summary><span class="dn">Tonkatsu</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Japanese, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Panko-crusted pork cutlets, fried golden, with tangy katsu sauce and cabbage.</p>
+<p class="facts"><span>Japanese</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 boneless pork loin chops, ½ inch thick</li><li>Salt and pepper</li><li>½ cup flour</li><li>2 eggs, beaten</li><li>2 cups panko</li><li>Oil for frying</li><li>¼ cup ketchup, 2 tbsp Worcestershire, 1 tbsp soy, 1 tsp sugar</li><li>Finely shredded cabbage, lemon and rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Make small cuts in the fat around the edges so the chops lie flat, then pound lightly and season.</li><li>Coat in flour, then egg, then panko.</li><li>Fry in 1 inch of oil at 340°F for 3 to 4 minutes a side, until golden and 145°F inside.</li><li>Drain on a rack and rest 3 minutes.</li><li>Slice into strips and serve with the mixed sauce, cabbage, lemon and rice.</li></ol></section>
+</div></div>
+</details>
+</section>
+<section class="course" id="course-lamb">
+<h3>Lamb <small>4</small></h3>
+<details class="dish" id="braised-lamb-shanks" data-k="Lamb" data-t="210">
+<summary><span class="dn">Braised Lamb Shanks</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mediterranean, </span>3 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Fall-off-the-bone shanks braised in red wine with rosemary and garlic.</p>
+<p class="facts"><span>Mediterranean</span><span>Serves 4</span><span>3 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 lamb shanks</li><li>2 tbsp olive oil</li><li>1 onion, 2 carrots and 2 ribs celery, chopped</li><li>6 cloves garlic</li><li>2 tbsp tomato paste</li><li>2 cups dry red wine</li><li>2 cups beef stock</li><li>1 can (14 oz) diced tomatoes</li><li>3 sprigs rosemary and 2 bay leaves</li><li>Gremolata of parsley, lemon zest and garlic</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the shanks and brown them well in the oil in a Dutch oven. Set aside.</li><li>Cook the vegetables 8 minutes, then the garlic and tomato paste for 2 minutes.</li><li>Add the wine and reduce by half, then the stock, tomatoes and herbs.</li><li>Return the shanks, cover and braise at 325°F for 2½ to 3 hours, until the meat pulls from the bone.</li><li>Skim the fat, reduce the sauce if thin, and serve over polenta or mashed potatoes with gremolata.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="lamb-kofta-with-tzatziki" data-k="Lamb" data-t="35">
+<summary><span class="dn">Lamb Kofta with Tzatziki</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Middle Eastern, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Grilled skewers of spiced ground lamb with cool cucumber yogurt.</p>
+<p class="facts"><span>Middle Eastern</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb ground lamb</li><li>½ onion, grated and squeezed dry</li><li>3 cloves garlic, minced</li><li>¼ cup each chopped parsley and mint</li><li>1 tsp each cumin, coriander and paprika</li><li>½ tsp cinnamon</li><li>1 tsp salt</li><li>1 cup Greek yogurt</li><li>½ cucumber, grated and squeezed</li><li>Lemon, dill, pita and salad to serve</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the lamb, onion, two thirds of the garlic, herbs, spices and salt. Chill 15 minutes.</li><li>Shape into 12 long sausages around skewers.</li><li>Stir the yogurt, cucumber, remaining garlic, lemon and dill for the tzatziki.</li><li>Grill over high heat 8 to 10 minutes, turning, until charred and cooked through.</li><li>Serve with warm pita, tzatziki and a tomato and onion salad.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="rack-of-lamb-with-herb-crust" data-k="Lamb" data-t="45">
+<summary><span class="dn">Rack of Lamb with Herb Crust</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>45 min</span></summary>
+<div class="rx">
+<p class="dek">Frenched lamb racks under a Dijon and herb crust, roasted pink.</p>
+<p class="facts"><span>French</span><span>Serves 4</span><span>45 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 racks of lamb, frenched</li><li>Salt and pepper</li><li>2 tbsp olive oil</li><li>2 tbsp Dijon mustard</li><li>½ cup panko</li><li>2 tbsp each chopped parsley and rosemary</li><li>2 cloves garlic, minced</li><li>2 tbsp melted butter</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 425°F. Season the lamb and sear it fat side down in the oil, then briefly on all sides.</li><li>Brush the fat side with the mustard.</li><li>Mix the panko, herbs, garlic and butter and press it onto the mustard.</li><li>Roast crust side up 15 to 20 minutes, to 130°F for medium rare.</li><li>Rest 10 minutes, then slice between the bones. Serve with gratin potatoes or green beans.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="shepherd-s-pie" data-k="Lamb" data-t="75">
+<summary><span class="dn">Shepherd's Pie</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">British, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">Savory minced lamb and vegetables under a golden mashed potato crown.</p>
+<p class="facts"><span>British</span><span>Serves 6</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb russet potatoes</li><li>4 tbsp butter and ½ cup warm milk</li><li>1½ lb ground lamb</li><li>1 onion, 2 carrots, diced</li><li>2 cloves garlic</li><li>2 tbsp tomato paste</li><li>2 tbsp flour</li><li>1 cup beef stock</li><li>1 tbsp Worcestershire sauce</li><li>1 tsp thyme</li><li>1 cup frozen peas</li><li>½ cup grated cheddar</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Boil the potatoes until tender, then mash with the butter, milk and salt.</li><li>Brown the lamb, drain most of the fat, and add the onion and carrots for 6 minutes. Add the garlic.</li><li>Stir in the tomato paste and flour, then the stock, Worcestershire and thyme. Simmer 10 minutes, then add the peas.</li><li>Spread the filling in a baking dish, top with the mash and rough it up with a fork. Sprinkle with cheddar.</li><li>Bake at 400°F for 25 minutes until bubbling and golden.</li></ol></section>
+</div></div>
+</details>
+</section>
+<section class="course" id="course-seafood">
+<h3>From the water <small>25</small></h3>
+<details class="dish" id="baked-cod-with-lemon-and-herbs" data-k="Seafood" data-t="25">
+<summary><span class="dn">Baked Cod with Lemon and Herbs</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mediterranean, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Flaky cod baked with tomatoes, olives, garlic and lemon.</p>
+<p class="facts"><span>Mediterranean</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 cod fillets</li><li>1 pint cherry tomatoes, halved</li><li>⅓ cup Kalamata olives</li><li>3 cloves garlic, sliced</li><li>¼ cup olive oil</li><li>1 lemon, sliced</li><li>1 tsp oregano</li><li>Salt, pepper and parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 400°F.</li><li>Toss the tomatoes, olives, garlic and oil in a baking dish and roast 10 minutes.</li><li>Nestle in the seasoned cod, top with lemon slices and oregano.</li><li>Bake 12 to 15 minutes until the fish flakes.</li><li>Spoon the juices over and finish with parsley.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="blackened-redfish" data-k="Seafood" data-t="20">
+<summary><span class="dn">Blackened Redfish</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cajun, </span>20 min</span></summary>
+<div class="rx">
+<p class="dek">Spice-crusted fillets seared black in cast iron, with lemon butter.</p>
+<p class="facts"><span>Cajun</span><span>Serves 4</span><span>20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 redfish or drum fillets, skinless</li><li>1 stick butter, melted</li><li>2 tsp paprika</li><li>1 tsp each garlic powder, onion powder, thyme and oregano</li><li>½ tsp each cayenne, black pepper and white pepper</li><li>1 tsp salt</li><li>Lemon wedges</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Mix the spices and salt.</li><li>Heat a cast iron skillet over high heat for at least 5 minutes, with the fan on or outdoors.</li><li>Dip each fillet in melted butter and coat heavily with the spice mix.</li><li>Cook 2 minutes a side until a dark crust forms, spooning a little butter on top.</li><li>Serve with the remaining butter and lemon, alongside dirty rice or a salad.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="bouillabaisse" data-k="Seafood" data-t="90">
+<summary><span class="dn">Bouillabaisse</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>1 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">The Marseille fish stew of saffron, fennel and orange with rouille toasts.</p>
+<p class="facts"><span>French</span><span>Serves 6</span><span>1 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>¼ cup olive oil</li><li>1 onion and 1 fennel bulb, sliced</li><li>1 leek, sliced</li><li>4 cloves garlic</li><li>1 can (14 oz) diced tomatoes</li><li>Pinch of saffron</li><li>1 strip orange peel</li><li>Thyme and bay leaf</li><li>6 cups fish stock</li><li>2 lb firm white fish, in chunks</li><li>1 lb mussels and 1 lb shrimp</li><li>Toasted baguette and rouille (mayonnaise with garlic, saffron and cayenne)</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the onion, fennel and leek in the oil 10 minutes, then the garlic.</li><li>Add the tomatoes, saffron, orange peel, herbs and stock. Simmer 30 minutes.</li><li>Add the firm fish and simmer 4 minutes.</li><li>Add the mussels and shrimp, cover and cook until the mussels open, about 4 minutes. Discard any that stay closed.</li><li>Ladle into bowls and serve with toasts spread with rouille.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="cedar-plank-salmon" data-k="Seafood" data-t="35">
+<summary><span class="dn">Cedar Plank Salmon</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Pacific Northwest, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Salmon roasted on smoldering cedar with a brown sugar and mustard glaze.</p>
+<p class="facts"><span>Pacific Northwest</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 untreated cedar plank, soaked 1 hour</li><li>1½ lb salmon fillet</li><li>2 tbsp brown sugar</li><li>1 tbsp Dijon mustard</li><li>1 tbsp soy sauce</li><li>1 tsp lemon zest</li><li>Salt and pepper</li><li>Lemon and dill</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the grill to medium high.</li><li>Mix the sugar, mustard, soy and zest.</li><li>Set the salmon on the soaked plank, season and spread the glaze over.</li><li>Put the plank on the grill, close the lid and cook 15 to 20 minutes until the salmon flakes.</li><li>Serve on the plank with lemon and dill.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="cioppino" data-k="Seafood" data-t="60">
+<summary><span class="dn">Cioppino</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">San Francisco, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">The fisherman's stew of crab, clams, shrimp and fish in tomato and wine.</p>
+<p class="facts"><span>San Francisco</span><span>Serves 6</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>¼ cup olive oil</li><li>1 onion and 1 fennel bulb, chopped</li><li>5 cloves garlic</li><li>½ tsp chile flakes</li><li>2 tbsp tomato paste</li><li>1½ cups dry white wine</li><li>1 can (28 oz) crushed tomatoes</li><li>3 cups fish stock</li><li>1 bay leaf and oregano</li><li>1 lb clams</li><li>1 lb shrimp</li><li>1 lb white fish, in chunks</li><li>1 lb crab legs, cracked</li><li>Basil and sourdough</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the onion and fennel in the oil 8 minutes, then the garlic, chile and tomato paste.</li><li>Add the wine and reduce by half, then the tomatoes, stock and herbs. Simmer 20 minutes.</li><li>Add the clams and crab and cook 5 minutes.</li><li>Add the fish and shrimp and cook 4 minutes until everything is done.</li><li>Finish with basil and serve with sourdough to dunk.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="clam-linguine" data-k="Seafood" data-t="30">
+<summary><span class="dn">Clam Linguine</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Linguine alle vongole: littlenecks, garlic, white wine and chile.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb linguine</li><li>3 lb littleneck clams, scrubbed</li><li>⅓ cup olive oil</li><li>5 cloves garlic, sliced</li><li>½ tsp chile flakes</li><li>¾ cup dry white wine</li><li>2 tbsp butter</li><li>½ cup chopped parsley</li><li>Lemon zest</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the pasta 2 minutes short of al dente and save 1 cup of the water.</li><li>Cook the garlic and chile in the oil until fragrant.</li><li>Add the clams and wine, cover and cook until they open, 5 to 7 minutes. Discard any that stay shut.</li><li>Add the pasta, butter and a splash of pasta water and toss over the heat 2 minutes.</li><li>Finish with parsley and lemon zest.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="crab-cakes-with-remoulade" data-k="Seafood" data-t="40">
+<summary><span class="dn">Crab Cakes with Rémoulade</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Southern, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Mostly lump crab, barely bound, seared golden with a Creole rémoulade.</p>
+<p class="facts"><span>Southern</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb lump crab meat, picked over</li><li>⅓ cup mayonnaise</li><li>1 egg</li><li>1 tsp Dijon mustard</li><li>1 tsp Worcestershire sauce</li><li>1 tsp Old Bay or Creole seasoning</li><li>½ cup crushed saltines or panko</li><li>2 tbsp parsley</li><li>3 tbsp butter</li><li>Rémoulade: ½ cup mayonnaise, 1 tbsp Creole mustard, 1 tsp each paprika, capers, pickle and hot sauce</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Whisk the mayonnaise, egg, mustard, Worcestershire and seasoning.</li><li>Gently fold in the crab, crumbs and parsley, keeping the lumps whole.</li><li>Shape into 8 cakes and chill 30 minutes.</li><li>Mix the rémoulade ingredients.</li><li>Fry the cakes in the butter 3 to 4 minutes a side until golden. Serve with the rémoulade and lemon.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="crawfish-etouffee" data-k="Seafood" data-t="50">
+<summary><span class="dn">Crawfish Étouffée</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Cajun, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Louisiana crawfish tails smothered in a buttery blond roux with the trinity.</p>
+<p class="facts"><span>Cajun</span><span>Serves 6</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 stick butter</li><li>⅓ cup flour</li><li>1 onion, 1 bell pepper and 2 ribs celery, finely chopped</li><li>4 cloves garlic</li><li>2 lb Louisiana crawfish tails with their fat</li><li>1½ cups seafood stock</li><li>1 tbsp tomato paste (optional)</li><li>1½ tsp Cajun seasoning</li><li>½ tsp cayenne</li><li>Green onions, parsley and white rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Melt the butter and whisk in the flour. Stir over medium heat 8 to 10 minutes to a caramel-colored roux.</li><li>Add the trinity and cook 8 minutes until very soft, then the garlic and tomato paste.</li><li>Slowly stir in the stock and seasonings and simmer 15 minutes.</li><li>Add the crawfish and their fat and simmer 8 minutes.</li><li>Stir in the green onions and parsley, taste for heat and serve over rice.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="fish-tacos-with-chipotle-crema" data-k="Seafood" data-t="35">
+<summary><span class="dn">Fish Tacos with Chipotle Crema</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Baja, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Crisp beer-battered fish with cabbage slaw and smoky crema.</p>
+<p class="facts"><span>Baja</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb cod or mahi, in strips</li><li>1 cup flour, plus extra for dusting</li><li>1 tsp each baking powder, salt and chili powder</li><li>1 cup cold beer</li><li>Oil for frying</li><li>½ cup sour cream with 1 chipotle in adobo, minced, and lime</li><li>2 cups shredded cabbage</li><li>Corn tortillas, pico de gallo, avocado and lime</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Stir the sour cream, chipotle, lime and salt for the crema.</li><li>Whisk the flour, baking powder, salt, chili powder and beer into a thin batter.</li><li>Heat 1½ inches of oil to 375°F. Dust the fish in flour, dip in batter and fry 3 to 4 minutes until golden.</li><li>Drain and salt.</li><li>Fill warm tortillas with fish, cabbage, pico, avocado and crema.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="fried-catfish-with-hushpuppies" data-k="Seafood" data-t="45">
+<summary><span class="dn">Fried Catfish with Hushpuppies</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Southern, </span>45 min</span></summary>
+<div class="rx">
+<p class="dek">Cornmeal-crusted catfish fried crisp with sweet onion hushpuppies.</p>
+<p class="facts"><span>Southern</span><span>Serves 4</span><span>45 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb catfish fillets, in pieces</li><li>1 cup buttermilk with hot sauce</li><li>1½ cups cornmeal and ½ cup flour</li><li>2 tsp Cajun seasoning</li><li>Oil for frying</li><li>Hushpuppies: 1 cup cornmeal, ½ cup flour, 1 tsp baking powder, 1 tsp sugar, 1 egg, ¾ cup buttermilk, ½ onion grated</li><li>Tartar sauce and lemon</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Soak the catfish in the buttermilk 20 minutes.</li><li>Heat 2 inches of oil to 350°F.</li><li>Mix the cornmeal, flour and seasoning. Dredge the fish and fry 4 to 5 minutes until golden. Drain.</li><li>Stir the hushpuppy ingredients into a thick batter and drop spoonfuls into the oil. Fry 3 minutes, turning, until brown.</li><li>Serve with tartar sauce, lemon and coleslaw.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="grilled-swordfish-with-salsa-verde" data-k="Seafood" data-t="30">
+<summary><span class="dn">Grilled Swordfish with Salsa Verde</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Meaty swordfish steaks off the grill with a bright herb and caper sauce.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 swordfish steaks, 1 inch thick</li><li>Olive oil, salt and pepper</li><li>1 cup parsley</li><li>¼ cup basil</li><li>2 tbsp capers</li><li>2 anchovy fillets</li><li>1 clove garlic</li><li>1 tbsp red wine vinegar</li><li>½ cup olive oil</li><li>Lemon</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Chop the herbs, capers, anchovies and garlic finely, or pulse them, then stir in the vinegar and oil.</li><li>Heat the grill to high and oil the grates.</li><li>Brush the fish with oil and season.</li><li>Grill 4 to 5 minutes a side until just opaque.</li><li>Spoon the salsa verde over and serve with lemon.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="halibut-with-beurre-blanc" data-k="Seafood" data-t="30">
+<summary><span class="dn">Halibut with Beurre Blanc</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Pan-roasted halibut with a classic white wine butter sauce and chives.</p>
+<p class="facts"><span>French</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 halibut fillets</li><li>Salt and pepper</li><li>2 tbsp oil</li><li>1 shallot, minced</li><li>⅓ cup dry white wine</li><li>2 tbsp white wine vinegar</li><li>1 stick cold butter, cubed</li><li>Chives and lemon</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>For the sauce, simmer the shallot, wine and vinegar until about 2 tbsp of liquid remains.</li><li>Over low heat, whisk in the butter one cube at a time until thick and pale. Season and keep warm, not hot.</li><li>Heat the oven to 400°F. Season the fish and sear it in the oil 3 minutes until golden.</li><li>Turn the fish and finish in the oven 4 to 6 minutes.</li><li>Spoon the sauce over and scatter with chives. Serve with asparagus.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="lobster-thermidor" data-k="Seafood" data-t="60">
+<summary><span class="dn">Lobster Thermidor</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Lobster meat in a cognac and Gruyère cream, gratinéed in the shell.</p>
+<p class="facts"><span>French</span><span>Serves 4</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lobsters, about 1½ lb each, cooked and halved</li><li>3 tbsp butter</li><li>1 shallot, minced</li><li>2 tbsp cognac</li><li>¼ cup dry white wine</li><li>¾ cup heavy cream</li><li>1 tsp Dijon mustard</li><li>1 egg yolk</li><li>½ cup grated Gruyère, plus extra for the tops</li><li>Tarragon, parsley and paprika</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Take the meat from the shells and claws, cut it into chunks and keep the shells.</li><li>Cook the shallot in the butter 2 minutes, add the cognac and wine and reduce by half.</li><li>Add the cream and mustard and simmer 5 minutes. Off the heat, whisk in the yolk, then the cheese and herbs.</li><li>Fold in the lobster and spoon it back into the shells. Top with more Gruyère and a pinch of paprika.</li><li>Broil 3 to 5 minutes until bubbling and golden.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="miso-glazed-salmon" data-k="Seafood" data-t="25">
+<summary><span class="dn">Miso-Glazed Salmon</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Japanese, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Silky salmon under a sweet, caramelized miso glaze.</p>
+<p class="facts"><span>Japanese</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 salmon fillets</li><li>3 tbsp white miso</li><li>2 tbsp mirin</li><li>1 tbsp soy sauce</li><li>1 tbsp brown sugar</li><li>1 tsp sesame oil</li><li>1 tsp grated ginger</li><li>Sesame seeds, green onions, rice and cucumber salad</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Whisk the miso, mirin, soy, sugar, sesame oil and ginger.</li><li>Pat the salmon dry and spread the glaze over the tops. Let it sit 15 minutes.</li><li>Heat the broiler with a rack 6 inches from the heat.</li><li>Broil on a foil-lined pan 7 to 9 minutes, until caramelized and just cooked through.</li><li>Top with sesame and green onions and serve with rice and cucumber salad.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="moules-marinieres" data-k="Seafood" data-t="25">
+<summary><span class="dn">Moules Marinières</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Mussels steamed in white wine, shallots and butter, with bread for the broth.</p>
+<p class="facts"><span>French</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 lb mussels, scrubbed and debearded</li><li>3 tbsp butter</li><li>3 shallots, minced</li><li>3 cloves garlic, minced</li><li>1½ cups dry white wine</li><li>¼ cup heavy cream (optional)</li><li>½ cup chopped parsley</li><li>Crusty bread or frites</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Discard any mussels that stay open when tapped.</li><li>Melt the butter in a large pot and cook the shallots and garlic 3 minutes.</li><li>Add the wine and bring to a boil.</li><li>Add the mussels, cover and steam 5 to 6 minutes, shaking the pot, until they open.</li><li>Stir in the cream and parsley and serve in bowls with the broth and bread.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="paella-valenciana-with-seafood" data-k="Seafood" data-t="70">
+<summary><span class="dn">Paella Valenciana with Seafood</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Spanish, </span>1 hr 10 min</span></summary>
+<div class="rx">
+<p class="dek">Saffron rice with shrimp, mussels and chorizo and a crisp socarrat crust.</p>
+<p class="facts"><span>Spanish</span><span>Serves 6</span><span>1 hr 10 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>¼ cup olive oil</li><li>4 oz Spanish chorizo, sliced</li><li>1 onion and 1 red bell pepper, diced</li><li>4 cloves garlic</li><li>1 tsp smoked paprika</li><li>1 cup grated tomato</li><li>2 cups bomba or Arborio rice</li><li>5 cups hot chicken or seafood stock with a big pinch of saffron</li><li>1 lb large shrimp</li><li>1 lb mussels</li><li>1 cup peas</li><li>Lemon wedges and parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>In a wide paella pan, cook the chorizo in the oil, then the onion and pepper for 6 minutes. Add the garlic and paprika.</li><li>Add the tomato and cook 5 minutes into a thick sofrito.</li><li>Stir in the rice to coat, then pour in the saffron stock and season. Spread the rice evenly and do not stir again.</li><li>Simmer 15 minutes, then press in the shrimp and mussels and scatter the peas. Cook 8 to 10 minutes more.</li><li>Turn up the heat for the last 2 minutes until the bottom crackles. Rest 5 minutes and serve with lemon.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="seafood-gumbo" data-k="Seafood" data-t="150">
+<summary><span class="dn">Seafood Gumbo</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Creole, </span>2 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">A dark roux gumbo loaded with shrimp, crab and okra.</p>
+<p class="facts"><span>Creole</span><span>Serves 8</span><span>2 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>¾ cup oil and ¾ cup flour</li><li>2 onions, 1 bell pepper and 3 ribs celery, chopped</li><li>5 cloves garlic</li><li>1 lb okra, sliced</li><li>1 can (14 oz) diced tomatoes</li><li>2½ quarts seafood stock</li><li>1 lb andouille, sliced (optional)</li><li>2 lb shrimp, peeled</li><li>1 lb lump crab meat</li><li>2 bay leaves, thyme and Creole seasoning</li><li>Green onions, rice and filé</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Stir the oil and flour over medium heat 30 to 40 minutes until dark brown.</li><li>Add the trinity and stir 8 minutes, then the garlic and okra for 10 minutes.</li><li>Add the tomatoes, stock, sausage and seasonings and simmer 1 hour.</li><li>Add the shrimp and cook 5 minutes, then gently fold in the crab.</li><li>Turn off the heat, add green onions, and serve over rice with filé.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="seared-scallops-with-brown-butter" data-k="Seafood" data-t="20">
+<summary><span class="dn">Seared Scallops with Brown Butter</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>20 min</span></summary>
+<div class="rx">
+<p class="dek">Caramelized sea scallops with sage brown butter and lemon.</p>
+<p class="facts"><span>French</span><span>Serves 2</span><span>20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>10 large dry sea scallops</li><li>Salt and pepper</li><li>1 tbsp oil</li><li>3 tbsp butter</li><li>6 sage leaves</li><li>Juice of ½ lemon</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Remove the side muscle and pat the scallops very dry. Season.</li><li>Heat the oil in a skillet until it shimmers.</li><li>Sear the scallops without moving them 2 minutes until deeply browned, then turn.</li><li>Add the butter and sage and baste 1 minute as the butter browns.</li><li>Add the lemon and serve right away over risotto or puréed cauliflower.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="shrimp-and-grits" data-k="Seafood" data-t="45">
+<summary><span class="dn">Shrimp and Grits</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Southern, </span>45 min</span></summary>
+<div class="rx">
+<p class="dek">Gulf shrimp in a bacon and lemon pan sauce over creamy cheese grits.</p>
+<p class="facts"><span>Southern</span><span>Serves 4</span><span>45 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 cup stone-ground grits</li><li>2 tbsp butter and 1 cup sharp cheddar</li><li>1½ lb Gulf shrimp, peeled</li><li>4 slices bacon, chopped</li><li>3 cloves garlic</li><li>1 tsp Cajun seasoning</li><li>½ cup chicken stock</li><li>Juice of ½ lemon</li><li>3 green onions, sliced</li><li>Hot sauce</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Simmer the grits in 4 cups salted water, stirring often, 25 to 30 minutes. Stir in the butter and cheese.</li><li>Cook the bacon until crisp and set it aside, leaving the fat.</li><li>Season the shrimp and sear in the fat 1 minute a side.</li><li>Add the garlic, then the stock and lemon, and simmer 1 minute until the shrimp are just cooked.</li><li>Spoon the shrimp and sauce over the grits and top with bacon, green onions and hot sauce.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="shrimp-creole" data-k="Seafood" data-t="50">
+<summary><span class="dn">Shrimp Creole</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Creole, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Shrimp simmered in a spicy tomato sauce with the holy trinity.</p>
+<p class="facts"><span>Creole</span><span>Serves 6</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 tbsp butter and 1 tbsp oil</li><li>1 onion, 1 bell pepper and 2 ribs celery, chopped</li><li>4 cloves garlic</li><li>1 can (28 oz) crushed tomatoes</li><li>1 cup seafood stock</li><li>1 tsp each thyme and Creole seasoning</li><li>2 bay leaves</li><li>1 tsp Worcestershire sauce</li><li>Hot sauce</li><li>2 lb shrimp, peeled</li><li>Green onions, parsley and rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the trinity in the butter and oil 8 minutes, then the garlic.</li><li>Add the tomatoes, stock, seasonings, bay and Worcestershire.</li><li>Simmer 25 minutes until thick.</li><li>Add the shrimp and cook 4 to 5 minutes until pink.</li><li>Season with hot sauce and finish with green onions and parsley. Serve over rice.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="shrimp-po-boys" data-k="Seafood" data-t="35">
+<summary><span class="dn">Shrimp Po'boys</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Louisiana, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Fried Gulf shrimp dressed with lettuce, tomato and rémoulade on French bread.</p>
+<p class="facts"><span>Louisiana</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb medium shrimp, peeled</li><li>1 cup buttermilk</li><li>1 cup cornmeal and ½ cup flour</li><li>2 tsp Creole seasoning</li><li>Oil for frying</li><li>4 lengths of soft-crust French bread</li><li>Shredded lettuce, sliced tomato and pickles</li><li>Rémoulade or mayonnaise and hot sauce</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Soak the shrimp in buttermilk 15 minutes.</li><li>Mix the cornmeal, flour and seasoning and dredge the shrimp.</li><li>Fry at 350°F for 2 minutes until golden. Drain.</li><li>Warm the bread and spread with rémoulade.</li><li>Pile on the shrimp and dress with lettuce, tomato and pickles.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="shrimp-scampi" data-k="Seafood" data-t="25">
+<summary><span class="dn">Shrimp Scampi</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian American, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Plump shrimp in garlic, white wine and butter over linguine.</p>
+<p class="facts"><span>Italian American</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>12 oz linguine</li><li>1½ lb large shrimp, peeled</li><li>4 tbsp butter and 2 tbsp olive oil</li><li>6 cloves garlic, sliced</li><li>½ tsp red chile flakes</li><li>½ cup dry white wine</li><li>Juice and zest of 1 lemon</li><li>¼ cup chopped parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the linguine in salted water and save ½ cup of the water.</li><li>Season the shrimp and sear in the oil 1 minute a side. Set aside.</li><li>Melt the butter, add the garlic and chile and cook 1 minute without browning.</li><li>Add the wine and lemon juice and simmer 2 minutes.</li><li>Toss in the pasta, shrimp, zest and parsley with a splash of pasta water until glossy.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="sole-meuniere" data-k="Seafood" data-t="20">
+<summary><span class="dn">Sole Meunière</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>20 min</span></summary>
+<div class="rx">
+<p class="dek">Julia Child's favorite: delicate sole in nutty brown butter, lemon and parsley.</p>
+<p class="facts"><span>French</span><span>Serves 2</span><span>20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 sole or flounder fillets</li><li>Salt and pepper</li><li>⅓ cup flour</li><li>1 tbsp oil</li><li>4 tbsp butter, divided</li><li>Juice of 1 lemon</li><li>1 tbsp chopped parsley</li><li>1 tbsp capers (optional)</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Season the fish and dredge it lightly in flour.</li><li>Heat the oil and 1 tbsp butter in a large skillet over medium high.</li><li>Cook the fillets 2 minutes a side until golden and move them to warm plates.</li><li>Wipe the pan, add the remaining butter and cook until it foams and turns hazelnut brown.</li><li>Take it off the heat, add the lemon, parsley and capers, and pour it over the fish.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="thai-red-curry-shrimp" data-k="Seafood" data-t="25">
+<summary><span class="dn">Thai Red Curry Shrimp</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Thai, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Shrimp in a rich red coconut curry with bamboo shoots and basil.</p>
+<p class="facts"><span>Thai</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb shrimp</li><li>3 tbsp red curry paste</li><li>1 can (13.5 oz) coconut milk</li><li>½ cup stock</li><li>1 red bell pepper, sliced</li><li>1 can bamboo shoots, drained</li><li>1 tbsp fish sauce</li><li>2 tsp brown sugar</li><li>Juice of 1 lime</li><li>Thai basil and jasmine rice</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Fry the curry paste in a spoonful of the coconut cream for 1 minute.</li><li>Add the rest of the coconut milk and the stock and simmer.</li><li>Add the pepper and bamboo shoots and cook 4 minutes.</li><li>Add the shrimp and cook 3 minutes until pink.</li><li>Season with fish sauce, sugar and lime, stir in basil and serve over rice.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="tuna-poke-bowls" data-k="Seafood" data-t="25">
+<summary><span class="dn">Tuna Poke Bowls</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Hawaiian, </span>25 min</span></summary>
+<div class="rx">
+<p class="dek">Sushi-grade ahi with soy, sesame and sweet onion over seasoned rice.</p>
+<p class="facts"><span>Hawaiian</span><span>Serves 4</span><span>25 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb sushi-grade ahi tuna, cubed</li><li>¼ cup soy sauce</li><li>1 tbsp sesame oil</li><li>1 tsp rice vinegar</li><li>½ sweet onion, thinly sliced</li><li>2 green onions</li><li>1 tsp sesame seeds</li><li>3 cups cooked sushi rice</li><li>Avocado, cucumber, edamame, seaweed salad and spicy mayo</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Whisk the soy, sesame oil and vinegar.</li><li>Toss the tuna with the dressing, onions and sesame seeds. Chill 10 to 15 minutes.</li><li>Season the warm rice with a splash of rice vinegar and a pinch of sugar and salt.</li><li>Divide the rice among bowls.</li><li>Top with the tuna and arrange the vegetables around it. Drizzle with spicy mayo.</li></ol></section>
+</div></div>
+</details>
+</section>
+<section class="course" id="course-vegetarian">
+<h3>From the garden <small>25</small></h3>
+<details class="dish" id="black-bean-enchiladas" data-k="Vegetarian" data-t="50">
+<summary><span class="dn">Black Bean Enchiladas</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mexican, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Black beans, roasted sweet potato and cheese rolled in red chile sauce.</p>
+<p class="facts"><span>Mexican</span><span>Serves 6</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 large sweet potato, diced and roasted</li><li>2 cans (15 oz) black beans, drained</li><li>1 cup corn</li><li>1 tsp cumin</li><li>2 cups red enchilada sauce</li><li>2 cups shredded Monterey Jack</li><li>12 corn tortillas</li><li>Avocado, cilantro, sour cream and pickled onions</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 375°F. Mash half the beans and mix with the rest, the sweet potato, corn, cumin and 1 cup cheese.</li><li>Spread ½ cup sauce in a baking dish.</li><li>Warm the tortillas, fill and roll them, and set them seam down in the dish.</li><li>Cover with the remaining sauce and cheese.</li><li>Bake 20 minutes and top with avocado, cilantro, sour cream and onions.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="butternut-squash-ravioli-with-sage-butter" data-k="Vegetarian" data-t="40">
+<summary><span class="dn">Butternut Squash Ravioli with Sage Butter</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Squash-filled ravioli in brown butter with crisp sage and toasted walnuts.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb fresh butternut squash ravioli</li><li>6 tbsp butter</li><li>12 sage leaves</li><li>⅓ cup walnuts, chopped</li><li>Pinch of nutmeg</li><li>⅓ cup grated Parmesan</li><li>Lemon zest</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Bring a large pot of salted water to a boil.</li><li>Melt the butter in a wide pan and cook until it smells nutty and turns brown.</li><li>Add the sage to crisp, then the walnuts and nutmeg.</li><li>Cook the ravioli 3 to 4 minutes and lift them into the pan with a splash of water.</li><li>Toss gently and finish with Parmesan and lemon zest.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="cacio-e-pepe" data-k="Vegetarian" data-t="20">
+<summary><span class="dn">Cacio e Pepe</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Roman, </span>20 min</span></summary>
+<div class="rx">
+<p class="dek">Rome in three ingredients: Pecorino, black pepper and pasta water.</p>
+<p class="facts"><span>Roman</span><span>Serves 4</span><span>20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb spaghetti or tonnarelli</li><li>2 cups finely grated Pecorino Romano</li><li>2 tsp freshly cracked black pepper</li><li>2 tbsp butter (optional)</li><li>Salt</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the pasta in less water than usual, lightly salted, so it becomes starchy. Save 1½ cups of the water.</li><li>Toast the pepper in a large pan 1 minute, then add ½ cup pasta water and the butter.</li><li>Mix the cheese with a little cool pasta water into a paste.</li><li>Add the pasta to the pan, take it off the heat and add the cheese paste, tossing hard and adding water until creamy.</li><li>Serve at once with more pepper.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="caprese-gnocchi-bake" data-k="Vegetarian" data-t="30">
+<summary><span class="dn">Caprese Gnocchi Bake</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Pillowy gnocchi baked in garlicky cherry tomatoes with fresh mozzarella.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb potato gnocchi</li><li>2 pints cherry tomatoes</li><li>4 cloves garlic, sliced</li><li>3 tbsp olive oil</li><li>8 oz fresh mozzarella, torn</li><li>¼ cup Parmesan</li><li>Basil and balsamic glaze</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 425°F. Toss the tomatoes, garlic, oil and salt in a baking dish and roast 15 minutes until bursting.</li><li>Meanwhile boil the gnocchi until they float and drain.</li><li>Stir the gnocchi into the tomatoes, crushing a few.</li><li>Top with mozzarella and Parmesan and bake 8 minutes.</li><li>Finish with basil and a drizzle of balsamic.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="chana-masala" data-k="Vegetarian" data-t="40">
+<summary><span class="dn">Chana Masala</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Indian, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Chickpeas simmered in a tangy, deeply spiced onion and tomato gravy.</p>
+<p class="facts"><span>Indian</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 cans (15 oz) chickpeas, drained</li><li>3 tbsp oil</li><li>1 tsp cumin seeds</li><li>1 large onion, finely chopped</li><li>1 tbsp each grated ginger and garlic</li><li>1 green chile</li><li>2 tsp coriander</li><li>1 tsp each cumin, turmeric and garam masala</li><li>1 tsp amchur (dried mango) or juice of ½ lemon</li><li>1 can (14 oz) crushed tomatoes</li><li>Cilantro and rice or naan</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oil and sizzle the cumin seeds 30 seconds.</li><li>Cook the onion 10 minutes until deep golden, then the ginger, garlic and chile.</li><li>Add the ground spices for 1 minute, then the tomatoes. Cook 8 minutes until the oil separates.</li><li>Add the chickpeas and 1 cup water and simmer 15 minutes, mashing a few to thicken.</li><li>Stir in the amchur and garam masala and finish with cilantro.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="eggplant-parmigiana" data-k="Vegetarian" data-t="90">
+<summary><span class="dn">Eggplant Parmigiana</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>1 hr 30 min</span></summary>
+<div class="rx">
+<p class="dek">Layers of golden fried eggplant, basil, marinara and melted mozzarella.</p>
+<p class="facts"><span>Italian</span><span>Serves 6</span><span>1 hr 30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 large eggplants, sliced ½ inch thick</li><li>Salt</li><li>1 cup flour, 3 eggs and 2 cups breadcrumbs</li><li>Olive oil for frying</li><li>3 cups marinara</li><li>1 lb mozzarella, sliced</li><li>1 cup grated Parmesan</li><li>Fresh basil</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Salt the eggplant slices and let them drain 30 minutes, then pat dry.</li><li>Bread them in flour, egg and crumbs and fry in oil until golden on both sides. Drain.</li><li>Heat the oven to 375°F. Spread sauce in a baking dish.</li><li>Layer eggplant, sauce, mozzarella, Parmesan and basil, ending with sauce and cheese.</li><li>Bake 35 minutes until bubbling. Rest 15 minutes before cutting.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="falafel-with-tahini-sauce" data-k="Vegetarian" data-t="50">
+<summary><span class="dn">Falafel with Tahini Sauce</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Middle Eastern, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Crisp, herb-green chickpea fritters with lemony tahini in warm pita.</p>
+<p class="facts"><span>Middle Eastern</span><span>Serves 4</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ cups dried chickpeas, soaked overnight (not canned)</li><li>1 onion, chopped</li><li>4 cloves garlic</li><li>1 cup parsley and ½ cup cilantro</li><li>2 tsp cumin and 1 tsp coriander</li><li>1 tsp salt and 1 tsp baking soda</li><li>Oil for frying</li><li>½ cup tahini, juice of 1 lemon, 1 garlic clove, water</li><li>Pita, tomato, cucumber, pickled turnips</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Pulse the drained chickpeas, onion, garlic, herbs and spices until finely ground but not pasty. Chill 30 minutes, then stir in the baking soda.</li><li>Whisk the tahini, lemon, garlic, salt and enough water for a pourable sauce.</li><li>Heat 2 inches of oil to 350°F.</li><li>Shape into small patties and fry 3 to 4 minutes until deep golden. Drain.</li><li>Tuck into pita with vegetables, pickles and tahini sauce.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="french-onion-soup" data-k="Vegetarian" data-t="120">
+<summary><span class="dn">French Onion Soup</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>2 hr</span></summary>
+<div class="rx">
+<p class="dek">Deeply caramelized onions in broth under a lid of bubbling Gruyère.</p>
+<p class="facts"><span>French</span><span>Serves 6</span><span>2 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 tbsp butter</li><li>4 lb yellow onions, thinly sliced</li><li>1 tsp sugar</li><li>2 cloves garlic</li><li>½ cup dry white wine or sherry</li><li>2 tbsp flour</li><li>8 cups rich vegetable stock (or beef stock if not vegetarian)</li><li>Thyme and bay leaf</li><li>Baguette slices, toasted</li><li>2 cups grated Gruyère</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Melt the butter and cook the onions with a pinch of salt over medium low, stirring now and then, about 1 hour until deep brown. Add the sugar halfway.</li><li>Add the garlic, then the wine, and scrape the pot.</li><li>Stir in the flour, then the stock and herbs. Simmer 30 minutes and season.</li><li>Ladle into ovenproof bowls, float the toasts on top and cover with cheese.</li><li>Broil until bubbling and browned.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="mushroom-risotto" data-k="Vegetarian" data-t="45">
+<summary><span class="dn">Mushroom Risotto</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>45 min</span></summary>
+<div class="rx">
+<p class="dek">Creamy Arborio rice with wild mushrooms, Parmesan and thyme.</p>
+<p class="facts"><span>Italian</span><span>Serves 4</span><span>45 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ cups Arborio rice</li><li>6 cups vegetable stock, kept hot</li><li>1 lb mixed mushrooms, sliced</li><li>4 tbsp butter, divided</li><li>2 tbsp olive oil</li><li>1 shallot, minced</li><li>2 cloves garlic</li><li>½ cup dry white wine</li><li>¾ cup grated Parmesan</li><li>Thyme and parsley</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Brown the mushrooms in the oil and 1 tbsp butter with thyme and salt. Set aside.</li><li>Cook the shallot and garlic in 1 tbsp butter, then stir in the rice to toast 2 minutes.</li><li>Add the wine and stir until absorbed.</li><li>Add the hot stock a ladle at a time, stirring often and waiting until each is absorbed, about 20 minutes, until creamy and al dente.</li><li>Stir in the mushrooms, remaining butter and Parmesan. Rest 2 minutes and finish with parsley.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="penne-alla-vodka" data-k="Vegetarian" data-t="30">
+<summary><span class="dn">Penne alla Vodka</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian American, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Penne in a blush tomato cream sauce with a splash of vodka and Parmesan.</p>
+<p class="facts"><span>Italian American</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 lb penne</li><li>3 tbsp butter</li><li>1 shallot, minced</li><li>3 cloves garlic</li><li>½ tsp chile flakes</li><li>¼ cup tomato paste</li><li>¼ cup vodka</li><li>¾ cup heavy cream</li><li>½ cup grated Parmesan</li><li>Basil</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the penne and save 1 cup pasta water.</li><li>Melt the butter and cook the shallot, garlic and chile 2 minutes.</li><li>Add the tomato paste and cook 4 minutes until brick red.</li><li>Add the vodka and cook it off, then stir in the cream.</li><li>Toss the pasta with the sauce, Parmesan and pasta water as needed. Finish with basil.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="ratatouille" data-k="Vegetarian" data-t="75">
+<summary><span class="dn">Ratatouille</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">Provençal summer vegetables baked in thin spirals over a pepper and tomato base.</p>
+<p class="facts"><span>French</span><span>Serves 6</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 onion and 1 red bell pepper, diced</li><li>3 cloves garlic</li><li>1 can (14 oz) crushed tomatoes</li><li>¼ cup olive oil</li><li>1 eggplant, 2 zucchini, 1 yellow squash and 4 Roma tomatoes, thinly sliced</li><li>1 tsp herbes de Provence</li><li>Fresh thyme and basil</li><li>Salt and pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 375°F. Cook the onion and pepper in 2 tbsp oil 8 minutes, add the garlic and crushed tomatoes and simmer 10 minutes. Spread in a baking dish.</li><li>Arrange the sliced vegetables over it in an alternating spiral.</li><li>Drizzle with the remaining oil and sprinkle with herbs, salt and pepper.</li><li>Cover with parchment and bake 45 minutes, then uncover for 15 minutes.</li><li>Finish with basil and serve with crusty bread or over polenta.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="saag-paneer" data-k="Vegetarian" data-t="40">
+<summary><span class="dn">Saag Paneer</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Indian, </span>40 min</span></summary>
+<div class="rx">
+<p class="dek">Golden cubes of paneer in a silky, spiced spinach purée.</p>
+<p class="facts"><span>Indian</span><span>Serves 4</span><span>40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>12 oz paneer, cubed</li><li>2 tbsp ghee or oil</li><li>1 lb spinach</li><li>1 onion, chopped</li><li>1 tbsp each ginger and garlic</li><li>1 green chile</li><li>1 tsp each cumin, coriander and garam masala</li><li>½ tsp turmeric</li><li>½ cup cream or yogurt</li><li>Salt and lemon</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Fry the paneer in the ghee until golden and set aside.</li><li>Blanch the spinach 1 minute, cool and blend smooth.</li><li>Cook the onion 8 minutes, then the ginger, garlic, chile and spices for 1 minute.</li><li>Add the spinach purée and simmer 5 minutes, then stir in the cream.</li><li>Add the paneer, warm through and finish with lemon. Serve with naan or rice.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="shakshuka" data-k="Vegetarian" data-t="35">
+<summary><span class="dn">Shakshuka</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">North African, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Eggs poached in a spiced pepper and tomato sauce with feta and herbs.</p>
+<p class="facts"><span>North African</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>3 tbsp olive oil</li><li>1 onion and 1 red bell pepper, sliced</li><li>4 cloves garlic</li><li>1 tsp each cumin and paprika</li><li>½ tsp chile flakes</li><li>1 can (28 oz) whole tomatoes, crushed by hand</li><li>6 eggs</li><li>½ cup crumbled feta</li><li>Cilantro, parsley and warm bread</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the onion and pepper in the oil 10 minutes until soft.</li><li>Add the garlic and spices for 1 minute, then the tomatoes. Simmer 10 minutes until thick.</li><li>Make six wells and crack in the eggs.</li><li>Cover and cook on low 6 to 8 minutes until the whites are set and the yolks still runny.</li><li>Top with feta and herbs and serve with bread.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="spanakopita" data-k="Vegetarian" data-t="75">
+<summary><span class="dn">Spanakopita</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Greek, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">Flaky phyllo pie filled with spinach, feta, dill and green onions.</p>
+<p class="facts"><span>Greek</span><span>Serves 8</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 lb fresh spinach or 2 packages frozen, thawed and squeezed</li><li>1 bunch green onions, sliced</li><li>½ cup chopped dill</li><li>12 oz feta, crumbled</li><li>½ cup ricotta</li><li>3 eggs</li><li>1 lb phyllo dough, thawed</li><li>½ cup melted butter or olive oil</li><li>Nutmeg and pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Wilt the spinach if fresh, cool and squeeze very dry. Chop it.</li><li>Mix the spinach, green onions, dill, cheeses, eggs, nutmeg and pepper.</li><li>Heat the oven to 375°F. Brush a 9x13 dish and layer 8 sheets of phyllo, brushing each with butter.</li><li>Spread the filling and top with 8 more buttered sheets. Score the top into squares.</li><li>Bake 45 minutes until golden and crisp. Rest 10 minutes.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="spinach-and-ricotta-stuffed-shells" data-k="Vegetarian" data-t="60">
+<summary><span class="dn">Spinach and Ricotta Stuffed Shells</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian American, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Jumbo pasta shells filled with herbed ricotta and spinach, baked in marinara.</p>
+<p class="facts"><span>Italian American</span><span>Serves 6</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>24 jumbo pasta shells</li><li>15 oz ricotta</li><li>10 oz frozen spinach, thawed and squeezed dry</li><li>1 egg</li><li>1½ cups shredded mozzarella, divided</li><li>½ cup Parmesan</li><li>2 cloves garlic, grated</li><li>Pinch of nutmeg</li><li>3 cups marinara</li><li>Basil</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the shells until just tender and drain.</li><li>Mix the ricotta, spinach, egg, 1 cup mozzarella, Parmesan, garlic, nutmeg and salt.</li><li>Heat the oven to 375°F and spread 1½ cups sauce in a baking dish.</li><li>Fill each shell and set them in the dish. Spoon the remaining sauce over and top with mozzarella.</li><li>Cover and bake 25 minutes, then uncover 10 minutes. Finish with basil.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="stuffed-bell-peppers" data-k="Vegetarian" data-t="60">
+<summary><span class="dn">Stuffed Bell Peppers</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Mediterranean, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Roasted peppers filled with herbed rice, chickpeas, tomato and feta.</p>
+<p class="facts"><span>Mediterranean</span><span>Serves 4</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 large bell peppers, tops cut and seeded</li><li>1 cup cooked rice or quinoa</li><li>1 can (15 oz) chickpeas</li><li>1 cup diced tomatoes</li><li>½ onion, diced and sautéed</li><li>2 cloves garlic</li><li>1 tsp each oregano and cumin</li><li>½ cup crumbled feta</li><li>¼ cup chopped parsley</li><li>Olive oil</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 375°F. Brush the peppers with oil and bake upright 10 minutes.</li><li>Mix the rice, chickpeas, tomatoes, onion, garlic, spices, half the feta and parsley.</li><li>Fill the peppers and set them in a baking dish with ¼ cup water.</li><li>Cover and bake 25 minutes, then uncover, top with the rest of the feta and bake 10 minutes.</li><li>Drizzle with oil and serve.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="thai-peanut-noodles" data-k="Vegetarian" data-t="20">
+<summary><span class="dn">Thai Peanut Noodles</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Thai inspired, </span>20 min</span></summary>
+<div class="rx">
+<p class="dek">Chilled noodles in a creamy spicy peanut sauce with crunchy vegetables.</p>
+<p class="facts"><span>Thai inspired</span><span>Serves 4</span><span>20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>12 oz linguine or rice noodles</li><li>½ cup peanut butter</li><li>3 tbsp soy sauce</li><li>2 tbsp rice vinegar</li><li>1 tbsp sesame oil</li><li>1 tbsp honey or maple syrup</li><li>1 tbsp sriracha</li><li>1 tsp each grated ginger and garlic</li><li>Warm water to thin</li><li>Red cabbage, carrot, cucumber, edamame, cilantro and peanuts</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the noodles, rinse in cold water and drain.</li><li>Whisk the peanut butter, soy, vinegar, sesame oil, honey, sriracha, ginger and garlic with warm water until smooth.</li><li>Toss the noodles in the sauce.</li><li>Add the shredded vegetables and edamame.</li><li>Top with cilantro and chopped peanuts.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="three-bean-chili" data-k="Vegetarian" data-t="60">
+<summary><span class="dn">Three Bean Chili</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Tex-Mex, </span>1 hr</span></summary>
+<div class="rx">
+<p class="dek">Hearty chili of kidney, black and pinto beans with smoky chipotle.</p>
+<p class="facts"><span>Tex-Mex</span><span>Serves 6</span><span>1 hr</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 tbsp oil</li><li>1 onion and 1 bell pepper, diced</li><li>4 cloves garlic</li><li>2 tbsp chili powder</li><li>2 tsp cumin</li><li>1 tsp smoked paprika</li><li>1 chipotle in adobo, minced</li><li>1 can (28 oz) crushed tomatoes</li><li>1 can each (15 oz) kidney, black and pinto beans, drained</li><li>1 cup corn</li><li>1 cup vegetable stock</li><li>Cheddar, sour cream, green onions and cornbread</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the onion and pepper in the oil 8 minutes, then the garlic and spices for 1 minute.</li><li>Add the chipotle, tomatoes, beans, corn and stock.</li><li>Simmer 40 minutes, stirring now and then, until thick.</li><li>Season with salt and a squeeze of lime.</li><li>Serve with the toppings and cornbread.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="vegetable-biryani" data-k="Vegetarian" data-t="75">
+<summary><span class="dn">Vegetable Biryani</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Indian, </span>1 hr 15 min</span></summary>
+<div class="rx">
+<p class="dek">Fragrant layered basmati with spiced vegetables, saffron and fried onions.</p>
+<p class="facts"><span>Indian</span><span>Serves 6</span><span>1 hr 15 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>2 cups basmati rice, soaked 30 minutes</li><li>4 tbsp ghee or oil</li><li>2 onions, thinly sliced</li><li>1 tbsp each ginger and garlic paste</li><li>3 cups mixed vegetables (carrot, cauliflower, beans, peas)</li><li>½ cup yogurt</li><li>2 tsp biryani masala or garam masala</li><li>Whole spices: 4 cardamom, 4 cloves, 1 bay leaf, 1 cinnamon stick</li><li>Pinch of saffron in 3 tbsp warm milk</li><li>Mint and cilantro</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Fry the onions in the ghee until deep brown and crisp. Set half aside.</li><li>Add the ginger, garlic, vegetables, yogurt and masala and cook 10 minutes.</li><li>Boil the rice in salted water with the whole spices for 6 minutes, until 70 percent cooked. Drain.</li><li>Layer the rice over the vegetables, sprinkle with herbs, fried onions and saffron milk.</li><li>Cover tightly and cook on very low heat 25 minutes. Fluff gently and serve with raita.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="vegetable-fried-rice" data-k="Vegetarian" data-t="20">
+<summary><span class="dn">Vegetable Fried Rice</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Chinese, </span>20 min</span></summary>
+<div class="rx">
+<p class="dek">Day-old rice wok-fried with eggs, vegetables, soy and scallions.</p>
+<p class="facts"><span>Chinese</span><span>Serves 4</span><span>20 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>4 cups cold cooked rice</li><li>3 eggs, beaten</li><li>3 tbsp oil</li><li>3 cloves garlic</li><li>1 cup peas and carrots</li><li>1 cup chopped broccoli or bok choy</li><li>3 tbsp soy sauce</li><li>1 tsp sesame oil</li><li>4 green onions</li><li>White pepper</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat a wok over high heat with 1 tbsp oil and scramble the eggs. Set aside.</li><li>Add the rest of the oil, then the garlic and vegetables for 2 minutes.</li><li>Add the rice, breaking up clumps, and fry 4 minutes until it starts to crisp.</li><li>Add the soy, sesame oil and white pepper and toss.</li><li>Fold in the egg and green onions.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="vegetable-lasagna" data-k="Vegetarian" data-t="100">
+<summary><span class="dn">Vegetable Lasagna</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Italian, </span>1 hr 40 min</span></summary>
+<div class="rx">
+<p class="dek">Layers of spinach, ricotta, roasted vegetables and marinara.</p>
+<p class="facts"><span>Italian</span><span>Serves 8</span><span>1 hr 40 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>12 lasagna noodles</li><li>2 zucchini and 1 red pepper, diced</li><li>8 oz mushrooms, sliced</li><li>5 oz spinach</li><li>2 tbsp olive oil</li><li>15 oz ricotta</li><li>1 egg</li><li>1 cup grated Parmesan</li><li>3 cups marinara</li><li>1 lb mozzarella, shredded</li><li>Basil and nutmeg</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Cook the noodles until just tender. Sauté the zucchini, pepper and mushrooms in the oil until browned, then wilt in the spinach.</li><li>Mix the ricotta, egg, half the Parmesan, a pinch of nutmeg and salt.</li><li>Heat the oven to 375°F. Spread sauce in a 9x13 dish and layer noodles, ricotta, vegetables, sauce and mozzarella three times.</li><li>Top with sauce, mozzarella and Parmesan. Cover with foil and bake 30 minutes, then uncover for 20 minutes.</li><li>Rest 15 minutes before slicing and finish with basil.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="vegetable-pad-thai" data-k="Vegetarian" data-t="30">
+<summary><span class="dn">Vegetable Pad Thai</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Thai, </span>30 min</span></summary>
+<div class="rx">
+<p class="dek">Rice noodles wok-tossed with tofu, egg, bean sprouts and peanuts.</p>
+<p class="facts"><span>Thai</span><span>Serves 4</span><span>30 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>8 oz flat rice noodles</li><li>14 oz extra-firm tofu, cubed and pressed</li><li>3 tbsp oil</li><li>3 cloves garlic</li><li>2 eggs</li><li>3 tbsp tamarind paste</li><li>3 tbsp soy sauce</li><li>2 tbsp brown sugar</li><li>1 tsp chile flakes</li><li>2 cups bean sprouts</li><li>4 green onions, cut long</li><li>Crushed peanuts and lime</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Soak the noodles in hot water 8 minutes until pliable, then drain.</li><li>Mix the tamarind, soy, sugar and chile.</li><li>Fry the tofu in 2 tbsp oil until golden and set aside.</li><li>Add the rest of the oil and the garlic, then scramble the eggs. Add the noodles and sauce and toss 2 minutes.</li><li>Add the tofu, sprouts and green onions and toss 1 minute. Serve with peanuts and lime.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="wild-mushroom-and-gruyere-tart" data-k="Vegetarian" data-t="50">
+<summary><span class="dn">Wild Mushroom and Gruyère Tart</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">French, </span>50 min</span></summary>
+<div class="rx">
+<p class="dek">Puff pastry spread with caramelized onion, mushrooms and nutty Gruyère.</p>
+<p class="facts"><span>French</span><span>Serves 6</span><span>50 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1 sheet puff pastry</li><li>1 lb mixed mushrooms, sliced</li><li>2 tbsp butter</li><li>1 onion, thinly sliced and caramelized</li><li>1 clove garlic</li><li>1 tsp thyme</li><li>1½ cups grated Gruyère</li><li>1 egg, beaten</li><li>Arugula and lemon to serve</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Heat the oven to 400°F. Score a border 1 inch in from the edge of the pastry and prick the middle with a fork.</li><li>Brown the mushrooms in the butter with garlic, thyme and salt until dry.</li><li>Spread the caramelized onions inside the border, then the mushrooms and cheese.</li><li>Brush the border with egg.</li><li>Bake 25 minutes until puffed and golden. Top with dressed arugula.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="wild-mushroom-stroganoff" data-k="Vegetarian" data-t="35">
+<summary><span class="dn">Wild Mushroom Stroganoff</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">Russian, </span>35 min</span></summary>
+<div class="rx">
+<p class="dek">Meaty mushrooms in paprika and sour cream sauce over egg noodles.</p>
+<p class="facts"><span>Russian</span><span>Serves 4</span><span>35 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>1½ lb mixed mushrooms, sliced</li><li>3 tbsp butter</li><li>1 onion, sliced</li><li>3 cloves garlic</li><li>1 tsp smoked paprika</li><li>2 tbsp flour</li><li>1½ cups vegetable stock</li><li>1 tbsp soy sauce</li><li>1 tsp Dijon mustard</li><li>¾ cup sour cream</li><li>12 oz egg noodles</li><li>Dill</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Brown the mushrooms in batches in the butter over high heat. Set aside.</li><li>Cook the onion 6 minutes, then the garlic and paprika.</li><li>Stir in the flour, then the stock, soy and mustard. Simmer until thick.</li><li>Return the mushrooms and stir in the sour cream off the boil.</li><li>Serve over the cooked noodles with dill.</li></ol></section>
+</div></div>
+</details>
+<details class="dish" id="wild-rice-and-mushroom-soup" data-k="Vegetarian" data-t="70">
+<summary><span class="dn">Wild Rice and Mushroom Soup</span><span class="dots" aria-hidden="true"></span><span class="dm"><span class="dc">American, </span>1 hr 10 min</span></summary>
+<div class="rx">
+<p class="dek">A creamy, earthy soup of wild rice, mushrooms and thyme.</p>
+<p class="facts"><span>American</span><span>Serves 6</span><span>1 hr 10 min</span></p>
+<div class="cols">
+<section class="ing"><h4>You will need</h4><ul><li>¾ cup wild rice</li><li>4 tbsp butter</li><li>1 onion, 2 carrots and 2 ribs celery, diced</li><li>1 lb mushrooms, sliced</li><li>3 cloves garlic</li><li>¼ cup flour</li><li>6 cups vegetable stock</li><li>1 cup half-and-half</li><li>Thyme, bay leaf and a splash of dry sherry</li></ul></section>
+<section class="how"><h4>Method</h4><ol><li>Simmer the wild rice in salted water 45 minutes until it splits, and drain.</li><li>Melt the butter and cook the vegetables and mushrooms 10 minutes. Add the garlic.</li><li>Stir in the flour for 1 minute, then whisk in the stock with the herbs.</li><li>Simmer 20 minutes, then add the rice and half-and-half.</li><li>Season, add a splash of sherry and serve with crusty bread.</li></ol></section>
+</div></div>
+</details>
+</section>
+</main>
+<p class="foot wrap">Built for our family table on <a href="/">r3ai.dev</a>. Season everything to taste.</p>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const dishes = [...document.querySelectorAll('.dish')];
+  const names = dishes.map(d => d.querySelector('.dn').textContent);
+  const card = $('card'), still = matchMedia('(prefers-reduced-motion: reduce)');
+  const label = {"Poultry":"Poultry","Beef":"Beef","Pork":"Pork","Lamb":"Lamb","Seafood":"From the water","Vegetarian":"From the garden"};
+  let bag = [], key = '', current = null, timer = 0;
+
+  const pool = () => {
+    const k = document.querySelector('input[name=k]:checked').value, q = $('quick').checked;
+    return dishes.filter(d => (!k || d.dataset.k === k) && (!q || +d.dataset.t <= 45));
+  };
+  const updatePool = () => {
+    const n = pool().length;
+    $('pool').textContent = n ? n + (n === 1 ? ' dish' : ' dishes') + ' to choose from' : 'Nothing on the menu matches. Try another choice.';
+    $('choose').disabled = !n;
+  };
+  // A shuffled bag, so every dish in the pool comes up once before any repeats.
+  const draw = () => {
+    const list = pool(), k = list.map(d => d.id).join();
+    if (k !== key || !bag.length) {
+      key = k; bag = list.slice();
+      for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+      if (bag.length > 1 && current && bag[bag.length - 1] === current) bag.unshift(bag.pop());
+    }
+    return bag.pop();
+  };
+  const show = (d, scroll) => {
+    current = d;
+    $('kind').textContent = label[d.dataset.k];
+    $('name').textContent = d.querySelector('.dn').textContent;
+    $('rx').innerHTML = d.querySelector('.rx').innerHTML;
+    card.classList.add('on'); card.classList.remove('riffle'); card.setAttribute('aria-busy', 'false');
+    history.replaceState(null, '', '#' + d.id);
+    document.title = d.querySelector('.dn').textContent + " · Chef's Choice";
+    if (scroll) card.scrollIntoView({ behavior: still.matches ? 'auto' : 'smooth', block: 'start' });
+  };
+  const choose = () => {
+    const d = draw(); if (!d) return;
+    clearTimeout(timer);
+    const first = !card.classList.contains('on');
+    card.classList.add('on');
+    if (first) card.scrollIntoView({ behavior: still.matches ? 'auto' : 'smooth', block: 'start' });
+    if (still.matches) return show(d);
+    // The riffle: names flick past, slowing down, then settle on the pick.
+    card.classList.add('riffle'); card.setAttribute('aria-busy', 'true');
+    $('kind').textContent = label[d.dataset.k]; $('rx').innerHTML = d.querySelector('.rx').innerHTML;
+    let step = 0; const steps = 14;
+    const tick = () => {
+      if (step++ < steps) {
+        $('name').textContent = names[Math.floor(Math.random() * names.length)];
+        timer = setTimeout(tick, 30 + step * step * 0.9);
+      } else show(d);
+    };
+    tick();
+  };
+
+  $('choose').addEventListener('click', choose);
+  $('again').addEventListener('click', choose);
+  $('print').addEventListener('click', () => print());
+  $('share').addEventListener('click', async e => {
+    const url = location.href, b = e.currentTarget;
+    try {
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ title: $('name').textContent, url });
+      else { await navigator.clipboard.writeText(url); b.textContent = 'Link copied'; setTimeout(() => b.textContent = 'Copy link', 1800); }
+    } catch (_) {}
+  });
+  document.querySelectorAll('.controls input').forEach(i => i.addEventListener('change', updatePool));
+  // A link to a dish (#coq-au-vin) opens it on the card.
+  const fromHash = () => { const d = location.hash && document.getElementById(location.hash.slice(1)); if (d && d.classList.contains('dish')) show(d, true); };
+  window.addEventListener('hashchange', fromHash);
+  updatePool(); fromHash();
+})();
+</script>
+</body>
+</html>

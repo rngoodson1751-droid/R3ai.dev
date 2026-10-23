@@ -117,6 +117,18 @@
   },
   {
     "section": "home",
+    "kind": "Kitchen",
+    "title": "Chef's Choice",
+    "summary": "A dinner picker with one hundred dishes and their full recipes. Press the button and the house decides tonight's meal.",
+    "links": [
+      {
+        "label": "Choose tonight's dinner",
+        "href": "/chefs-choice/"
+      }
+    ]
+  },
+  {
+    "section": "home",
     "kind": "Game",
     "title": "River's Galactic Playground",
     "summary": "A 3D space adventure for up to three players on one screen. Nine worlds and 27 stars, with dinosaurs, penguins, a rainbow surf ride, a canyon race and a grumpy robot king to tickle. Nobody can lose.",
