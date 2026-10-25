@@ -7,7 +7,7 @@ Robert Goodson's personal site: an **At work** section, an **At home** section, 
 - `content/posts/` holds the blog posts, one text file each.
 - `content/projects.json` lists the project and game cards shown on each section page.
 - `static/` is copied to the site unchanged. Games and images go here.
-- `src/styles.css` is the design. `src/site.js` runs the water background, the puzzle cube on the home page and the request form.
+- `src/styles.css` is the design. `src/site.js` runs the live sky background (lit by the real time of day over the lake), the liquid glass drops and puzzle cube on the home page, and the request form.
 - `src/sw.js` is the service worker. It makes the site installable and keeps visited pages and saved games working offline.
 - `src/demos/` holds the demos and the small tools that sit inside posts.
 - `worker/index.js` is the only server code. It saves post requests, counts page views and answers questions on `/ask/`.

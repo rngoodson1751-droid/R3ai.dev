@@ -29,64 +29,340 @@
 
   // ---------- pointer highlight on glass ----------
   document.addEventListener('pointermove', function (e) {
-    var g = e.target.closest && e.target.closest('.glass');
+    var g = e.target.closest && e.target.closest('.glass, a.sheet, .card');
     if (!g) return;
     var b = g.getBoundingClientRect();
     g.style.setProperty('--mx', (e.clientX - b.left) + 'px');
     g.style.setProperty('--my', (e.clientY - b.top) + 'px');
   }, { passive: true });
 
-  // ---------- wallpaper: a slow, soft neutral shader behind the page, for the glass to catch ----------
+  // ---------- the sky: the whole site is lit by the real sky over the lake, right now ----------
+  // The sun's position over the lake sets the wallpaper's colours, a soft sun glow, stars at night in dark mode,
+  // and the --sky, --sky2 and --sun colours the stylesheet uses for small accents. ?sky=18:40 previews a time of day.
+  var SKY = (function () {
+    var LAT = 30.22, LON = -93.22, TZ = 'America/Chicago', R = Math.PI / 180;
+    var over = null, listeners = [];
+    try {
+      var q = new URLSearchParams(location.search).get('sky');
+      var mm = q && q.match(/^(\d{1,2}):(\d{2})$/);
+      if (mm) over = Math.min(1439, +mm[1] * 60 + +mm[2]);
+    } catch (e) {}
+    var clock = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit', hourCycle: 'h23' });
+    function lakeMinutes(d) {
+      var p = {}; clock.formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
+      return (+p.hour % 24) * 60 + +p.minute;
+    }
+    function when() {
+      var now = new Date();
+      return over == null ? now : new Date(now.getTime() + (over - lakeMinutes(now)) * 60000);
+    }
+    // a compact solar position (good to a fraction of a degree, which is plenty for colour)
+    function sun(date) {
+      var d = date.getTime() / 86400000 - 10957.5;
+      var g = (357.529 + .98560028 * d) * R, q = 280.459 + .98564736 * d;
+      var L = (q + 1.915 * Math.sin(g) + .02 * Math.sin(2 * g)) * R, ob = (23.439 - .00000036 * d) * R;
+      var ra = Math.atan2(Math.cos(ob) * Math.sin(L), Math.cos(L)), dec = Math.asin(Math.sin(ob) * Math.sin(L));
+      var gmst = ((18.697374558 + 24.06570982441908 * d) % 24 + 24) % 24;
+      var H = (gmst * 15 + LON) * R - ra, la = LAT * R;
+      var alt = Math.asin(Math.sin(la) * Math.sin(dec) + Math.cos(la) * Math.cos(dec) * Math.cos(H));
+      var az = Math.atan2(-Math.sin(H), Math.tan(dec) * Math.cos(la) - Math.sin(la) * Math.cos(H));
+      return { alt: alt / R, az: (az / R + 360) % 360, rising: Math.sin(H) < 0 };
+    }
+    // palettes by the sun's height in degrees: deep night, twilight, the sun on the horizon, golden hour, full day
+    var STOPS = [-18, -6, 0, 8, 22];
+    var LIGHT = [
+      [[.93, .935, .96], [.8, .815, .89], [.66, .7, .86], [.85, .83, .95]],
+      [[.94, .92, .97], [.82, .8, .92], [.66, .62, .92], [.96, .76, .86]],
+      [[.995, .93, .9], [.96, .81, .8], [1, .6, .47], [.82, .72, .96]],
+      [[.995, .96, .91], [.97, .87, .75], [1, .73, .47], [.98, .8, .78]],
+      [[.97, .975, .985], [.87, .9, .95], [.72, .83, .98], [.99, .94, .86]]
+    ];
+    var DARK = [
+      [[.018, .022, .04], [.055, .065, .11], [.13, .17, .33], [.2, .16, .32]],
+      [[.035, .035, .085], [.1, .085, .21], [.3, .22, .55], [.46, .18, .38]],
+      [[.07, .035, .055], [.2, .075, .11], [.72, .29, .2], [.32, .14, .44]],
+      [[.07, .05, .035], [.19, .11, .065], [.64, .37, .12], [.42, .16, .18]],
+      [[.04, .05, .07], [.09, .12, .17], [.17, .31, .54], [.38, .34, .28]]
+    ];
+    function mix(a, b, f) { return a.map(function (v, i) { return v + (b[i] - v) * f; }); }
+    function palette(alt, dark) {
+      var P = dark ? DARK : LIGHT, i = 0;
+      if (alt <= STOPS[0]) return P[0];
+      if (alt >= STOPS[4]) return P[4];
+      while (alt > STOPS[i + 1]) i++;
+      var f = (alt - STOPS[i]) / (STOPS[i + 1] - STOPS[i]); f = f * f * (3 - 2 * f);
+      return P[i].map(function (c, j) { return mix(c, P[i + 1][j], f); });
+    }
+    function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+    function step(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+    function words(s, mins) {
+      var a = s.alt;
+      if (a < -12) return 'Night';
+      if (a < -4) return s.rising ? 'First light' : 'Dusk';
+      if (a < 3) return s.rising ? 'Sunrise' : 'Sunset';
+      if (a < 12) return s.rising ? 'Early light' : 'Golden hour';
+      return mins < 660 ? 'Morning' : mins < 840 ? 'Midday' : 'Afternoon';
+    }
+    var state = {};
+    function update() {
+      var d = when(), s = sun(d), dark = isDark(), mins = lakeMinutes(d);
+      var pal = palette(s.alt, dark);
+      var low = 1 - step(10, 40, s.alt);
+      state = {
+        alt: s.alt, rising: s.rising, minutes: mins, dark: dark, pal: pal,
+        // where the sun sits on screen: east on the left, west on the right, higher as it climbs
+        sun: [clamp((s.az - 90) / 180, -.15, 1.15) * .84 + .08, .16 + clamp(s.alt, -12, 70) / 70 * .95],
+        glow: step(-9, 1, s.alt) * (.45 + .55 * low) * (dark ? .8 : 1),
+        sunc: mix([.8, .85, 1], mix([1, .95, .86], [1, .56, .3], low), step(-10, -2, s.alt)),
+        stars: dark ? step(-3, -12, s.alt) : 0,
+        words: words(s, mins),
+        time: clock.format(d).replace(/^(\d+):(\d\d)$/, function (_, h, m) { h = +h; return ((h + 11) % 12 + 1) + ':' + m + (h < 12 ? ' am' : ' pm'); })
+      };
+      var css = function (c) { return 'rgb(' + c.map(function (v) { return Math.round(clamp(v, 0, 1) * 255); }).join(' ') + ')'; };
+      root.style.setProperty('--sky', css(pal[2]));
+      root.style.setProperty('--sky2', css(pal[3]));
+      root.style.setProperty('--sun', css(state.sunc));
+      document.querySelectorAll('[data-sky-text]').forEach(function (el) { el.textContent = state.words.toLowerCase() + ' on the lake, ' + state.time; });
+      document.querySelectorAll('[data-sky-words]').forEach(function (el) { el.textContent = state.words + ' on the lake'; });
+      document.querySelectorAll('[data-sky-time]').forEach(function (el) { el.textContent = state.time; });
+      document.querySelectorAll('[data-sky]').forEach(function (el) { el.hidden = false; });
+      listeners.forEach(function (f) { f(state); });
+    }
+    themeListeners.push(update);
+    setInterval(function () { if (over == null) update(); }, 60000);
+    var t0 = performance.now(), seed = Math.random() * 40;
+    return {
+      get: function () { return state; },
+      on: function (f) { listeners.push(f); },
+      update: update,
+      set: function (m) { over = m; update(); },
+      live: function () { return over == null; },
+      minutes: function () { return lakeMinutes(when()); },
+      t: function (now) { return seed + (now - t0) / 1000; },
+      m: [.5, .5], vp: [innerWidth, innerHeight], ok: false
+    };
+  })();
+  SKY.update();
+
+  // the shader that draws the sky. The drops on the home page draw the same sky, bent through glass, so it is shared.
+  var SKY_GLSL = [
+    'uniform float t;uniform vec2 m;uniform vec3 a;uniform vec3 b;uniform vec3 k;uniform vec3 g;uniform vec2 sun;uniform vec3 sunc;uniform float glow;uniform float stars;uniform float asp;',
+    'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+    'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}',
+    'float fb(vec2 p){float v=0.,s=.5;for(int i=0;i<4;i++){v+=s*n(p);p=p*2.03+vec2(3.1,1.7);s*=.5;}return v;}',
+    'vec3 sky(vec2 u){vec2 p=vec2(u.x*asp,u.y)*1.15+(m-.5)*.22;',
+    ' vec2 q=vec2(fb(p+t*.022),fb(p+vec2(5.2,1.3)-t*.018));',
+    ' vec2 w=vec2(fb(p+2.6*q+vec2(1.7,9.2)+t*.014),fb(p+2.6*q+vec2(8.3,2.8)-t*.012));',
+    ' float s=fb(p+3.*w);float fold=smoothstep(.32,.78,s);',
+    ' vec3 col=mix(a,b,fold);col=mix(col,k,smoothstep(.45,.95,length(w))*.36);col=mix(col,g,smoothstep(.42,.78,q.y)*.32);',
+    ' col=mix(col,b,smoothstep(.15,1.,u.y)*.18);',
+    ' vec2 d=(u-sun)*vec2(asp,1.);float r2=dot(d,d);',
+    ' col=mix(col,sunc,clamp(exp(-r2*2.6)*glow*.62,0.,1.));col+=sunc*exp(-r2*38.)*glow*.22;',
+    ' if(stars>0.){vec2 sp=vec2(u.x*asp,u.y)*95.;vec2 ce=floor(sp);float hs=h(ce);vec2 f=fract(sp)-.5-(vec2(h(ce+3.1),h(ce+7.7))-.5)*.6;',
+    '  col+=step(.986,hs)*smoothstep(.07,0.,length(f))*(.55+.45*sin(t*1.3+hs*60.))*stars*(.25+.75*u.y)*vec3(.95,.95,1.);}',
+    ' col+=(.5-abs(fract(s*5.)-.5))*.012;return col;}'
+  ].join('\n');
+  function skyUniforms(gl, U, st) {
+    var p = st.pal;
+    gl.uniform3fv(U.a, p[0]); gl.uniform3fv(U.b, p[1]); gl.uniform3fv(U.k, p[2]); gl.uniform3fv(U.g, p[3]);
+    gl.uniform2fv(U.sun, st.sun); gl.uniform3fv(U.sunc, st.sunc); gl.uniform1f(U.glow, st.glow); gl.uniform1f(U.stars, st.stars);
+  }
+  function program(gl, fs, names) {
+    function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+    var prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    var U = {}; names.concat(['t', 'm', 'a', 'b', 'k', 'g', 'sun', 'sunc', 'glow', 'stars', 'asp']).forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+    return U;
+  }
+
+  // ---------- the wallpaper behind every page ----------
   (function silk() {
     var c = document.getElementById('silk');
     if (!c) return;
     var gl = c.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
     if (!gl) { c.remove(); return; }
-    var vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-    var fs = [
-      'precision mediump float;uniform vec2 r;uniform float t;uniform vec2 m;uniform vec3 a;uniform vec3 b;uniform vec3 k;uniform vec3 g;',
-      'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
-      'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}',
-      'float f(vec2 p){float v=0.,s=.5;for(int i=0;i<4;i++){v+=s*n(p);p=p*2.03+vec2(3.1,1.7);s*=.5;}return v;}',
-      'void main(){vec2 u=gl_FragCoord.xy/r;vec2 p=vec2(u.x*r.x/r.y,u.y)*1.15+(m-.5)*.22;',
-      'vec2 q=vec2(f(p+t*.022),f(p+vec2(5.2,1.3)-t*.018));',
-      'vec2 w=vec2(f(p+2.6*q+vec2(1.7,9.2)+t*.014),f(p+2.6*q+vec2(8.3,2.8)-t*.012));',
-      'float s=f(p+3.*w);float fold=smoothstep(.32,.78,s);',
-      'vec3 col=mix(a,b,fold);col=mix(col,k,smoothstep(.45,.95,length(w))*.34);col=mix(col,g,smoothstep(.42,.78,q.y)*.3);',
-      'col+=(.5-abs(fract(s*5.)-.5))*.012;',
-      'gl_FragColor=vec4(col,1.);}'
-    ].join('\n');
-    function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
-    var prog = gl.createProgram();
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { c.remove(); return; }
-    gl.useProgram(prog);
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    var U = {}; ['r', 't', 'm', 'a', 'b', 'k', 'g'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
-    var mouse = [.5, .5], aim = [.5, .5];
-    function colors() {
-      if (isDark()) { gl.uniform3f(U.a, .035, .035, .045); gl.uniform3f(U.b, .11, .11, .13); gl.uniform3f(U.k, .26, .15, .13); gl.uniform3f(U.g, .16, .14, .27); }
-      else { gl.uniform3f(U.a, .965, .965, .975); gl.uniform3f(U.b, .85, .855, .885); gl.uniform3f(U.k, 1., .85, .78); gl.uniform3f(U.g, .83, .81, .97); }
-    }
+    var U = program(gl, 'precision mediump float;uniform vec2 r;\n' + SKY_GLSL + '\nvoid main(){gl_FragColor=vec4(sky(gl_FragCoord.xy/r),1.);}', ['r']);
+    if (!U) { c.remove(); return; }
+    SKY.ok = true;
+    var aim = [.5, .5], running = true;
     function size() {
-      var s = Math.min(window.devicePixelRatio || 1, 2) * .5;
-      c.width = Math.max(2, Math.round(innerWidth * s)); c.height = Math.max(2, Math.round(innerHeight * s));
-      gl.viewport(0, 0, c.width, c.height); gl.uniform2f(U.r, c.width, c.height);
+      var s = Math.min(window.devicePixelRatio || 1, 2) * .5, w = c.clientWidth || innerWidth, h = c.clientHeight || innerHeight;
+      SKY.vp = [w, h];
+      c.width = Math.max(2, Math.round(w * s)); c.height = Math.max(2, Math.round(h * s));
+      gl.viewport(0, 0, c.width, c.height); gl.uniform2f(U.r, c.width, c.height); gl.uniform1f(U.asp, w / h);
     }
-    var t0 = performance.now(), seed = Math.random() * 40, running = true;
     function draw(now) {
-      mouse[0] += (aim[0] - mouse[0]) * .04; mouse[1] += (aim[1] - mouse[1]) * .04;
-      gl.uniform1f(U.t, seed + (now - t0) / 1000); gl.uniform2f(U.m, mouse[0], mouse[1]);
+      var m = SKY.m;
+      m[0] += (aim[0] - m[0]) * .04; m[1] += (aim[1] - m[1]) * .04;
+      gl.uniform1f(U.t, SKY.t(now)); gl.uniform2fv(U.m, m);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       if (running && !still) requestAnimationFrame(draw);
     }
-    colors(); size(); themeListeners.push(function () { colors(); if (still || !running) draw(performance.now()); });
+    skyUniforms(gl, U, SKY.get()); size();
+    SKY.on(function (st) { skyUniforms(gl, U, st); if (still || !running) draw(performance.now()); });
     addEventListener('resize', function () { size(); if (still) draw(performance.now()); });
     addEventListener('pointermove', function (e) { aim[0] = e.clientX / innerWidth; aim[1] = 1 - e.clientY / innerHeight; }, { passive: true });
     document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running && !still) requestAnimationFrame(draw); });
     requestAnimationFrame(draw);
+  })();
+
+  // ---------- the sky pill: says what the light is doing, and lets you scrub through the day ----------
+  (function skyPill() {
+    var pill = document.querySelector('.sky-now'), panel = document.getElementById('sky-panel');
+    if (!pill || !panel) return;
+    var range = panel.querySelector('input'), out = panel.querySelector('output'), back = panel.querySelector('[data-sky-live]');
+    function show() { range.value = SKY.minutes(); out.textContent = SKY.get().time; back.hidden = SKY.live(); }
+    pill.addEventListener('click', function () {
+      var open = panel.hidden;
+      panel.hidden = !open; pill.setAttribute('aria-expanded', String(open));
+      if (open) { show(); range.focus(); }
+    });
+    range.addEventListener('input', function () { SKY.set(+range.value); out.textContent = SKY.get().time; back.hidden = false; });
+    back.addEventListener('click', function () { SKY.set(null); show(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { panel.hidden = true; pill.setAttribute('aria-expanded', 'false'); pill.focus(); } });
+  })();
+
+  // ---------- the drops: Robert, Rachelle and River as three drops of liquid glass on the home page ----------
+  (function drops() {
+    var c = document.getElementById('drops'), pool = document.querySelector('.pool');
+    if (!c || !pool || !SKY.ok) return;
+    var gl = c.getContext('webgl', { antialias: false, alpha: true, premultipliedAlpha: true, powerPreference: 'default' });
+    if (!gl) return;
+    var fs = [
+      'precision highp float;',
+      SKY_GLSL,
+      'uniform float sc;uniform vec2 off;uniform vec2 vp;uniform vec2 C[3];uniform vec2 V[3];uniform float RR[3];uniform float R0;uniform vec2 L;uniform float dk;',
+      'float smin(float a,float b,float kk){float hh=clamp(.5+.5*(b-a)/kk,0.,1.);return mix(b,a,hh)-kk*hh*(1.-hh);}',
+      'float field(vec2 p){float d=1e5;for(int i=0;i<3;i++){vec2 q=p-C[i];float sp=length(V[i]);',
+      ' if(sp>1.){vec2 dir=V[i]/sp;float st=1.+min(sp*.0007,.32);float al=dot(q,dir);q=(q-al*dir)*st+al*dir/st;}',
+      ' d=smin(d,length(q)-RR[i],R0*.42);}return d;}',
+      'vec3 at(vec2 p){return sky((p+off)/vp);}',
+      'void main(){vec2 p=gl_FragCoord.xy/sc;float d=field(p);',
+      ' if(d>R0*1.6){gl_FragColor=vec4(0.);return;}',
+      // outside the glass: a soft shadow below, and light focused by the drop on the side away from the sun
+      ' float ds=field(p+vec2(-L.x*6.,16.));float sh=(1.-smoothstep(-R0*.35,R0*.3,ds))*mix(.1,.32,dk);',
+      ' float dc=field(p+L*R0*.62);float ca=smoothstep(R0*.15,-R0*.55,dc)*(1.-smoothstep(-R0*.55,-R0*.95,dc))*mix(.11,.12,dk);',
+      ' sh+=smoothstep(2.5,0.,d)*(1.-dk)*.1;',
+      ' vec4 outer=vec4(mix(vec3(.72,.78,1.),sunc,clamp(glow*1.6,0.,1.))*ca,sh);',
+      ' float al=smoothstep(.9,-.9,d);',
+      ' if(al<=0.){gl_FragColor=outer;return;}',
+      // inside: bend the sky like a thick lens. Strong at the rim, a gentle magnification in the middle, colours split slightly at the edge.
+      ' float e=1.;vec2 nn=normalize(vec2(field(p+vec2(e,0.))-field(p-vec2(e,0.)),field(p+vec2(0.,e))-field(p-vec2(0.,e)))+1e-6);',
+      ' float depth=clamp(-d/(R0*.6),0.,1.);float bend=pow(1.-depth,2.4);',
+      ' vec2 o=nn*(bend*R0*.85-depth*R0*.24);',
+      ' vec3 col=vec3(at(p+o).r,at(p+o*1.1).g,at(p+o*1.22).b);',
+      ' vec3 refl=at(p-nn*R0*1.4);col=mix(col,refl*mix(1.02,1.15,dk)+mix(.0,.05,dk),pow(1.-depth,5.)*mix(.22,.35,dk));',
+      ' col=mix(col,vec3(1.),mix(.03,.03,dk)+mix(.05,.1,dk)*bend);',
+      ' float lit=max(dot(nn,L),0.),back=max(dot(nn,-L),0.);',
+      ' col+=vec3(1.)*pow(lit,2.5)*pow(1.-depth,4.)*mix(.95,.7,dk);',
+      ' col+=sunc*pow(back,2.)*pow(1.-depth,7.)*.45;',
+      ' col*=1.-pow(1.-depth,3.)*max(dot(nn,vec2(0.,-1.)),0.)*mix(.12,.3,dk);',
+      ' col+=smoothstep(1.6,0.,abs(d))*mix(.45,.3,dk);',
+      ' gl_FragColor=vec4(col*al,al)+outer*(1.-al);}'
+    ].join('\n');
+    var U = program(gl, fs, ['sc', 'off', 'vp', 'C', 'V', 'RR', 'R0', 'L', 'dk']);
+    if (!U) return;
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    root.classList.add('drops-on');
+
+    var names = Array.prototype.slice.call(document.querySelectorAll('.drop-name'));
+    var D = [0, 1, 2].map(function (i) { return { x: 0, y: 0, vx: 0, vy: 0, hx: 0, hy: 0, r: 60, ph: i * 2.1 }; });
+    var W = 0, H = 0, sc = 1, R0 = 60, placed = false, grab = null, visible = true, moving = true, last = 0;
+    function layout() {
+      var cr = c.getBoundingClientRect(), pr = pool.getBoundingClientRect();
+      W = cr.width; H = cr.height;
+      sc = Math.min(window.devicePixelRatio || 1, 2) * (W > 900 ? .8 : 1);
+      c.width = Math.max(2, Math.round(W * sc)); c.height = Math.max(2, Math.round(H * sc));
+      gl.viewport(0, 0, c.width, c.height);
+      var cx = pr.left - cr.left + pr.width / 2, cy = pr.top - cr.top + pr.height / 2;
+      var r = Math.max(44, Math.min(118, Math.min(pr.width, pr.height) * .22));
+      var spots = [[-1.32, -.38, 1], [1.24, -.62, .9], [.06, 1.22, .74]];
+      D.forEach(function (d, i) {
+        d.r = r * spots[i][2]; d.hx = cx + spots[i][0] * r; d.hy = cy + spots[i][1] * r;
+        if (!placed) { d.x = d.hx; d.y = d.hy - 30 - i * 14; }
+      });
+      R0 = r * .88; placed = true; moving = true;
+    }
+    function frame(now) {
+      var dt = Math.min(.033, last ? (now - last) / 1000 : .016); last = now;
+      var tt = now / 1000, energy = 0;
+      D.forEach(function (d, i) {
+        var tx = d.hx, ty = d.hy, k = 55, damp = 6.5;
+        if (!still) { tx += Math.sin(tt * .32 + d.ph) * d.r * .14; ty += Math.cos(tt * .27 + d.ph * 1.7) * d.r * .12; }
+        if (grab && grab.i === i) { tx = grab.x; ty = grab.y; k = 420; damp = 26; }
+        d.vx += (tx - d.x) * k * dt; d.vy += (ty - d.y) * k * dt;
+        var f = Math.exp(-damp * dt); d.vx *= f; d.vy *= f;
+        d.x += d.vx * dt; d.y += d.vy * dt;
+        energy += Math.abs(d.vx) + Math.abs(d.vy) + Math.abs(tx - d.x) + Math.abs(ty - d.y);
+        if (names[i]) names[i].style.transform = 'translate(' + d.x.toFixed(1) + 'px,' + d.y.toFixed(1) + 'px) translate(-50%,-50%)';
+      });
+      moving = energy > .5 || !!grab;
+      var cr = c.getBoundingClientRect(), st = SKY.get();
+      gl.uniform1f(U.t, SKY.t(now)); gl.uniform2fv(U.m, SKY.m);
+      gl.uniform1f(U.sc, sc); gl.uniform2f(U.vp, SKY.vp[0], SKY.vp[1]); gl.uniform1f(U.asp, SKY.vp[0] / SKY.vp[1]);
+      gl.uniform2f(U.off, cr.left, SKY.vp[1] - cr.bottom);
+      gl.uniform2fv(U.C, [D[0].x, H - D[0].y, D[1].x, H - D[1].y, D[2].x, H - D[2].y]);
+      gl.uniform2fv(U.V, [D[0].vx, -D[0].vy, D[1].vx, -D[1].vy, D[2].vx, -D[2].vy]);
+      gl.uniform1fv(U.RR, [D[0].r, D[1].r, D[2].r]); gl.uniform1f(U.R0, R0);
+      // light comes from wherever the sun is on screen
+      var lx = st.sun[0] * SKY.vp[0] - (cr.left + W / 2), ly = st.sun[1] * SKY.vp[1] - (SKY.vp[1] - cr.bottom + H / 2);
+      var ll = Math.hypot(lx, ly) || 1; gl.uniform2f(U.L, lx / ll, ly / ll);
+      gl.uniform1f(U.dk, st.dark ? 1 : 0);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (visible && !document.hidden && (!still || moving)) requestAnimationFrame(frame); else last = 0;
+    }
+    function kick() { if (!last) requestAnimationFrame(frame); }
+    function apply(st) { skyUniforms(gl, U, st); kick(); }
+    function local(e) { var r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+    function hit(x, y) {
+      var best = -1, bd = 1e9;
+      D.forEach(function (d, i) { var dd = Math.hypot(x - d.x, y - d.y); if (dd < d.r * 1.12 && dd < bd) { bd = dd; best = i; } });
+      return best;
+    }
+    // the drops sit under the words, so listen on the whole hero and only take the pointer when it lands on a drop
+    var hero = c.parentElement;
+    hero.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('a, button, input')) return;
+      var p = local(e), i = hit(p[0], p[1]);
+      if (i < 0) return;
+      grab = { i: i, x: p[0], y: p[1], sx: p[0], sy: p[1], id: e.pointerId, moved: false };
+      try { hero.setPointerCapture(e.pointerId); } catch (er) {}
+      hero.classList.add('grabbing'); kick();
+    });
+    hero.addEventListener('touchstart', function (e) {
+      if (e.target.closest('a, button, input')) return;
+      var t = e.touches[0], r = c.getBoundingClientRect();
+      if (hit(t.clientX - r.left, t.clientY - r.top) >= 0) e.preventDefault();
+    }, { passive: false });
+    hero.addEventListener('pointermove', function (e) {
+      var p = local(e);
+      if (grab && e.pointerId === grab.id) {
+        grab.x = p[0]; grab.y = p[1];
+        if (Math.hypot(p[0] - grab.sx, p[1] - grab.sy) > 6) grab.moved = true;
+        return;
+      }
+      if (e.pointerType === 'mouse') hero.classList.toggle('over-drop', hit(p[0], p[1]) >= 0);
+    });
+    function drop(e) {
+      if (!grab || e.pointerId !== grab.id) return;
+      // a tap without a drag makes the drop jump
+      if (!grab.moved) { var d = D[grab.i]; d.vy -= 900; d.vx += (Math.random() - .5) * 500; }
+      grab = null; hero.classList.remove('grabbing'); kick();
+    }
+    hero.addEventListener('pointerup', drop);
+    hero.addEventListener('pointercancel', drop);
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; if (visible) kick(); }).observe(c);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
+    addEventListener('resize', function () { layout(); kick(); });
+    SKY.on(apply);
+    layout(); apply(SKY.get());
   })();
 
   // ---------- the cube: a 3 by 3 puzzle. Drag a tile to turn a row, drag beside it to spin the whole thing ----------

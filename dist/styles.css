@@ -27,6 +27,10 @@
   --glass: light-dark(rgb(255 255 255 / .16), rgb(255 255 255 / .05));
   --lens: light-dark(rgb(255 255 255 / .62), rgb(255 255 255 / .17));
   --shade: light-dark(rgb(0 0 0 / .2), rgb(0 0 0 / .65));
+  /* the sky over the lake right now. site.js keeps these three in step with the real time of day; these are the midday values. */
+  --sky: light-dark(rgb(184 212 250), rgb(43 79 138));
+  --sky2: light-dark(rgb(252 240 219), rgb(97 87 71));
+  --sun: rgb(255 242 219);
   --display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, 'Segoe UI', sans-serif;
   --body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, 'Segoe UI', sans-serif;
   --wrap: 68rem;
@@ -203,13 +207,58 @@ body::after { display: none; bottom: 0; height: 96px; background: linear-gradien
 main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: clamp(1.1rem, 2vw, 1.5rem); align-content: start; }
 
 /* ---------- hero ---------- */
-.hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); align-items: center; gap: 1.5rem; padding-block: clamp(1rem, 4vw, 3rem); }
-.hero h1 { font-size: clamp(2.5rem, 6.4vw, 4.9rem); line-height: 1.02; letter-spacing: -0.04em; font-weight: 800; }
+/* The hero is a pool of light: three drops of liquid glass (a WebGL canvas, #drops) float over the live sky.
+   The canvas spans the full window width and reaches up under the bar; the words sit above it and let the pointer through to the drops. */
+.hero { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); align-items: center; gap: 1.5rem; min-height: min(calc(100svh - 6.5rem), 52rem); padding-block: clamp(1rem, 4vw, 3rem); }
+#drops, .drop-names { position: absolute; z-index: -1; top: -6.5rem; left: calc(50% - 50vw); width: 100vw; height: calc(100% + 7.5rem); display: block; pointer-events: none; }
+html:not(.drops-on) #drops { display: none; }
+.hero-copy { position: relative; display: grid; justify-items: start; pointer-events: none; }
+.hero-copy :is(a, button, input, label, output, .sky-panel) { pointer-events: auto; }
+.hero h1 { font-size: clamp(2.9rem, 6.3vw, 5.5rem); line-height: .98; letter-spacing: -0.048em; font-weight: 800; }
 .hero h1 em { font-style: normal; color: var(--soft); }
-.hero p { margin-top: 1.3rem; font-size: clamp(1.08rem, 1.7vw, 1.28rem); max-width: 33rem; color: var(--soft); }
+.hero-copy > p { margin-top: 1.4rem; font-size: clamp(1.08rem, 1.7vw, 1.3rem); max-width: 31rem; color: var(--soft); }
 .acts { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; }
-.hero .acts { margin-top: 1.7rem; }
-@media (max-width: 760px) { .hero { grid-template-columns: minmax(0, 1fr); } .stage { order: -1; } .scene { --s: clamp(170px, 50vw, 230px); } }
+.hero .acts { margin-top: 1.9rem; }
+.pool { position: relative; align-self: stretch; min-height: 22rem; display: grid; place-items: center; }
+.drop-names { z-index: 0; overflow: hidden; }
+.drop-name { position: absolute; left: 0; top: 0; font: 600 .92rem/1 var(--body); letter-spacing: -.005em; color: var(--ink); white-space: nowrap; text-shadow: 0 1px 2px light-dark(rgb(255 255 255 / .7), rgb(0 0 0 / .5)); will-change: transform; }
+html:not(.drops-on) .drop-names { display: none; }
+.hero.grabbing, .hero.grabbing * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+.hero.over-drop { cursor: grab; }
+.drop-hint { position: absolute; right: 0; bottom: .25rem; max-width: 26rem; text-align: right; font-size: .86rem; color: var(--soft); pointer-events: none; }
+html:not(.drops-on) .drop-hint { display: none; }
+/* without WebGL the pool shows three still CSS bubbles instead */
+.bubble { position: absolute; border-radius: 50%; width: var(--d); aspect-ratio: 1; background: radial-gradient(circle at 32% 28%, rgb(255 255 255 / .9), rgb(255 255 255 / .18) 22%, rgb(255 255 255 / .06) 55%, rgb(255 255 255 / .35) 100%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .55), inset -6px -10px 24px rgb(255 255 255 / .25), 0 22px 40px -22px var(--shade); -webkit-backdrop-filter: blur(2px) saturate(160%); backdrop-filter: blur(2px) saturate(160%); }
+.bubble:nth-child(1) { --d: 9.5rem; translate: -6.5rem -1.5rem; }
+.bubble:nth-child(2) { --d: 8.4rem; translate: 5.5rem -3.5rem; }
+.bubble:nth-child(3) { --d: 7rem; translate: .5rem 6rem; }
+.drops-on .bubble { display: none; }
+@media (max-width: 760px) {
+  .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: .5rem; padding-top: .5rem; }
+  .pool { order: -1; min-height: 19rem; }
+  .bubble:nth-child(1) { --d: 6.4rem; translate: -4.4rem -1rem; } .bubble:nth-child(2) { --d: 5.6rem; translate: 3.8rem -2.4rem; } .bubble:nth-child(3) { --d: 4.7rem; translate: .3rem 4rem; }
+  .drop-hint { position: static; text-align: left; max-width: none; margin-top: 1rem; }
+  .scene { --s: clamp(170px, 50vw, 230px); }
+}
+
+/* the live sky, in words: a glass pill with the sun in it. It opens a slider that relights the site for any time of day. */
+.sky-row { position: relative; margin-bottom: 1.4rem; }
+.sky-now { display: inline-flex; align-items: center; gap: .55rem; font: 500 .9rem/1 var(--body); color: var(--ink); padding: .55rem .95rem .55rem .7rem; cursor: pointer; }
+.sky-time { color: var(--soft); font-variant-numeric: tabular-nums; }
+.sun-dot { display: inline-block; flex: none; width: .78rem; height: .78rem; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, var(--sun) 60%); box-shadow: 0 0 0 3px color-mix(in oklab, var(--sun) 28%, transparent), 0 0 14px 2px color-mix(in oklab, var(--sun) 70%, transparent); }
+@media (prefers-reduced-motion: no-preference) { .sun-dot { animation: breathe 4.5s ease-in-out infinite; } @keyframes breathe { 50% { box-shadow: 0 0 0 5px color-mix(in oklab, var(--sun) 18%, transparent), 0 0 22px 4px color-mix(in oklab, var(--sun) 60%, transparent); } } }
+.sky-panel { --r: 22px; position: absolute; z-index: 5; top: calc(100% + .6rem); left: 0; width: min(22rem, calc(100vw - 2.5rem)); padding: 1.1rem; display: grid; gap: .8rem; font-size: .92rem; color: var(--soft); }
+.sky-panel output { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.sky-ends { display: flex; justify-content: space-between; font-size: .75rem; margin-top: -.45rem; }
+.sky-panel .btn { justify-self: start; }
+.sky-range { -webkit-appearance: none; appearance: none; width: 100%; height: 1.9rem; background: none; margin: 0; cursor: pointer; }
+.sky-range::-webkit-slider-runnable-track { height: .45rem; border-radius: 999px; background: linear-gradient(90deg, #252946, #6b5aa8 20%, #f2a37d 27%, #f6d9a6 36%, #cfe0f7 50%, #f6d9a6 66%, #f08a63 74%, #6b5aa8 81%, #252946); box-shadow: inset 0 1px 2px rgb(0 0 0 / .25); }
+.sky-range::-moz-range-track { height: .45rem; border-radius: 999px; background: linear-gradient(90deg, #252946, #6b5aa8 20%, #f2a37d 27%, #f6d9a6 36%, #cfe0f7 50%, #f6d9a6 66%, #f08a63 74%, #6b5aa8 81%, #252946); }
+.sky-range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.9rem; height: 1.3rem; margin-top: -.43rem; border-radius: 999px; background: rgb(255 255 255 / .55); border: 0; box-shadow: inset 0 1px 0 #fff, inset 0 0 6px rgb(255 255 255 / .6), 0 0 0 .5px rgb(0 0 0 / .18), 0 4px 12px rgb(0 0 0 / .22); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); transition: scale .2s; }
+.sky-range:active::-webkit-slider-thumb { scale: 1.25; }
+.sky-range::-moz-range-thumb { width: 1.9rem; height: 1.3rem; border-radius: 999px; background: rgb(255 255 255 / .7); border: 0; box-shadow: 0 0 0 .5px rgb(0 0 0 / .18), 0 4px 12px rgb(0 0 0 / .22); }
+.sky-line { display: flex; gap: .55rem; align-items: center; }
+
 
 /* the cube of three R's: a 3 by 3 puzzle you can turn. Six glassy tile colours, picked to stay easy to tell apart. */
 .stage { display: grid; justify-items: center; gap: .1rem; min-width: 0; }
@@ -252,8 +301,16 @@ main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: cla
 .n3 { --t: rotateX(90deg); --tile: #f5f5f7; --on: #1d1d1f; }
 .n4 { --t: rotateY(0deg); --tile: #2c2c30; }
 .n5 { --t: rotateY(180deg); --tile: #a97bff; }
-.cube-ui { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; align-items: center; }
-.hero .cube-say { flex-basis: 100%; margin: .15rem 0 0; max-width: none; text-align: center; font-size: .9rem; color: var(--soft); min-height: 1.6em; }
+.cube-ui { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+/* the cube's own section on the home page */
+.cube-tile { --r: 32px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1rem 2rem; padding: clamp(1.4rem, 4vw, 2.6rem) clamp(1.4rem, 4vw, 3rem); overflow: hidden; }
+.cube-copy { display: grid; gap: .8rem; justify-items: start; }
+.cube-copy h2 { font-size: clamp(2rem, 4.4vw, 3.2rem); letter-spacing: -.04em; }
+.cube-copy > p:not(.kicker) { color: var(--soft); max-width: 30rem; font-size: 1.08rem; }
+.cube-copy .cube-ui { margin-top: .6rem; }
+.cube-say { flex-basis: 100%; margin: .15rem 0 0; font-size: .9rem; color: var(--soft); min-height: 1.6em; }
+@media (max-width: 760px) { .cube-tile { grid-template-columns: minmax(0, 1fr); } .cube-tile .stage { order: -1; } }
+.kicker { font: 600 .8rem/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: color-mix(in oklab, var(--sky) 55%, var(--ink)); }
 html:not(.js) .cube-ui { display: none; }
 
 /* ---------- buttons, chips ---------- */
@@ -564,3 +621,21 @@ html:not(.js) [data-copy] { display: none; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* ---------- the sky in the type and the glass ----------
+   A little of the live sky reaches the interface: the headline, the current nav item, glows and selection. Always mixed with ink, so text keeps its contrast. */
+.sky-ink { background: linear-gradient(100deg, color-mix(in oklab, var(--sky) 62%, var(--ink)) 10%, color-mix(in oklab, var(--sky2) 52%, var(--ink)) 90%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.head h1 { background: linear-gradient(100deg, var(--ink) 35%, color-mix(in oklab, var(--sky) 58%, var(--ink))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .06em; }
+.links a[aria-current="page"], .tabs a[aria-current="page"] { background: color-mix(in oklab, var(--lens) 84%, var(--sky)); }
+@supports (anchor-name: --a) and (position-anchor: --a) {
+  .links a[aria-current="page"], .tabs a[aria-current="page"] { background: none; }
+  .links::before, .tabs::before { background: color-mix(in oklab, var(--lens) 84%, var(--sky)); transition: left .38s cubic-bezier(.3, 1.35, .5, 1), right .38s cubic-bezier(.3, 1.35, .5, 1), top .34s, bottom .34s, background-color 1s; }
+}
+.btn:not(.glass) { box-shadow: inset 0 1px 0 light-dark(rgb(255 255 255 / .22), rgb(255 255 255 / .9)), 0 12px 28px -12px color-mix(in oklab, var(--sky) 70%, var(--shade)); }
+a { text-decoration-color: color-mix(in oklab, var(--sky) 55%, color-mix(in oklab, var(--ink) 40%, transparent)); }
+::selection { background: color-mix(in oklab, var(--sky) 45%, transparent); }
+.glass::after { background: radial-gradient(140px circle at var(--mx, 50%) var(--my, -60%), color-mix(in oklab, light-dark(rgb(255 255 255 / .75), rgb(255 255 255 / .16)) 80%, var(--sun)), transparent 70%); }
+/* sheets you can click catch a glint of light that follows the pointer, like the glass controls */
+a.sheet::after, .card::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, -40%), light-dark(rgb(255 255 255 / .55), rgb(255 255 255 / .07)), transparent 70%); opacity: 0; transition: opacity .35s; }
+a.sheet:hover::after, .card:hover::after { opacity: 1; }
+@supports (corner-shape: squircle) { a.sheet::after, .card::after { corner-shape: squircle; } }
