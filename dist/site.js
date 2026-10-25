@@ -7,6 +7,12 @@
     return root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   };
 
+  // ---------- liquid glass lens: Chromium can bend light through an SVG backdrop filter; Safari and Firefox keep the plain clear glass ----------
+  try {
+    var ua = navigator.userAgentData;
+    if (ua && ua.brands && ua.brands.some(function (b) { return /Chromium/.test(b.brand); }) && !matchMedia('(prefers-reduced-transparency: reduce)').matches) root.classList.add('lens');
+  } catch (e) {}
+
   // ---------- light and dark ----------
   var themeListeners = [];
   var btn = document.getElementById('theme');
@@ -30,7 +36,7 @@
     g.style.setProperty('--my', (e.clientY - b.top) + 'px');
   }, { passive: true });
 
-  // ---------- water: a slow blue and green shader behind the page ----------
+  // ---------- wallpaper: a slow, soft neutral shader behind the page, for the glass to catch ----------
   (function silk() {
     var c = document.getElementById('silk');
     if (!c) return;
@@ -61,8 +67,8 @@
     var U = {}; ['r', 't', 'm', 'a', 'b', 'k', 'g'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
     var mouse = [.5, .5], aim = [.5, .5];
     function colors() {
-      if (isDark()) { gl.uniform3f(U.a, .022, .078, .108); gl.uniform3f(U.b, .036, .145, .175); gl.uniform3f(U.k, .07, .34, .66); gl.uniform3f(U.g, .05, .5, .4); }
-      else { gl.uniform3f(U.a, .93, .972, .978); gl.uniform3f(U.b, .8, .915, .94); gl.uniform3f(U.k, .36, .66, .94); gl.uniform3f(U.g, .42, .84, .7); }
+      if (isDark()) { gl.uniform3f(U.a, .035, .035, .045); gl.uniform3f(U.b, .11, .11, .13); gl.uniform3f(U.k, .26, .15, .13); gl.uniform3f(U.g, .16, .14, .27); }
+      else { gl.uniform3f(U.a, .965, .965, .975); gl.uniform3f(U.b, .85, .855, .885); gl.uniform3f(U.k, 1., .85, .78); gl.uniform3f(U.g, .83, .81, .97); }
     }
     function size() {
       var s = Math.min(window.devicePixelRatio || 1, 2) * .5;

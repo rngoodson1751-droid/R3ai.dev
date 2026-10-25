@@ -1,32 +1,34 @@
-/* r3ai.dev, frosted water edition (the iOS 27 glass: more diffusion behind the glass, a darkened rim, brighter highlights).
-   Plan: blues and greens, the colours of the lake I sail on, over a slow shader that moves like water.
-   Surfaces are frosted: the water still shows as soft colour and movement, but text always sits on calm glass. Blue and green meet in one gradient
-   (the "tide") that is used for the primary button, the nav pill and small marks, and nowhere else.
-   Only the floating controls are liquid glass. The showpiece is the clear cube of three R's.
-   Type: Newsreader for headings, Geist for reading. Content is left aligned. */
+/* r3ai.dev, Liquid Glass edition (October 2026).
+   Plan: Apple's current iOS look. Clear, colourless glass that bends the light behind it, a bright specular rim,
+   and a soft neutral wallpaper that slowly drifts underneath so the glass has something to catch.
+   No brand colour: ink on pearl in light, white on graphite in dark. The prominent fill (still called the "tide") is solid ink.
+   Floating controls (the top bar, the phone tab bar, glass buttons) are the clearest glass; content sits on frosted sheets so text stays easy to read.
+   Type: San Francisco on Apple devices, Inter everywhere else. Content is left aligned. */
 @view-transition { navigation: auto; }
 
 :root {
   color-scheme: light dark;
-  --ground: light-dark(#e9f4f5, #06161f);
-  --ink: light-dark(#0a2230, #e6f3f3);
-  --soft: light-dark(#3f5a66, #9ab5bc);
-  --blue: light-dark(#0b6cc4, #63b8ff);
-  --green: light-dark(#0a7f66, #52d9ad);
-  --accent: var(--blue);
-  --tide: linear-gradient(115deg, var(--blue), var(--green));
-  --on-tide: light-dark(#ffffff, #04202a);
-  --surface: light-dark(rgb(246 252 253 / .54), rgb(26 64 76 / .46));
-  --surface-strong: light-dark(rgb(249 253 254 / .76), rgb(12 40 50 / .74));
-  --hair: light-dark(rgb(10 70 90 / .14), rgb(160 230 240 / .15));
-  --edge: light-dark(rgb(255 255 255 / .96), rgb(200 245 252 / .3));
-  --rim: light-dark(rgb(10 60 80 / .17), rgb(0 0 0 / .55));
-  --shine: light-dark(rgb(255 255 255 / .98), rgb(255 255 255 / .3));
-  --frost: blur(26px) saturate(175%);
-  --glass: light-dark(rgb(250 254 255 / .52), rgb(36 84 98 / .52));
-  --shade: light-dark(rgb(10 70 100 / .26), rgb(0 0 0 / .6));
-  --display: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  --body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ground: light-dark(#f2f2f5, #0b0b0d);
+  --ink: light-dark(#1d1d1f, #f5f5f7);
+  --soft: light-dark(#5b5b62, #a1a1aa);
+  --blue: var(--ink);
+  --green: light-dark(#48484f, #c7c7cc);
+  --accent: var(--ink);
+  --tide: light-dark(#1d1d1f, #f5f5f7);
+  --on-tide: light-dark(#ffffff, #0b0b0d);
+  --surface: light-dark(rgb(255 255 255 / .46), rgb(44 44 50 / .4));
+  --surface-strong: light-dark(rgb(255 255 255 / .7), rgb(30 30 34 / .68));
+  --hair: light-dark(rgb(0 0 0 / .09), rgb(255 255 255 / .1));
+  --edge: light-dark(rgb(255 255 255 / .7), rgb(255 255 255 / .2));
+  --rim: light-dark(rgb(0 0 0 / .07), rgb(0 0 0 / .5));
+  --shine: light-dark(rgb(255 255 255 / .95), rgb(255 255 255 / .34));
+  --frost: blur(24px) saturate(180%);
+  --clear: blur(5px) saturate(200%) brightness(1.04);
+  --glass: light-dark(rgb(255 255 255 / .16), rgb(255 255 255 / .05));
+  --lens: light-dark(rgb(255 255 255 / .62), rgb(255 255 255 / .17));
+  --shade: light-dark(rgb(0 0 0 / .2), rgb(0 0 0 / .65));
+  --display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, 'Segoe UI', sans-serif;
   --wrap: 68rem;
   --read: 40rem;
 }
@@ -43,36 +45,57 @@ body {
   flex-direction: column;
   background: var(--ground);
   color: var(--ink);
-  font: 400 1.0625rem/1.62 var(--body);
+  font: 400 1.0625rem/1.55 var(--body);
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
 #silk { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; pointer-events: none; }
 
 img { max-width: 100%; height: auto; }
-a { color: inherit; text-decoration-color: color-mix(in oklab, var(--green) 80%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
-a:hover { color: var(--accent); }
+a { color: inherit; text-decoration-color: color-mix(in oklab, var(--ink) 35%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+a:hover { color: var(--accent); text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
-h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -0.02em; font-optical-sizing: auto; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.06; margin: 0; text-wrap: balance; letter-spacing: -0.025em; }
 p { margin: 0; text-wrap: pretty; }
 .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: 1.25rem; }
 
-/* ---------- liquid glass: used only for floating controls ---------- */
+/* ---------- liquid glass ----------
+   Every glass surface gets a specular rim: a 1px ring that is bright where light would strike it (top left and bottom right) and fades on the sides.
+   It is drawn by ::before with a mask, so it never tints the glass itself. */
+.glass, .sheet { position: relative; isolation: isolate; }
+.glass::before, .sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--shine), light-dark(rgb(255 255 255 / .25), rgb(255 255 255 / .06)) 32%, transparent 50%, light-dark(rgb(255 255 255 / .25), rgb(255 255 255 / .05)) 68%, light-dark(rgb(255 255 255 / .85), rgb(255 255 255 / .22)));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* floating controls: the clearest glass, barely frosted, so the page reads straight through it */
 .glass {
-  position: relative;
-  isolation: isolate;
   background: var(--glass);
-  -webkit-backdrop-filter: var(--frost);
-  backdrop-filter: var(--frost);
-  border: 1px solid var(--edge);
+  -webkit-backdrop-filter: var(--clear);
+  backdrop-filter: var(--clear);
+  border: 0;
   border-radius: 999px;
   box-shadow:
-    inset 0 1.5px 0 var(--shine),
-    inset 0 -1px 1px light-dark(rgb(10 70 100 / .14), rgb(0 0 0 / .45)),
-    0 0 0 1px var(--rim),
-    0 14px 34px -18px var(--shade),
-    0 2px 6px -2px light-dark(rgb(10 70 100 / .12), rgb(0 0 0 / .5));
+    inset 1.5px 1.5px 1px -1px light-dark(rgb(255 255 255 / .9), rgb(255 255 255 / .35)),
+    inset -1px -1px 1px -.5px light-dark(rgb(255 255 255 / .7), rgb(255 255 255 / .18)),
+    inset 0 0 18px light-dark(rgb(255 255 255 / .35), rgb(255 255 255 / .04)),
+    0 0 0 .5px var(--rim),
+    0 10px 30px -10px var(--shade),
+    0 1px 3px light-dark(rgb(0 0 0 / .06), rgb(0 0 0 / .4));
 }
-/* a highlight that follows the pointer across the glass */
+/* where the browser can bend light through an SVG filter (Chrome, Edge), the glass refracts the page like a lens.
+   site.js adds .lens to <html> only in those browsers, and the filter itself is in the page template. */
+.lens .glass { -webkit-backdrop-filter: url(#lg) var(--clear); backdrop-filter: url(#lg) var(--clear); }
+/* a glint that follows the pointer across the glass */
 .glass::after {
   content: "";
   position: absolute;
@@ -80,13 +103,13 @@ p { margin: 0; text-wrap: pretty; }
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-  background: radial-gradient(160px circle at var(--mx, 50%) var(--my, -60%), light-dark(rgb(255 255 255 / .8), rgb(255 255 255 / .16)), transparent 70%);
+  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, -60%), light-dark(rgb(255 255 255 / .7), rgb(255 255 255 / .14)), transparent 70%);
   opacity: 0;
   transition: opacity .3s;
 }
 .glass:hover::after { opacity: 1; }
 @media (prefers-reduced-transparency: reduce) {
-  .glass, .sheet { background: light-dark(#f4fafb, #0c2630); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass, .sheet, .bar, .tabs { background: light-dark(#fbfbfd, #1c1c1f) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 }
 
 /* ---------- top capsule and phone tab bar ---------- */
@@ -103,19 +126,19 @@ p { margin: 0; text-wrap: pretty; }
   padding: .32rem .36rem .32rem 1.05rem;
   view-transition-name: bar;
 }
-.bar, .tabs { background: light-dark(rgb(244 251 253 / .7), rgb(10 38 49 / .7)); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
-.mark { font: 600 1.35rem/1 var(--display); text-decoration: none; margin-right: .5rem; letter-spacing: -.02em; }
-.mark sup { font-size: .58em; color: var(--green); margin-left: .04em; }
+.mark { font: 700 1.3rem/1 var(--display); text-decoration: none; margin-right: .5rem; letter-spacing: -.03em; }
+.mark sup { font-size: .58em; color: var(--soft); margin-left: .04em; }
 .links, .tabs { position: relative; }
 .links { display: flex; gap: .1rem; }
-.links a, .tabs a { position: relative; z-index: 1; text-decoration: none; font-weight: 500; font-size: .98rem; padding: .48rem .95rem; border-radius: 999px; white-space: nowrap; transition: color .2s; }
+.links a, .tabs a { position: relative; z-index: 1; text-decoration: none; font-weight: 500; font-size: .96rem; padding: .48rem .95rem; border-radius: 999px; white-space: nowrap; transition: color .2s; }
 .links a:hover, .tabs a:hover { color: var(--ink); }
-.links a[aria-current="page"], .tabs a[aria-current="page"] { background: var(--tide); color: var(--on-tide); }
-/* where the browser can do it, the dark pill becomes a lens that slides to whatever you point at */
+/* the current page sits under a brighter drop of glass, the way the iOS tab bar marks the selected tab */
+.links a[aria-current="page"], .tabs a[aria-current="page"] { background: var(--lens); font-weight: 600; box-shadow: inset 0 1px 0 var(--shine), 0 4px 14px -6px var(--shade); }
+/* where the browser can do it, that drop slides to whatever you point at */
 @supports (anchor-name: --a) and (position-anchor: --a) {
-  .links a[aria-current="page"], .tabs a[aria-current="page"] { background: none; anchor-name: --here; }
-  .links:has(a:hover) a[aria-current="page"], .tabs:has(a:hover) a[aria-current="page"] { anchor-name: none; color: var(--ink); }
-  .links a:hover, .tabs a:hover { anchor-name: --here; color: var(--on-tide); }
+  .links a[aria-current="page"], .tabs a[aria-current="page"] { background: none; box-shadow: none; anchor-name: --here; }
+  .links:has(a:hover) a[aria-current="page"], .tabs:has(a:hover) a[aria-current="page"] { anchor-name: none; }
+  .links a:hover, .tabs a:hover { anchor-name: --here; }
   .links::before, .tabs::before {
     content: "";
     position: absolute;
@@ -125,15 +148,31 @@ p { margin: 0; text-wrap: pretty; }
     top: anchor(top);
     bottom: anchor(bottom);
     border-radius: 999px;
-    background: var(--tide);
-    transition: left .34s cubic-bezier(.3, 1.3, .5, 1), right .34s cubic-bezier(.3, 1.3, .5, 1), top .34s, bottom .34s;
+    background: var(--lens);
+    box-shadow: inset 0 1px 0 var(--shine), inset 0 -1px 1px light-dark(rgb(0 0 0 / .04), rgb(0 0 0 / .3)), 0 4px 14px -6px var(--shade);
+    transition: left .38s cubic-bezier(.3, 1.35, .5, 1), right .38s cubic-bezier(.3, 1.35, .5, 1), top .34s, bottom .34s;
   }
   .links:not(:has(a[aria-current="page"], a:hover))::before, .tabs:not(:has(a[aria-current="page"], a:hover))::before { display: none; }
 }
 .theme { appearance: none; border: 0; background: none; color: inherit; width: 2.3rem; height: 2.3rem; border-radius: 50%; cursor: pointer; display: grid; place-items: center; }
-.theme:hover { background: light-dark(rgb(255 255 255 / .6), rgb(255 255 255 / .12)); }
+.theme:hover { background: var(--lens); }
 .theme svg { width: 1.15rem; height: 1.15rem; }
 .tabs { display: none; }
+.bar, .tabs { background: light-dark(rgb(255 255 255 / .24), rgb(40 40 46 / .26)); }
+/* the scroll edge: content softly blurs and fades as it slides under the bars, as in iOS, so the clear glass stays readable */
+body::before, body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 19;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  background: linear-gradient(color-mix(in oklab, var(--ground) 70%, transparent), transparent);
+}
+body::before { top: 0; height: 76px; -webkit-mask: linear-gradient(#000 35%, transparent); mask: linear-gradient(#000 35%, transparent); }
+body::after { display: none; bottom: 0; height: 96px; background: linear-gradient(transparent, color-mix(in oklab, var(--ground) 70%, transparent)); -webkit-mask: linear-gradient(transparent, #000 65%); mask: linear-gradient(transparent, #000 65%); }
 @media (max-width: 640px) {
   .bar { width: calc(100% - 28px); justify-content: space-between; }
   .links { display: none; }
@@ -148,13 +187,15 @@ p { margin: 0; text-wrap: pretty; }
     padding: .32rem;
     view-transition-name: tabs;
   }
-  .tabs a { flex: 1; text-align: center; padding-inline: .2rem; font-size: .93rem; }
+  .tabs a { flex: 1; text-align: center; padding-inline: .2rem; font-size: .92rem; }
   body { padding-bottom: 5.5rem; }
+  body::after { display: block; }
 }
-/* the capsule tightens as you scroll, like the iOS bars do */
+/* the bars shrink as you scroll, like the iOS tab bar does */
 @supports (animation-timeline: scroll()) {
-  @media (prefers-reduced-motion: no-preference) and (min-width: 641px) {
-    .bar { animation: tighten linear both; animation-timeline: scroll(root); animation-range: 0 160px; }
+  @media (prefers-reduced-motion: no-preference) {
+    @media (min-width: 641px) { .bar { animation: tighten linear both; animation-timeline: scroll(root); animation-range: 0 160px; } }
+    @media (max-width: 640px) { .tabs { animation: tighten linear both; animation-timeline: scroll(root); animation-range: 0 220px; transform-origin: 50% 100%; } }
     @keyframes tighten { to { scale: .92; translate: 0 -4px; } }
   }
 }
@@ -163,14 +204,14 @@ main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: cla
 
 /* ---------- hero ---------- */
 .hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); align-items: center; gap: 1.5rem; padding-block: clamp(1rem, 4vw, 3rem); }
-.hero h1 { font-size: clamp(2.5rem, 6.4vw, 4.9rem); line-height: 1.02; letter-spacing: -0.03em; }
-.hero h1 em { font-style: italic; color: var(--accent); }
+.hero h1 { font-size: clamp(2.5rem, 6.4vw, 4.9rem); line-height: 1.02; letter-spacing: -0.04em; font-weight: 800; }
+.hero h1 em { font-style: normal; color: var(--soft); }
 .hero p { margin-top: 1.3rem; font-size: clamp(1.08rem, 1.7vw, 1.28rem); max-width: 33rem; color: var(--soft); }
 .acts { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; }
 .hero .acts { margin-top: 1.7rem; }
 @media (max-width: 760px) { .hero { grid-template-columns: minmax(0, 1fr); } .stage { order: -1; } .scene { --s: clamp(170px, 50vw, 230px); } }
 
-/* the cube of three R's: a 3 by 3 puzzle you can turn. Six tile colours, all blues and greens. */
+/* the cube of three R's: a 3 by 3 puzzle you can turn. Six glassy tile colours, picked to stay easy to tell apart. */
 .stage { display: grid; justify-items: center; gap: .1rem; min-width: 0; }
 .scene { --s: clamp(150px, 22vw, 250px); --c: calc(var(--s) / 3); perspective: calc(var(--s) * 5.5); display: grid; place-items: center; padding: calc(var(--s) * .3) calc(var(--s) * .22) calc(var(--s) * .36); border-radius: 28px; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .scene:active { cursor: grabbing; }
@@ -188,8 +229,8 @@ main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: cla
   justify-items: center;
   font-style: normal;
   color: var(--on, #fff);
-  background: light-dark(#0c2b3c, #020c12);
-  outline: 1px solid light-dark(#0c2b3c, #020c12);
+  background: light-dark(#1d1d1f, #000);
+  outline: 1px solid light-dark(#1d1d1f, #000);
   backface-visibility: hidden;
   transform: var(--t) translateZ(calc(var(--c) / 2));
 }
@@ -199,27 +240,27 @@ main { flex: 1; padding-block: clamp(1.5rem, 4vw, 3rem); display: grid; gap: cla
   inset: 5.5%;
   border-radius: 19%;
   background: linear-gradient(140deg, rgb(255 255 255 / .46), rgb(255 255 255 / 0) 48%), var(--tile);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / .6), inset 0 -2px 5px rgb(0 25 45 / .2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .6), inset 0 -2px 5px rgb(0 0 0 / .2);
 }
 .fc > * { position: relative; }
-.fc b { font: 500 calc(var(--c) * .6)/.9 var(--display); letter-spacing: -.04em; }
+.fc b { font: 700 calc(var(--c) * .56)/.9 var(--display); letter-spacing: -.04em; }
 .fc span { font: 500 calc(var(--c) * .15)/1 var(--body); margin-top: .35em; opacity: .85; }
 .fc sup { font-size: .5em; }
-.n0 { --t: rotateY(90deg); --tile: #0d9d74; }
-.n1 { --t: rotateY(-90deg); --tile: #6cc8f5; --on: #0a2230; }
-.n2 { --t: rotateX(-90deg); --tile: #b9e860; --on: #0a2230; }
-.n3 { --t: rotateX(90deg); --tile: #f2fbfc; --on: #0a2230; }
-.n4 { --t: rotateY(0deg); --tile: #1272d6; }
-.n5 { --t: rotateY(180deg); --tile: #12386b; }
+.n0 { --t: rotateY(90deg); --tile: #ff8a3d; }
+.n1 { --t: rotateY(-90deg); --tile: #ffd60a; --on: #1d1d1f; }
+.n2 { --t: rotateX(-90deg); --tile: #ff5f8f; }
+.n3 { --t: rotateX(90deg); --tile: #f5f5f7; --on: #1d1d1f; }
+.n4 { --t: rotateY(0deg); --tile: #2c2c30; }
+.n5 { --t: rotateY(180deg); --tile: #a97bff; }
 .cube-ui { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; align-items: center; }
 .hero .cube-say { flex-basis: 100%; margin: .15rem 0 0; max-width: none; text-align: center; font-size: .9rem; color: var(--soft); min-height: 1.6em; }
 html:not(.js) .cube-ui { display: none; }
 
 /* ---------- buttons, chips ---------- */
-.btn { display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; font-weight: 500; padding: .72rem 1.3rem; border-radius: 999px; background: var(--tide); color: var(--on-tide); border: 1px solid transparent; box-shadow: 0 10px 24px -14px var(--blue); transition: scale .2s; }
-.btn:hover { color: var(--on-tide); scale: 1.03; }
-.btn:active { scale: .98; }
-.btn.glass { background: var(--glass); color: var(--ink); border-color: var(--edge); }
+.btn { display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; font-weight: 500; padding: .72rem 1.3rem; border-radius: 999px; background: var(--tide); color: var(--on-tide); border: 0; box-shadow: inset 0 1px 0 light-dark(rgb(255 255 255 / .22), rgb(255 255 255 / .9)), 0 10px 24px -12px var(--shade); transition: scale .25s cubic-bezier(.3, 1.4, .5, 1); }
+.btn:hover { color: var(--on-tide); scale: 1.04; }
+.btn:active { scale: .96; }
+.btn.glass { background: var(--glass); color: var(--ink); }
 .btn.glass:hover { color: var(--ink); }
 button.btn { font: inherit; font-weight: 500; cursor: pointer; }
 .btn.sm { padding: .42rem .95rem; font-size: .92rem; }
@@ -232,14 +273,13 @@ button.btn { font: inherit; font-weight: 500; cursor: pointer; }
 .sheet {
   --r: 26px;
   background: var(--surface);
-  border: 1px solid var(--hair);
   border-radius: var(--r);
   -webkit-backdrop-filter: var(--frost);
   backdrop-filter: var(--frost);
-  box-shadow: inset 0 1px 0 var(--shine), 0 0 0 1px var(--rim), 0 18px 40px -30px var(--shade);
+  box-shadow: inset 0 0 24px light-dark(rgb(255 255 255 / .4), rgb(255 255 255 / .03)), 0 0 0 .5px var(--rim), 0 20px 44px -28px var(--shade);
 }
 .sheet.strong { background: var(--surface-strong); }
-@supports (corner-shape: squircle) { .sheet { corner-shape: squircle; border-radius: calc(var(--r) * 1.7); } }
+@supports (corner-shape: squircle) { .sheet, .sheet::before { corner-shape: squircle; } .sheet { border-radius: calc(var(--r) * 1.7); } }
 
 .bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(1.1rem, 2vw, 1.5rem); }
 .tile { padding: clamp(1.3rem, 2.6vw, 2rem); display: grid; gap: .7rem; align-content: start; grid-column: span 3; }
@@ -247,7 +287,7 @@ button.btn { font: inherit; font-weight: 500; cursor: pointer; }
 .tile > p { color: var(--soft); }
 .tile .end { margin-top: auto; padding-top: .8rem; display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
 a.tile { text-decoration: none; color: inherit; transition: translate .3s cubic-bezier(.2, .8, .2, 1), background-color .3s; }
-a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-strong); }
+a.tile:hover { translate: 0 -4px; scale: 1.01; color: inherit; background: var(--surface-strong); }
 .span-2 { grid-column: span 2; } .span-4 { grid-column: span 4; } .span-6 { grid-column: span 6; }
 @media (max-width: 860px) { .tile, .span-2, .span-4 { grid-column: span 6; } }
 .ask { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
@@ -291,9 +331,9 @@ a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-stro
 .prose h3 { font-size: 1.3rem; margin-top: .6rem; }
 .prose ul, .prose ol { margin: 0; padding-left: 1.3rem; display: grid; gap: .45rem; }
 .prose li::marker { color: var(--green); }
-.prose blockquote { margin: 0; padding-left: 1rem; border-left: 3px solid; border-image: linear-gradient(var(--blue), var(--green)) 1; color: var(--soft); font-family: var(--display); font-size: 1.2em; }
-.prose code { font: .88em ui-monospace, 'SFMono-Regular', Menlo, monospace; background: light-dark(rgb(10 70 90 / .08), rgb(255 255 255 / .09)); padding: .1em .4em; border-radius: 6px; }
-.prose pre { margin: 0; padding: 1rem; border-radius: 14px; background: light-dark(rgb(10 70 90 / .06), rgb(0 0 0 / .3)); overflow-x: auto; }
+.prose blockquote { margin: 0; padding-left: 1rem; border-left: 3px solid; border-color: var(--hair); color: var(--soft); font-family: var(--display); font-size: 1.2em; }
+.prose code { font: .88em ui-monospace, 'SFMono-Regular', Menlo, monospace; background: light-dark(rgb(0 0 0 / .06), rgb(255 255 255 / .09)); padding: .1em .4em; border-radius: 6px; }
+.prose pre { margin: 0; padding: 1rem; border-radius: 14px; background: light-dark(rgb(0 0 0 / .05), rgb(0 0 0 / .3)); overflow-x: auto; }
 .prose pre code { background: none; padding: 0; }
 .prose hr { border: 0; border-top: 1px solid var(--hair); width: 100%; }
 /* a page from static/ shown inside a post ({{embed}} in build.mjs). The frame is as tall as a 1060 by 1640 drawing plus its controls. */
@@ -303,7 +343,7 @@ a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-stro
 .prose img { border-radius: 14px; border: 1px solid var(--hair); max-width: min(100%, 26rem); }
 /* a video or a wide captioned picture in a post ({{video}} and {{photo}} in build.mjs) */
 .prose .video, .prose .photo { margin: 0; display: grid; gap: .6rem; width: 100%; }
-.prose .video video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 18px; border: 1px solid var(--hair); background: light-dark(#dfeef0, #031018); box-shadow: 0 18px 40px -24px var(--shade); }
+.prose .video video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 18px; border: 1px solid var(--hair); background: light-dark(#e8e8ed, #000); box-shadow: 0 18px 40px -24px var(--shade); }
 .prose .photo a { display: block; }
 .prose .photo img { display: block; width: 100%; max-width: 100%; border-radius: 18px; box-shadow: 0 18px 40px -24px var(--shade); }
 .prose .video figcaption, .prose .photo figcaption { color: var(--soft); font-size: .95rem; line-height: 1.45; }
@@ -318,7 +358,7 @@ a.tile:hover { translate: 0 -4px; color: inherit; background: var(--surface-stro
 .input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 16px; }
 textarea.input { min-height: 9.5rem; resize: vertical; display: block; }
 select.input { appearance: none; padding-right: 2.6rem; background-image: linear-gradient(45deg, transparent 50%, var(--soft) 50%), linear-gradient(135deg, var(--soft) 50%, transparent 50%); background-position: calc(100% - 1.25rem) 55%, calc(100% - .9rem) 55%; background-size: .36rem .36rem; background-repeat: no-repeat; }
-select.input option, select.input optgroup { background: light-dark(#fff, #0b2733); color: light-dark(#0a2230, #e6f3f3); }
+select.input option, select.input optgroup { background: light-dark(#fff, #1c1c1f); color: var(--ink); }
 .pick { border: 0; margin: 0; padding: 0; display: flex; gap: .5rem; flex-wrap: wrap; }
 .pick legend { padding: 0; margin-bottom: .55rem; }
 .pick label { position: relative; cursor: pointer; padding: .5rem 1.05rem; border-radius: 999px; border: 1px solid var(--hair); background: light-dark(rgb(255 255 255 / .5), rgb(255 255 255 / .05)); }
@@ -354,7 +394,7 @@ a.chip:hover { color: var(--accent); border-color: currentColor; }
 .path li + li { border-top: 1px solid var(--hair); }
 .path a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.1rem; align-items: start; padding: 1.15rem 1.05rem; border-radius: 18px; text-decoration: none; color: inherit; transition: background-color .2s; }
 .path a:hover { background: light-dark(rgb(255 255 255 / .6), rgb(255 255 255 / .06)); color: inherit; }
-.step { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--tide); color: var(--on-tide); font: 500 1.3rem/1 var(--display); }
+.step { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--tide); color: var(--on-tide); font: 700 1.15rem/1 var(--display); }
 .path h3 { font-size: 1.45rem; line-height: 1.18; margin-block: .2rem .35rem; }
 .path p { color: var(--soft); max-width: var(--read); }
 .path .why { font-size: .88rem; font-weight: 500; color: var(--green); }
@@ -417,7 +457,7 @@ a.chip:hover { color: var(--accent); border-color: currentColor; }
 .paper .sign { margin-top: 1.4rem; display: flex; gap: 1rem; align-items: end; color: var(--soft); }
 .paper .sign span { flex: 1; max-width: 20rem; border-bottom: 1px solid var(--ink); height: 1.6rem; }
 @media print {
-  #silk, .bar, .tabs, .foot, .head, .note, .demo-controls, .steps, .people button { display: none !important; }
+  body::before, body::after, #silk, .bar, .tabs, .foot, .head, .note, .demo-controls, .steps, .people button { display: none !important; }
   body { background: #fff; color: #000; padding: 0; }
   .sheet, .paper { border: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; padding: 0; }
 }
@@ -467,14 +507,14 @@ html:not(.js) [data-copy] { display: none; }
 /* ---------- live bus map demo ---------- */
 .map-cols { grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); }
 @media (max-width: 800px) { .map-cols { grid-template-columns: minmax(0, 1fr); } }
-.map-wrap { border-radius: 18px; overflow: hidden; border: 1px solid var(--hair); background: light-dark(#f3faf8, #0b222c); }
+.map-wrap { border-radius: 18px; overflow: hidden; border: 1px solid var(--hair); background: light-dark(#f7f7f9, #18181b); }
 .map { display: block; width: 100%; height: auto; }
-.map .water { fill: light-dark(#cfe7f3, #123a52); }
-.map .streets path { stroke: light-dark(rgb(10 70 90 / .1), rgb(160 230 240 / .09)); stroke-width: 6; fill: none; }
+.map .water { fill: light-dark(#dcdde3, #2a2b31); }
+.map .streets path { stroke: light-dark(rgb(0 0 0 / .08), rgb(255 255 255 / .08)); stroke-width: 6; fill: none; }
 .map .route { fill: none; stroke-width: 7; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
 .map .stop { cursor: pointer; outline: none; }
-.map .stop circle { fill: light-dark(#fff, #0b222c); stroke: var(--ink); stroke-width: 3; }
-.map .stop text { font: 500 19px var(--body); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: light-dark(#f3faf8, #0b222c); stroke-width: 4; }
+.map .stop circle { fill: light-dark(#fff, #18181b); stroke: var(--ink); stroke-width: 3; }
+.map .stop text { font: 500 19px var(--body); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: light-dark(#f7f7f9, #18181b); stroke-width: 4; }
 .map .stop.is-picked circle, .map .stop:focus-visible circle { stroke: var(--accent); stroke-width: 6; }
 .map .bus { cursor: pointer; outline: none; transition: transform var(--glide, .5s) linear; }
 .map .bus .spin { transition: transform .3s; }
@@ -483,7 +523,7 @@ html:not(.js) [data-copy] { display: none; }
 .map .bus.is-picked circle, .map .bus:focus-visible circle { stroke: var(--ink); stroke-width: 5; }
 .map .bus.parked .spin { opacity: 0; }
 .map-clock { font: 500 1.7rem/1 var(--display); min-width: 7.5rem; font-variant-numeric: tabular-nums; }
-.feed { margin: 0; padding: .9rem; border-radius: 14px; background: light-dark(rgb(10 70 90 / .06), rgb(0 0 0 / .3)); font: .82rem/1.45 ui-monospace, 'SFMono-Regular', Menlo, monospace; overflow-x: auto; }
+.feed { margin: 0; padding: .9rem; border-radius: 14px; background: light-dark(rgb(0 0 0 / .05), rgb(0 0 0 / .3)); font: .82rem/1.45 ui-monospace, 'SFMono-Regular', Menlo, monospace; overflow-x: auto; }
 @media (prefers-reduced-motion: reduce) { .map .bus { transition: none; } }
 /* on a phone the stop names are too small to read, so only the transit center and the stop you picked are named */
 @media (max-width: 640px) { .map .stop text { display: none; font-size: 34px; stroke-width: 8; } .map .stop.is-picked text, .map .stop[data-stop="hub"] text { display: block; } .map .stop circle { r: 12; } .map .bus circle { r: 19; } .map .bus text { font-size: 22px; } .map .bus text { transform: translateY(3px); } }

@@ -133,8 +133,8 @@ function layout({ title, description, path, section = '', nav = '', body, og = '
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#e9f4f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#06161f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/icon-180.png">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -142,13 +142,14 @@ function layout({ title, description, path, section = '', nav = '', body, og = '
 <script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
 <link rel="stylesheet" href="/styles.css">
 <script src="/site.js" defer></script>${scripts.map(src => `\n<script src="${src}" defer></script>`).join('')}
 <script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
 </head>
 <body${section ? ` data-section="${section}"` : ''}>
 <canvas id="silk" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="lg" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.007 0.011" numOctaves="2" seed="7" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="30" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <header class="glass bar">
   <a class="mark" href="/" aria-label="R Cubed, home page">R<sup>3</sup></a>
   <nav class="links" aria-label="Main">${links}</nav>
@@ -536,7 +537,7 @@ ${posts.map(p => `<item><title>${esc(p.title)}</title><link>${SITE.url}${p.url}<
 write('search.json', JSON.stringify(posts.map(p => ({ t: p.title, u: p.url, s: p.summary, c: p.section, x: p.text }))));
 write('manifest.webmanifest', JSON.stringify({
   name: 'R3 AI: Robert, Rachelle and River', short_name: 'R Cubed', description: 'Software, games and family projects built with AI.',
-  start_url: '/', scope: '/', display: 'standalone', background_color: '#e9f4f5', theme_color: '#0b6cc4',
+  start_url: '/', scope: '/', display: 'standalone', background_color: '#f2f2f5', theme_color: '#1d1d1f',
   icons: [
     { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
     { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

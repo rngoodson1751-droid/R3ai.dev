@@ -176,7 +176,7 @@ The Public Works call center's transit page, at `/work/call-center/`. Transit ca
 
 ### Limiting Factor
 
-Limiting Factor is a working first version of a tool for finding what holds a service back. Staff log what got in the way of a step and roughly how many hours it costs a month; the page ranks those limits by cost and by how long they have been open, and writes a one-page brief for whoever controls the budget. Its page is `worker/private/limiting-factor.html`. It uses the site's blues, greens and clear glass with its own type, and has a Theme button (Auto, Light, Dark) in the header.
+Limiting Factor is a working first version of a tool for finding what holds a service back. Staff log what got in the way of a step and roughly how many hours it costs a month; the page ranks those limits by cost and by how long they have been open, and writes a one-page brief for whoever controls the budget. Its page is `worker/private/limiting-factor.html`. It keeps its own blues, greens and clear glass with its own type, and has a Theme button (Auto, Light, Dark) in the header.
 
 - `worker/limits/api.js` answers `<page address>/api`. A plain read returns everything the page shows; a POST makes one change (a report, an import, a service, a status, the hourly rate) and returns the fresh data. The page asks again every 20 seconds, so two people see each other's entries.
 - The data is in the `lf_services`, `lf_reports`, `lf_status` and `lf_settings` tables of the `r3ai-requests` database (layout in `worker/schema.sql`). Reports store the role a person picked, never a name. The services, their steps, the roles and the hourly rate are all edited on the page itself (Services and Data tabs), not in this repository.
