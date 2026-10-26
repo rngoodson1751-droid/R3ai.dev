@@ -3,7 +3,7 @@ title: River's astrophysics phase is accelerating
 date: 2026-10-10
 section: home
 topics: Games, Family, Using AI
-summary: River keeps asking about space and aliens. Well, space and alien games. So he got nine worlds, 27 stars and a grumpy robot king to tickle. It's a start.
+summary: River keeps asking about space and aliens. Well, space and alien games. So he got ten worlds, 30 stars and a grumpy robot king to tickle. It's a start.
 ---
 
 River's astrophysics phase is accelerating. I would call it exponential. Every day there are more questions about space and aliens.
@@ -26,7 +26,7 @@ The first four worlds came back in about an hour. I said it was great and asked 
 
 ## What's in it
 
-Nine worlds with three stars in each, 27 in all. You start on the Starship Plaza and walk into a glowing gate to pick a world. Every world is open from the start.
+Ten worlds with three stars in each, 30 in all. You start on the Starship Plaza and walk into a glowing gate to pick a world. Every world is open from the start.
 
 - **Rainbow Planet.** Stepping stones, bouncy mushrooms and a moving cloud. The Grumble Bots are grumpy until you spin next to them.
 - **Cosmic Sky Ride.** Fly a saucer through twelve star rings and beam up four lost baby aliens.
@@ -37,12 +37,34 @@ Nine worlds with three stars in each, 27 in all. You start on the Starship Plaza
 - **Comet Surf.** Hoverboards on a rainbow road that loops through space. Lean, jump off the launch pads and spin in the air for tricks.
 - **Dusty Canyon Dash.** I asked for a desert canyon race in the spirit of a famous one from the movies. So there are hover racers with two giant rocket engines each, red rock walls and stone arches to fly under. This one is the whole family. River wears a golden robot costume. I am a small green sage with very long ears. Rachelle runs the junk shop by the start line and bolts a new part onto your racer after each race.
 - **King Grumble's Castle.** A boss battle. Jump over his shockwave rings, wait until he gets tired, then run up and spin to tickle him. Three tickles and he turns green and smiles.
+- **Mighty Makers HQ.** The newest world, and the one with homework hidden in it. More on that below.
 
 {{photo /shots/galactic-dino-volcano.jpg Dino Volcano. The squad is on the start island, and Bronto is giving rides up to the crater.}}
 
 {{photo /shots/galactic-canyon-dash.jpg Dusty Canyon Dash. River is the golden robot in front. I am the green one with the ears.}}
 
-Find all 27 stars and the rocket on the plaza launches with fireworks.
+Find all 30 stars and the rocket on the plaza launches with fireworks.
+
+## Update: a superhero headquarters
+
+River is deep in superheroes now, alongside the astrophysics. So the plaza got a tenth gate, right behind where you start, and it goes to Mighty Makers HQ.
+
+I asked for something in the spirit of the kid version of a certain famous superhero team. Claude said no to the actual characters, which are somebody else's, and made our own instead. I think ours are better. I am biased.
+
+- **River** is the hero in charge. He wears a Mega Suit he built himself, with rocket boots and a cape.
+- **Captain Gale** is me. A sailor captain in navy and yellow who runs on wind power. Make of that what you will.
+- **Professor Prism** is Rachelle. Goggles, a lab cape and a prism that turns light into a rainbow.
+- **Gus the Gem Giant** is the big one. He is made of purple crystal, he is very strong and he is very gentle.
+
+Every mission is a little science lesson wearing a costume.
+
+- **Spin three wind turbines.** Each one explains a piece of how wind becomes electricity. When all three spin, the wires light up in a loop to the charger, and the game says the word circuit out loud. River's Mega Suit powers up and everyone's rocket boots get a third jump.
+- **Ride Gus's lever.** Stand on one end of a giant seesaw and Gus stomps on the other. You fly up to the Sky Lab. The voice explains that a lever is a simple machine. A bubble floats you back down.
+- **Professor Prism's quiz.** Five questions picked from fourteen: magnets, floating, planets, gravity, rainbows, shapes, counting. The voice reads the question and the choices, and you answer by walking onto the right picture. A wrong answer greys out that pad and gives a hint. Nobody can lose, same as everywhere else.
+
+{{photo /shots/galactic-mighty-makers.jpg Professor Prism's lab. Step on a color pad to answer.}}
+
+The quiz is meant for a kindergartner who is learning to read in two languages. If the questions turn out too easy, that is a good problem and I will ask for harder ones.
 
 ## Three players, and two names I didn't ask for
 
