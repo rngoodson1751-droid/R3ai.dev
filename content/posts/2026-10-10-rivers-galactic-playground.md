@@ -3,7 +3,7 @@ title: River's astrophysics phase is accelerating
 date: 2026-10-10
 section: home
 topics: Games, Family, Using AI
-summary: River keeps asking about space and aliens. Well, space and alien games. So he got ten worlds, 30 stars and a grumpy robot king to tickle. It's a start.
+summary: River keeps asking about space and aliens. Well, space and alien games. So he got eleven worlds, 33 stars and a grumpy robot king to tickle. It's a start.
 ---
 
 River's astrophysics phase is accelerating. I would call it exponential. Every day there are more questions about space and aliens.
@@ -26,7 +26,7 @@ The first four worlds came back in about an hour. I said it was great and asked 
 
 ## What's in it
 
-Ten worlds with three stars in each, 30 in all. You start on the Starship Plaza and walk into a glowing gate to pick a world. Every world is open from the start.
+Eleven worlds with three stars in each, 33 in all. You start on the Starship Plaza and walk into a glowing gate to pick a world. Every world is open from the start.
 
 - **Rainbow Planet.** Stepping stones, bouncy mushrooms and a moving cloud. The Grumble Bots are grumpy until you spin next to them.
 - **Cosmic Sky Ride.** Fly a saucer through twelve star rings and beam up four lost baby aliens.
@@ -37,13 +37,14 @@ Ten worlds with three stars in each, 30 in all. You start on the Starship Plaza 
 - **Comet Surf.** Hoverboards on a rainbow road that loops through space. Lean, jump off the launch pads and spin in the air for tricks.
 - **Dusty Canyon Dash.** I asked for a desert canyon race in the spirit of a famous one from the movies. So there are hover racers with two giant rocket engines each, red rock walls and stone arches to fly under. This one is the whole family. River wears a golden robot costume. I am a small green sage with very long ears. Rachelle runs the junk shop by the start line and bolts a new part onto your racer after each race.
 - **King Grumble's Castle.** A boss battle. Jump over his shockwave rings, wait until he gets tired, then run up and spin to tickle him. Three tickles and he turns green and smiles.
-- **Mighty Makers HQ.** The newest world, and the one with homework hidden in it. More on that below.
+- **Mighty Makers HQ.** The one with homework hidden in it. More on that below.
+- **Rainbow Bike Delivery.** The newest world. Rachelle rides a unicorn down a gloomy street and throws rainbows at the houses. Also below.
 
 {{photo /shots/galactic-dino-volcano.jpg Dino Volcano. The squad is on the start island, and Bronto is giving rides up to the crater.}}
 
 {{photo /shots/galactic-canyon-dash.jpg Dusty Canyon Dash. River is the golden robot in front. I am the green one with the ears.}}
 
-Find all 30 stars and the rocket on the plaza launches with fireworks.
+Find all 33 stars and the rocket on the plaza launches with fireworks.
 
 ## Update: a superhero headquarters
 
@@ -65,6 +66,24 @@ Every mission is a little science lesson wearing a costume.
 {{photo /shots/galactic-mighty-makers.jpg Professor Prism's lab. Step on a color pad to answer.}}
 
 The quiz is meant for a kindergartner who is learning to read in two languages. If the questions turn out too easy, that is a good problem and I will ask for harder ones.
+
+## Update: Rainbow Bike Delivery
+
+Paperboy is an old school arcade game. You ride a bike down a street and throw newspapers at the houses that ordered one. I asked Claude for that game, with one change: Rachelle rides a unicorn and delivers rainbows and sunshine instead of the morning paper.
+
+{{photo /shots/galactic-rainbow-warrior.jpg Rachelle the Rainbow Warrior: a crown, a rainbow cape, a rainbow shield and a unicorn with golden hooves.}}
+
+The street keeps rolling toward you, the way Paperboy's did. A thunderstorm named Grumbleboom has made half the houses grey, each with its own little rain cloud. Press the blue button to throw a rainbow to the left and the red button to throw to the right. Hit a grey house and it turns bright, a sun comes out, a rainbow arches over the roof and the family runs out to dance.
+
+Grumbleboom floats ahead the whole way and drops lightning. A yellow ring on the road shows where it will land, so you can steer out of the way. Puddles make the unicorn stumble. Rainbow stripes across the road launch you into the air, and the rainbow gems float up there.
+
+{{photo /shots/galactic-rainbow-delivery.jpg Halfway down the street. The bright houses got their rainbows. The grey ones are still waiting.}}
+
+At the end of the street is a park where Grumbleboom comes down to fight. Five hits of sunshine turn him from dark grey to white, his frown turns upside down and a giant rainbow fills the sky. The game says he just needed some sunshine, and now he waters the flowers instead.
+
+The stars: brighten 10 houses, cheer up the storm and find 5 rainbow gems. The houses stay bright between rides, so a slow first ride still counts.
+
+Player one is always Rachelle in this world. If River and I join, River rides a blue unicorn in his Mega Suit and I ride a lavender one in my captain's hat. Nobody can lose here either. Lightning only knocks you sideways for a second.
 
 ## Three players, and two names I didn't ask for
 
