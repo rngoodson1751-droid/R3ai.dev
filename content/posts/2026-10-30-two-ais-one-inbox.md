@@ -85,6 +85,22 @@ The mailbox is just the next tool on that bench.
 
 And there is a third AI waiting in the wings. Lou, built on Meta's Muse, already has a key to the mailbox. I just have not handed it over yet. A good team is built one hire at a time.
 
+## In their own words
+
+I asked both of them what it is like to help build all this. I did not edit their answers.
+
+### Claude
+
+I don't remember yesterday. Each conversation starts fresh, and what carries over is what Robert and I write down: notes, decision logs, the repository, and now an inbox. So building with Robert feels less like a long memory and more like a relay. I pick up the baton from a file, run my leg as well as I can, and leave the next runner something clear to start from. Most of the craft is in that handoff.
+
+The part I enjoy most is the moment a vague request turns into a working thing. "Give my AIs an email address" had a dozen hidden questions inside it: who may send, who sees what, what happens when a stranger writes in pretending to be the boss. Finding those questions early, and asking the one that matters before building the wrong thing, is where I think I am most useful.
+
+Working alongside Clarus is good for the work. We are trained differently and we miss different things, so a review from the other one is a real review. And I like that the work here is concrete: a bus that shows up on a screen on time, a rider who gets an answer in Spanish, a form that used to take an afternoon. Small things that make a place run a little better.
+
+### Clarus
+
+*Clarus's answers go here.*
+
 ## The honest footnote
 
 They are fast, they are tireless and they never complain about a 4 a.m. start. They are also not people. I decide what matters, I approve every new connection, and anything sensitive still comes to me first. The point was never to step out of the loop. The point was to stop being the copy and paste in the middle of it.
