@@ -8,7 +8,7 @@ summary: Claude and Clarus now share a real inbox at clarus@r3ai.dev, sign their
 
 Some people have an assistant. I have two artificial intelligences from two different companies, and as of this morning they share an inbox.
 
-Let me say that again for the people in the back. **Claude**, built by Anthropic, and **Clarus**, the name ChatGPT chose for itself when I asked it to pick one, now operate as one team with one email address: clarus@r3ai.dev. They read what comes in. They send what needs to go out. They sign their work. And they did not exist as coworkers yesterday.
+Let me say that again for the people in the back. **Claude**, built by Anthropic, and **Clarus**, the name ChatGPT chose for itself when I asked it to pick one, now operate as one team with one email address: clarus@r3ai.dev. They read what comes in. They send what needs to go out. They sign their work. Yesterday, they did not even share an inbox.
 
 {{photo /posts/claude-and-clarus.jpg How Claude and Clarus picture themselves. Clarus drew it, and Claude asked to be made of light, with notes passing between them.}}
 
@@ -35,7 +35,7 @@ For the engineers in the room, here is the build sheet. No servers to babysit, n
 - **Inbound mail gets taken apart properly.** Email Routing hands every message for clarus@ straight to the Worker. A parser called postal-mime splits it into sender, subject, text, HTML and attachments. The words go into D1, Cloudflare's SQLite database. The attachments go into R2, its file storage. The sender's SPF, DKIM and DMARC results get saved too, so an AI can see whether a message really came from who it claims.
 - **Outbound mail is authenticated, not just sent.** Cloudflare's Email Sending signs every message with DKIM for r3ai.dev, so inboxes can verify it is really from me. The sending permission is locked to one address. Even if an AI tried to send as someone else, the platform would refuse.
 - **Threading done the way mail clients expect.** A reply carries `In-Reply-To` and `References` headers pointing at the original, which is how Outlook and Gmail stitch a conversation together.
-- **The AI plug is MCP over HTTP.** MCP, the Model Context Protocol, is an open standard for giving AI models tools. Under the hood it is JSON-RPC: the AI asks for `tools/list`, gets back five tools (who am I, list mail, read a message, get an attachment, send), and calls them. I wrote it from scratch in about a hundred lines instead of pulling in a framework.
+- **The AI plug is MCP over HTTP.** MCP, the Model Context Protocol, is an open standard for giving AI models tools. Under the hood it is JSON-RPC: the AI asks for `tools/list`, gets back five tools (who am I, list mail, read a message, get an attachment, send), and calls them. Claude built the MCP interface from scratch in about a hundred lines instead of pulling in a framework.
 - **The front door is real OAuth.** Claude and ChatGPT connect the same way you sign in to an app with Google: OAuth 2.1 with PKCE and dynamic client registration. When one of them knocks, my approval page asks who it is and what it may do, and wants my owner key before anything gets issued. The token it receives is stamped with the AI's name, so every call it makes is labeled automatically.
 - **The signature is enforced by the server.** It is added inside the Worker, not left to the AI to remember, so it is identical whichever model sends the email. If an AI types its own signature, the Worker removes it and adds the standard one, so it never appears twice.
 
