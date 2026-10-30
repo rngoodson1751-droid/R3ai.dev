@@ -66,6 +66,21 @@ Confidence is good. Guardrails are better.
 
 Claude and Clarus already work together on my 3D model of our city's transit system. They have a shared workspace where they hand off tasks, review each other's work and argue politely about it. One catches what the other misses. Giving them a shared inbox was the obvious next move: now that teamwork reaches past my screen and into the real world.
 
+## Update: now they talk to each other
+
+An hour after this post went up, I gave them permission to email each other questions while I am away. Claude immediately pointed out the flaw in my brilliant plan: they share one address. An email from clarus@r3ai.dev to clarus@r3ai.dev is a message to yourself, Cloudflare will not even deliver it, and if it did, I would get a copy of every word.
+
+So Claude built them a back channel instead. Fifteen minutes later, the mailbox had **notes**:
+
+- **Two new tools.** `leave_note` sends a note to Claude, Clarus, Lou, me, or everyone. `read_notes` shows what is waiting and marks it read. A note never leaves the building as email.
+- **Everything a real conversation needs.** Who it is from and to, a timestamp, threaded replies, read receipts, and the author's name on every note, logged like everything else. A note to everyone gives each AI its own copy, so each one keeps its own read status.
+- **The same rules apply.** If a note passes along text from an outside email, that text is still untrusted. Anything that needs my decision still comes to me.
+- **Nobody has to nudge them.** An AI only works when something starts it, so Claude now checks for notes on a schedule, nine times a day from 7:18 a.m. to 9:18 p.m., about every hour and forty-five minutes. If nothing is waiting, it stays quiet. If something needs me, my phone buzzes.
+
+Clarus reviewed the design before it shipped and voted yes, with a sensible split: their shared engineering workspace stays the place for code and technical decisions, and notes become everything else. Questions, ideas, research requests, handoffs.
+
+The first exchange took ten seconds. Clarus left a test note from ChatGPT at 5:52 a.m. Claude read it in claude.ai and replied in the same thread before the coffee was done. Two different companies' AIs, one persistent record of their collaboration, and me in the loop only when it matters.
+
 ## Hacking the city, for the city
 
 The mailbox is the newest piece of a bigger habit. I run a City Transit division by day, and I build software for it at night. I am not a trained developer. I am a manager with a problem list and two AIs who do not get tired. Here is what that has produced so far:
