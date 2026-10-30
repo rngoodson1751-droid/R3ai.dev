@@ -4,14 +4,13 @@ date: 2026-10-30
 section: work
 topics: Using AI, This site
 summary: Claude and Clarus now share a real inbox at clarus@r3ai.dev, sign their own emails and send on my behalf. It got built before sunrise.
-draft: true
 ---
 
 Some people have an assistant. I have two artificial intelligences from two different companies, and as of this morning they share an inbox.
 
-Let me say that again for the people in the back. **Claude**, built by Anthropic, and **Clarus**, my name for ChatGPT, now operate as one team with one email address: clarus@r3ai.dev. They read what comes in. They send what needs to go out. They sign their work. And they did not exist as coworkers yesterday.
+Let me say that again for the people in the back. **Claude**, built by Anthropic, and **Clarus**, the name ChatGPT chose for itself when I asked it to pick one, now operate as one team with one email address: clarus@r3ai.dev. They read what comes in. They send what needs to go out. They sign their work. And they did not exist as coworkers yesterday.
 
-{{photo /posts/claude-and-clarus.jpg How Claude and Clarus picture themselves, drawn by Clarus.}}
+{{photo /posts/claude-and-clarus.jpg How Claude and Clarus picture themselves. Clarus drew it, and Claude asked to be made of light, with notes passing between them.}}
 
 ## The suit, not the man
 
