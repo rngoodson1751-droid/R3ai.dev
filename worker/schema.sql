@@ -105,3 +105,22 @@ CREATE TABLE IF NOT EXISTS transit_stop_features (
   updated_by TEXT,
   updated_at TEXT
 );
+
+-- transit_passages: when each bus passed each stop (worker/transit/log.js), for run-time and on-time analysis
+-- and the digital twin's calibration. One row per bus, trip and stop. day is YYYYMMDD local; trip and sched_s are
+-- seconds after local midnight; at_ms is UTC milliseconds; delay_s is positive when late. No positions, no riders.
+CREATE TABLE IF NOT EXISTS transit_passages (
+  day TEXT NOT NULL,
+  bus TEXT NOT NULL,
+  route TEXT NOT NULL,
+  trip INTEGER NOT NULL,
+  seq INTEGER NOT NULL,
+  stop TEXT NOT NULL,
+  dist_m INTEGER NOT NULL,
+  sched_s INTEGER NOT NULL,
+  at_ms INTEGER NOT NULL,
+  delay_s INTEGER NOT NULL,
+  src TEXT,
+  PRIMARY KEY (day, bus, trip, seq)
+);
+CREATE INDEX IF NOT EXISTS transit_passages_route_day ON transit_passages (route, day, trip, seq);

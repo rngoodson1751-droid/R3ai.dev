@@ -9,6 +9,7 @@ import raw from './network.json';
 import { prepare, localTime, tripsOn, metres } from './geo.js';
 import { update, mergeReports, heard, LIVE } from './fleet.js';
 import { simReports, SIM } from './sim.js';
+import { passages, save as savePassages } from './log.js';
 
 export const networkForPage = JSON.stringify(raw).replace(/</g, '\\u003c'); // what the page draws from, taken before prepare() adds its working data
 const net = prepare(raw);
@@ -238,6 +239,8 @@ async function liveFleet(env, now) {
     const day = localTime(now, net.feed.timezone).day;
     const forced = Object.fromEntries(((await env.DB.prepare('SELECT bus, route FROM transit_overrides WHERE day = ?1').bind(day).all().catch(() => ({ results: [] }))).results || []).map(o => [String(o.bus).split('-').pop(), o.route]));
     const out = { ...update(net, saved.states, mergeReports(lists), now, forced), trackers };
+    // stop passages for the digital twin's run-time calibration; never allowed to break the tracker
+    try { await savePassages(env, passages(net, saved.out, out, saved.fetched, now)); } catch (e) { console.error('passage log failed', e?.message || e); }
     await env.DB.prepare('INSERT INTO transit_state (k, v, t) VALUES (?1, ?2, ?3) ON CONFLICT (k) DO UPDATE SET v = ?2, t = ?3')
       .bind('buses', JSON.stringify({ rules: RULES, states: saved.states, fetched: now, out, zonar: saved.zonar }), now).run();
     return out;
