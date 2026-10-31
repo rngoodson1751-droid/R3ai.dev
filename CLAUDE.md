@@ -55,6 +55,10 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - The data is in the `lf_*` tables of `r3ai-requests`. It holds the Transit Division's real services, steps and roles, which Robert and his staff edit on the page; do not overwrite them from here without asking. Rows with `example = 1` are made-up samples. Never write a real person's name into a report.
 - After changing it, test with `npx wrangler dev --local` (the AI summary only works on the live site).
 
+## Wendy's ChatGPT guide (unlisted)
+
+- `worker/private/wendy-guide.html` at `/work/wendy-guide/<key>/`, a personal guide for Public Works Director Wendy Robinson written by Clarus (31 October 2026). It keeps Clarus's look and British spelling; the citywide guide for all employees is separate and in American English. Never change its address or key once Robert sends it.
+
 ## Design rules
 
 - Concept: "Glass on the lake" (25 October 2026). Robert gave full creative permission and asked for something extraordinary, built on Apple's current Liquid Glass. There is no brand colour. The whole site is lit by the real sky over the lake he sails on, right now.

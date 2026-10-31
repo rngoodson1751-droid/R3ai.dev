@@ -113,6 +113,10 @@ An unlisted page is online but not on the site: no card, no sitemap entry, nothi
 - `worker/index.js` serves it at `/work/<name>/<key>/`. The `UNLISTED` list at the top holds the SHA-256 of the key, not the key, so the link cannot be read out of this repository. Any other address under that name shows the usual "page not found".
 - The project also has an entry in `content/projects.json` with `"unlisted": true`, which keeps it off every page.
 
+### Wendy's ChatGPT guide
+
+A personal ChatGPT prompt guide for Wendy Robinson, the Public Works Director, written by Clarus and added on 31 October 2026 so she can read it on her phone. It is `worker/private/wendy-guide.html`, served read only at `/work/wendy-guide/<key>/` through the `UNLISTED` list. It keeps Clarus's own look and British spelling. Replace the file to update it; keep its address and key, since the link goes to Wendy.
+
 ### The bus tracker
 
 The lobby display is a live bus tracker. Its page is `worker/private/lobby-display.html`; everything behind it is in `worker/transit/`.
