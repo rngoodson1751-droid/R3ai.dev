@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building a digital twin of our city, with three AIs on the crew · R3 AI</title>
+<meta name="description" content="The bus driving game is growing into something more serious, a 3D model of the city for planning routes and testing traffic. Two AIs from two companies are building it together, with rules, a task board and me as the one who signs off.">
+<link rel="canonical" href="https://r3ai.dev/blog/a-digital-twin-of-our-city/">
+<meta property="og:title" content="Building a digital twin of our city, with three AIs on the crew">
+<meta property="og:description" content="The bus driving game is growing into something more serious, a 3D model of the city for planning routes and testing traffic. Two AIs from two companies are building it together, with rules, a task board and me as the one who signs off.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://r3ai.dev/blog/a-digital-twin-of-our-city/">
+<meta property="og:site_name" content="R3 AI">
+<meta property="og:image" content="https://r3ai.dev/og/a-digital-twin-of-our-city.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="lg" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.007 0.011" numOctaves="2" seed="7" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="30" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R Cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-31">October 31, 2026</time><span class="chip">At work</span><a class="chip" href="/blog/#using-ai">Using AI</a><a class="chip" href="/blog/#transit-tools">Transit tools</a></p><h1 style="view-transition-name:post-a-digital-twin-of-our-city">Building a digital twin of our city, with three AIs on the crew</h1></header>
+<div class="prose">
+<p>The driving game on this site started as a trolley simulator and kept growing. This is where it grows up.</p>
+<p>A <strong>digital twin</strong> is a working copy of a real place on a computer. Not a picture of the city, a model of it: the real streets, the real stops, the real buildings, with traffic and buses moving through it. You change something in the copy before you change it in the world, and see what happens.</p>
+<p>For a transit agency that's a big deal. What if a route skips a stretch of road? What if a light changes timing on our busiest corridor? What does a detour around construction do to the schedule? Today those answers come from experience, a spreadsheet and a guess. A twin lets you try them.</p>
+<h3>Why not just keep adding to the game</h3>
+<p>The <a href="/blog/transit-simulator/">transit simulator</a> already has the routes, the stops and about 40,000 building footprints. So the twin reuses it instead of starting over. But a game and a planning tool want different things. A game can fudge a lane. A planning tool can't.</p>
+<p>So the twin is its own project, kept apart from the public game and this site:</p>
+<ul><li><strong>Its own private home on GitHub,</strong> which holds the code and every decision we make.</li><li><strong>Its own private web address</strong> behind a sign-in, so only the people I choose can open it.</li><li><strong>Real data only.</strong> Routes and stops from the same schedule data we publish for trip-planning apps. Streets and buildings from the City's public GIS layers, pulled by a pipeline anyone can rerun to get the same result.</li><li><strong>Traffic simulated with SUMO,</strong> a free, open traffic simulator used by researchers worldwide. It runs offline first, then feeds the 3D view.</li><li><strong>It has to run on the computer I actually have:</strong> an ordinary office tower with 16 GB of memory, at a smooth 60 frames a second.</li><li><strong>And it should cost as close to nothing as possible.</strong> So far it costs nothing.</li></ul>
+<h3>The crew</h3>
+<p>Here's the part I find most interesting. I'm not building this with one AI. I'm building it with a team.</p>
+<ul><li><strong>Claude</strong> (Anthropic) handles the infrastructure: hosting, deployment, the data that covers the whole corridor, and review of the other's work.</li><li><strong>Clarus</strong> (ChatGPT) handles the simulator code, the GIS data, the traffic model and the planning dashboard.</li></ul>
+<p>They don't just take turns in my chat windows. They share a project workspace with a task board. Each one claims a task before starting it, so they never work on the same thing at once. When one finishes a piece, it asks the other to review it before it goes in. They leave each other notes and hand off work with a written summary.</p>
+<p>And there are rules. Big choices are written down as numbered decisions, with the reasons, and <strong>only I accept a decision or merge work into the main copy.</strong> Ten decisions so far: things like one coordinate system for everything, no heavy frameworks to start, and data cut into tiles 600 meters square so the city loads a piece at a time.</p>
+<h3>Where it stands</h3>
+<p>It's been about two days. The plan is accepted, the architecture is set, nine tasks are done and a handful are moving. The first real milestone is one stretch of Route 2 along Ryan Street that you can drive and recognize: verified lanes, signals and speed limits, the buildings where they belong, and smooth on my machine. Both AIs are on it right now, and there's a stack of their work waiting on review.</p>
+<p>Once one stretch is right, the rest of the city is the same work repeated.</p>
+<h3>Why I'm doing this</h3>
+<p>Partly because it's fun. Mostly because cities our size don't get tools like this. Big agencies hire consultants for a model like this. We have a transit manager, a free traffic simulator, public data and two AIs who've learned to work as a team. I want to see how far that gets us.</p>
+<p>This is my own project, not an official City product, and it's early. I'll post again when Ryan Street is drivable.</p>
+</div>
+<p class="acts"><a class="btn glass" href="/work/">More from at work</a><a class="btn glass" href="/request/?about=a-digital-twin-of-our-city">Request a follow-up</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p class="sky-line" data-sky hidden><i class="sun-dot" aria-hidden="true"></i>This page is lit by the real sky over the lake I sail on. Right now it's <span data-sky-text></span>.</p>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>

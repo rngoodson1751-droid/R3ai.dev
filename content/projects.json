@@ -116,6 +116,30 @@
     "image": "/shots/lc-transit-simulator.jpg"
   },
   {
+    "kind": "Office IT",
+    "title": "Finance system launcher fix",
+    "summary": "A permanent fix for the City's finance system crashing at startup after every Java update: give it a private copy of Java nothing else can touch.",
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/the-launcher-that-kept-crashing/"
+      }
+    ]
+  },
+  {
+    "kind": "Planning",
+    "title": "Lake Charles digital twin",
+    "summary": "A 3D working model of the city for route planning and traffic testing, built from real data by two AIs working as a team.",
+    "section": "work",
+    "links": [
+      {
+        "label": "Read the write-up",
+        "href": "/blog/a-digital-twin-of-our-city/"
+      }
+    ]
+  },
+  {
     "section": "home",
     "kind": "Kitchen",
     "title": "Chef's Choice",

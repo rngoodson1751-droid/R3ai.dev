@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The finance launcher that kept crashing, and the fix that stuck · R3 AI</title>
+<meta name="description" content="Every time Java updated, my new work computer refused to open the City's finance system. Turning off updates didn't help. Here is what was really going on and the five minute fix that ended it.">
+<link rel="canonical" href="https://r3ai.dev/blog/the-launcher-that-kept-crashing/">
+<meta property="og:title" content="The finance launcher that kept crashing, and the fix that stuck">
+<meta property="og:description" content="Every time Java updated, my new work computer refused to open the City's finance system. Turning off updates didn't help. Here is what was really going on and the five minute fix that ended it.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://r3ai.dev/blog/the-launcher-that-kept-crashing/">
+<meta property="og:site_name" content="R3 AI">
+<meta property="og:image" content="https://r3ai.dev/og/the-launcher-that-kept-crashing.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="R3 AI" href="/feed.xml">
+<script>try{var t=localStorage.getItem('r3-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script src="/site.js" defer></script>
+<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/games/*"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body data-section="work">
+<canvas id="silk" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="lg" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.007 0.011" numOctaves="2" seed="7" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="30" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<header class="glass bar">
+  <a class="mark" href="/" aria-label="R Cubed, home page">R<sup>3</sup></a>
+  <nav class="links" aria-label="Main"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+</header>
+<nav class="glass tabs" aria-label="Main, bottom bar"><a href="/work/">At work</a><a href="/home/">At home</a><a href="/blog/" aria-current="page">Blog</a><a href="/request/">Request</a><a href="/about/">About</a></nav>
+<main class="wrap">
+<article class="sheet strong post">
+<header><p class="when"><time datetime="2026-10-31">October 31, 2026</time><span class="chip">At work</span><a class="chip" href="/blog/#using-ai">Using AI</a><a class="chip" href="/blog/#office-work">Office work</a></p><h1 style="view-transition-name:post-the-launcher-that-kept-crashing">The finance launcher that kept crashing, and the fix that stuck</h1></header>
+<div class="prose">
+<p>Every City department runs on one old system for money. Purchase orders, budgets, invoices. If you can't open it, you can't buy a box of zip ties. We call it HTE, after the company that built it decades ago, and it lives on a green screen that looks like 1985 because, in a sense, it is.</p>
+<p>My new work computer would not open it. Click the icon, a window flickers, gone. It started after a Java update. We turned off Java's automatic updates. It updated anyway. It crashed again.</p>
+<p>My first question to Claude was a hopeful one: could we just build a launcher that doesn't need Java at all?</p>
+<h3>The wrong question, answered honestly</h3>
+<p>Claude's answer was no, and it said why. Whatever opens HTE still needs Java underneath, so a new launcher would only move the problem. The real fix was to stop Java from changing out from under it.</p>
+<p>That was useful, but still general. The breakthrough came when I sent it the actual shortcut file we're told to use.</p>
+<h3>What the file gave away</h3>
+<p>That one small file told the whole story. HTE isn't really a program on my computer. It's a terminal session, run by an IBM tool called Access Client Solutions, that connects over an encrypted line to the City's hosted system. Java is just the engine that IBM tool runs on.</p>
+<p>Then we dug into the install itself:</p>
+<ul><li><strong>The IBM tool is from April 2019</strong> and was built for Java 8.</li><li><strong>It carries no Java of its own.</strong> Every time it starts, it asks Windows &quot;where's Java?&quot; and uses whatever answer it gets.</li><li><strong>Updates change that answer.</strong> When the system's Java gets updated, replaced or removed, the IBM tool either finds nothing it can use or starts on a version it was never built for. Either way it dies before it can even write an error log.</li><li><strong>Turning off updates can't fix that.</strong> Patch tools and other software can still swap the system's Java whenever they like.</li></ul>
+<p>The crash dumps in my Documents folder turned up a bonus: a second, unrelated crash after the session had been open about 23 hours, a known bug in older Java 8 builds.</p>
+<h3>The fix: give it its own Java</h3>
+<p>IBM documents a way to make its tool use a private copy of Java that lives in a folder right next to it. Nothing else on the computer knows that copy exists, so nothing ever updates it.</p>
+<ol><li><strong>Download a private Java.</strong> IBM's free Semeru runtime, Java 8, as a plain zip file, not the installer. A zip adds nothing to Windows and comes with no updater.</li><li><strong>Unzip it next to the IBM launcher</strong> and name the folder <code>jre</code>. That's the folder name IBM's launcher looks for first.</li><li><strong>Add a small launch script</strong> that checks the private Java and the session file are both there, points the launcher straight at that Java, and opens the HTE session.</li><li><strong>Put a shortcut to the script on the desktop</strong> and stop using the old icons, which still go hunting for the system's Java.</li></ol>
+<p>HTE opened on the first try and has opened every time since. The system's own Java is still installed and can update all it wants. It no longer matters.</p>
+<p>One small thing: the first launch brought up a Windows Firewall prompt for the new Java. I clicked Cancel and it still connected fine, because that prompt is about incoming connections and HTE only goes out.</p>
+<h3>Passing it on</h3>
+<p>Then I asked Claude to write the whole thing up for IT: root cause, every step, the file locations, what to tell the firewall, and IBM's own support pages behind each claim. It also recommended three things for the long run:</p>
+<ul><li><strong>Apply the same fix on every HTE computer.</strong> It takes about five minutes a machine and changes nothing else.</li><li><strong>Upgrade the IBM tool</strong> from its 2019 version to a current one, packaged with its own Java the same way, so every new install gets it automatically.</li><li><strong>Tell patching tools to leave that <code>jre</code> folder alone.</strong></li></ul>
+<h3>What I took from it</h3>
+<p>I started by asking for the wrong thing. A non-Java launcher sounded like a clean fix and would have been a waste of a week. What actually solved it was handing over the real evidence, one little file and a folder of crash dumps, and letting the tool read it.</p>
+<p>It also didn't stop at &quot;it works on my machine.&quot; Most of the value was the write-up, so the next person in the building who hits this gets five minutes of work instead of three days of frustration.</p>
+<aside class="try"><h2>Try this yourself</h2><p class="hint">A prompt like the one I used. Paste it into any AI chat and fill in the brackets.</p><pre class="prompt">My work software crashes on startup every time Java updates, even with updates turned off. Here is the shortcut or config file we use to launch it: [paste it]. Tell me what this program really is, why Java updates break it, and a permanent fix that doesn't depend on the system's Java. Then write it up for my IT department.</pre><button class="btn glass sm" type="button" data-copy>Copy the prompt</button></aside>
+</div>
+<p class="acts"><a class="btn glass" href="/work/">More from at work</a><a class="btn glass" href="/request/?about=the-launcher-that-kept-crashing">Request a follow-up</a></p>
+</article>
+</main>
+<footer class="wrap foot">
+  <nav aria-label="Footer"><a href="/start/">Start here</a><a href="/blog/">Blog</a><a href="/games/">Games</a><a href="/demos/">Demos</a><a href="/ask/">Ask the site</a><a href="/request/">Request a post</a><a href="/feed.xml">RSS feed</a><a href="/about/">About</a></nav>
+  <p class="sky-line" data-sky hidden><i class="sun-dot" aria-hidden="true"></i>This page is lit by the real sky over the lake I sail on. Right now it's <span data-sky-text></span>.</p>
+  <p>&copy; 2026 Robert Goodson. This is a personal site. It is not an official site of my employer, and the opinions here are my own.</p>
+</footer>
+</body>
+</html>
