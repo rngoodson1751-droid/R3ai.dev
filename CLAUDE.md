@@ -33,6 +33,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - Positions come from Zonar and Geotab, each bus using whichever heard from it last. "Why isn't bus N showing?": open `<page address>/live?debug=1` first.
 - Paratransit vans (Geotab names 609-002 to 609-008) are not buses and must never reach the lobby display. Their positions go only to the Para-Transit app through `live?vans=1`, which requires the `PARA_FEED_KEY` secret header. Never relax that check.
 - The Zonar and Geotab logins are Worker secrets. Never write them into a file, a commit or a command.
+- Stop passages (since 30 October 2026): every refresh, `worker/transit/log.js` records when each matched bus passed each stop into `transit_passages` (route, trip, stop, time, delay; no positions, nothing about riders). The Lake Charles Digital Twin uses it to check modelled run times. "How late was Route 2 this morning?" is a query on that table. A failure there is logged and never stops the tracker.
 
 ## City Navigator (unlisted, temporary)
 

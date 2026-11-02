@@ -6,6 +6,8 @@ import { prepare, localTime, tripsOn } from '../worker/transit/geo.js';
 import { pointAt, distAt, tripsOn as tripsFor } from '../worker/transit/geo.js';
 import { simReports } from '../worker/transit/sim.js';
 import { update, mergeReports } from '../worker/transit/fleet.js';
+import { passages } from '../worker/transit/log.js';
+import { SIM } from '../worker/transit/sim.js';
 
 const net = prepare(JSON.parse(readFileSync(new URL('../worker/transit/network.json', import.meta.url))));
 const truth = Object.fromEntries(net.routes.map((r, i) => [String(901 + i), r.id]));
@@ -194,6 +196,29 @@ run('Lunch break: buses are driven off for lunch and return', {
     }),
     expect: r => r.wrong === 0 && all5(r) && r.detour === 0 && Object.values(r.identified).every(t => t > at(5, 45)),
   });
+}
+
+// 3. Stop passage log (log.js). Refresh every 30 s through a morning, as liveFleet does, and log passages between
+// refreshes. Each simulated bus runs late by a known amount that grows along the trip (SIM.drift), so every logged
+// delay can be checked against the truth. No duplicates, nothing for unmatched buses, timing within a refresh.
+{
+  const states = {}, rows = []; let prev = null, prevAt = 0;
+  for (let t = at(5, 20); t <= at(10, 0); t += 30e3) {
+    const out = update(net, states, simReports(net, t), t);
+    rows.push(...passages(net, prev, out, prevAt, t));
+    prev = out; prevAt = t;
+  }
+  const keys = new Set(rows.map(p => [p.day, p.bus, p.trip, p.seq].join('|')));
+  const errs = rows.map(p => {
+    const idx = Number(p.bus) - 901, r = net.byId[p.route], trip = tripsOn(net, r, localTime(p.at, net.feed.timezone)).find(x => x[0] === p.trip);
+    const dur = trip[1].at(-1)[2], off = trip[1][p.seq][2];
+    return Math.abs(p.delay - SIM.drift[idx] * off / dur);
+  }).sort((a, b) => a - b);
+  const med = errs[errs.length >> 1] ?? Infinity, p90 = errs[Math.floor(errs.length * 0.9)] ?? Infinity;
+  const wrongBus = rows.filter(p => truth[p.bus] !== p.route).length;
+  const ok = rows.length > 300 && keys.size === rows.length && wrongBus === 0 && med <= 20 && p90 <= 45;
+  if (!ok) failed++;
+  console.log(`${ok ? 'PASS' : 'FAIL'}  Stop passage log, 5:20 to 10:00, refresh every 30 s\n      passages ${rows.length}, duplicates ${rows.length - keys.size}, on the wrong route ${wrongBus}, delay error median ${med.toFixed(1)} s, 90th percentile ${p90.toFixed(1)} s`);
 }
 
 console.log(failed ? `\n${failed} scenario(s) failed` : '\nAll scenarios passed');
