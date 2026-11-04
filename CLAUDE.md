@@ -63,7 +63,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 ## Bethany's card (unlisted)
 
 - `worker/private/bethany-card.html` at `/work/bethany-card/<key>/`: a 3D business card for Bethany Doty that a stealth jet delivers (3 November 2026). It keeps its own bone and navy look. Never change its address or key once Robert sends it.
-- `worker/private/bethany-doty.html` at `/work/bethany-doty/<key>/`: Bethany's everyday digital business card (save contact as a vCard, email, share, and a QR code of its own link). The QR code is baked into the page, so changing the key means making a new QR. Never change its address or key once she shares it.
+- `worker/private/bethany-doty.html` at `/work/bethany-doty/<key>/`: the everyday digital business cards for Robert and Bethany (4 November 2026: Robert's added at his request). A Robert / Bethany / Both switch at the top (radio buttons, works without JavaScript); `?c=robert` or `?c=bethany` opens one card, no `c` shows both. Each card has Save (a vCard baked into the link), Email, Share and a QR code of its own `?c=` address; Robert's also has Call (cell) and his office line. The QR codes are baked into the page, so changing the key means making new ones. Never change its address or key once shared.
 
 ## Design rules
 
