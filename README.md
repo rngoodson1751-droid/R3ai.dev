@@ -206,3 +206,5 @@ The link is a shared key, not a login: anyone it is forwarded to can open the pa
 ## Bethany's card (unlisted)
 
 A 3D business card for Assistant Transit Manager Bethany Doty that a stealth jet flies in and drops, towing a banner (3 November 2026). It is `worker/private/bethany-card.html`, served read only at `/work/bethany-card/<key>/` through the `UNLISTED` list. Replace the file to update it; keep its address and key once Robert shares the link.
+
+Her everyday digital card, without the jet, is `worker/private/bethany-doty.html` at `/work/bethany-doty/<key>/`. It has Save (a vCard), Email, Share and a QR code of its own address.

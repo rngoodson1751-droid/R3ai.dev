@@ -19,6 +19,7 @@ import { staffCheck, refusal } from './callcenter/access.js';
 import { stopFeatures } from './callcenter/stops.js';
 import wendyGuide from './private/wendy-guide.html';
 import bethanyCard from './private/bethany-card.html';
+import bethanyDoty from './private/bethany-doty.html';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -35,6 +36,8 @@ const UNLISTED = {
   // Wendy's ChatGPT guide: a personal prompt guide for the Public Works Director, written by Clarus (31 October 2026). Read only.
   'wendy-guide': { keyHash: '7c35e681f673d35784ac4a2ef98013b4f02a9b397b575329d9ab42b7a403e527', html: wendyGuide },
   // Bethany's business card, delivered by stealth jet (3 November 2026). Read only, just for fun.
+  // Bethany's everyday digital business card: save contact, email, share, QR (3 November 2026). Read only.
+  'bethany-doty': { keyHash: '0b81db5ac30399d6812d88233326110c60af97813409fb03eb9893c37b9c0c7b', html: bethanyDoty },
   'bethany-card': { keyHash: '5f781dcb7f53243dd909ee25b3efe45173171ee0b355aaf2596b19ff5d783ba5', html: bethanyCard },
 };
 function riderLive(request, env, url, ctx) {
