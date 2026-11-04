@@ -18,6 +18,7 @@ import callCenterPage from './private/call-center.html';
 import { staffCheck, refusal } from './callcenter/access.js';
 import { stopFeatures } from './callcenter/stops.js';
 import wendyGuide from './private/wendy-guide.html';
+import bethanyCard from './private/bethany-card.html';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -33,6 +34,8 @@ const UNLISTED = {
   'get-around': { keyHash: 'c7c9d376c3576ad24b80153fac794ab24bcbd351ecfe10281645b011eba5d1eb', until: '2026-10-17T05:00:00Z', html: getAround.replace('"__NETWORK__"', () => networkForPage), live: riderLive, api: placeSearch },
   // Wendy's ChatGPT guide: a personal prompt guide for the Public Works Director, written by Clarus (31 October 2026). Read only.
   'wendy-guide': { keyHash: '7c35e681f673d35784ac4a2ef98013b4f02a9b397b575329d9ab42b7a403e527', html: wendyGuide },
+  // Bethany's business card, delivered by stealth jet (3 November 2026). Read only, just for fun.
+  'bethany-card': { keyHash: '5f781dcb7f53243dd909ee25b3efe45173171ee0b355aaf2596b19ff5d783ba5', html: bethanyCard },
 };
 function riderLive(request, env, url, ctx) {
   if (url.searchParams.has('vans') || url.searchParams.has('debug')) return json({ error: 'Not found.' }, 404);

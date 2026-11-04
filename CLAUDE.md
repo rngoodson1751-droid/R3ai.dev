@@ -60,6 +60,10 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 - `worker/private/wendy-guide.html` at `/work/wendy-guide/<key>/`, a personal guide for Public Works Director Wendy Robinson written by Clarus (31 October 2026). It keeps Clarus's look and British spelling; the citywide guide for all employees is separate and in American English. Never change its address or key once Robert sends it.
 
+## Bethany's card (unlisted)
+
+- `worker/private/bethany-card.html` at `/work/bethany-card/<key>/`: a 3D business card for Bethany Doty that a stealth jet delivers (3 November 2026). It keeps its own bone and navy look. Never change its address or key once Robert sends it.
+
 ## Design rules
 
 - Concept: "Glass on the lake" (25 October 2026). Robert gave full creative permission and asked for something extraordinary, built on Apple's current Liquid Glass. There is no brand colour. The whole site is lit by the real sky over the lake he sails on, right now.

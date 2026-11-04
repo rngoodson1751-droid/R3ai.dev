@@ -201,3 +201,8 @@ The link is a shared key, not a login: anyone it is forwarded to can open the pa
 ## Cloudflare settings
 
 `wrangler.jsonc` tells Cloudflare to serve `./dist`, run `worker/index.js` for `/api/requests` and the unlisted pages, and connect the requests database. The built site is committed, so no build command is needed. If you would rather have Cloudflare build it, set the build command to `node build.mjs`.
+
+
+## Bethany's card (unlisted)
+
+A 3D business card for Assistant Transit Manager Bethany Doty that a stealth jet flies in and drops, towing a banner (3 November 2026). It is `worker/private/bethany-card.html`, served read only at `/work/bethany-card/<key>/` through the `UNLISTED` list. Replace the file to update it; keep its address and key once Robert shares the link.
