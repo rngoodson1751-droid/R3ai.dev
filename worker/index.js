@@ -20,6 +20,7 @@ import { stopFeatures } from './callcenter/stops.js';
 import wendyGuide from './private/wendy-guide.html';
 import bethanyCard from './private/bethany-card.html';
 import bethanyDoty from './private/bethany-doty.html';
+import clarusVan from './private/clarus-van.html';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -39,6 +40,8 @@ const UNLISTED = {
   // Bethany's everyday digital business card: save contact, email, share, QR (3 November 2026). Read only.
   'bethany-doty': { keyHash: '0b81db5ac30399d6812d88233326110c60af97813409fb03eb9893c37b9c0c7b', html: bethanyDoty },
   'bethany-card': { keyHash: '5f781dcb7f53243dd909ee25b3efe45173171ee0b355aaf2596b19ff5d783ba5', html: bethanyCard },
+  // Clarus van demo: a 3D Transit 350 paratransit van with a Clarus puck on every smart system (4 November 2026). Read only.
+  'clarus-van': { keyHash: 'bfd38cfc0d0d8ce7c5dddfb4a42359dc1128954c280ad0d643408081a2073d6d', html: clarusVan },
 };
 function riderLive(request, env, url, ctx) {
   if (url.searchParams.has('vans') || url.searchParams.has('debug')) return json({ error: 'Not found.' }, 404);

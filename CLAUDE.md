@@ -65,6 +65,10 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 - `worker/private/bethany-card.html` at `/work/bethany-card/<key>/`: a 3D business card for Bethany Doty that a stealth jet delivers (3 November 2026). It keeps its own bone and navy look. Never change its address or key once Robert sends it.
 - `worker/private/bethany-doty.html` at `/work/bethany-doty/<key>/`: the everyday digital business cards for Robert and Bethany (4 November 2026: Robert's added at his request). A Robert / Bethany / Both switch at the top (radio buttons, works without JavaScript); `?c=robert` or `?c=bethany` opens one card, no `c` shows both. Each card has Save (a vCard baked into the link), Email, Share and a QR code of its own `?c=` address; Both have Call (each person's cell); both share the office line (337) 491-1253. The card faces copy Robert's real City business card (white stock, City seal taken from the tracker page, CITY OF LAKE CHARLES / ONE Lake Charles header, Transit Department block, Tinos as Times New Roman, indigo #2f2a6b); Bethany's is the same layout. Keep them matching his paper card. The QR codes are baked into the page, so changing the key means making new ones. Never change its address or key once shared.
 
+## Clarus van demo (unlisted)
+
+- `worker/private/clarus-van.html` at `/work/clarus-van/<key>/` (4 November 2026): a 3D Transit 350 paratransit van with a black Clarus puck on every smart system, product cards and a build-your-own total. It keeps its own dark studio look. Products, prices and citations live in `PRODUCTS` in the script; everything about pricing and savings is labelled illustrative because Clarus is a concept. Check it at 1280 wide and 390 wide after changes. Never change its address or key once Robert shares it.
+
 ## Design rules
 
 - Concept: "Glass on the lake" (25 October 2026). Robert gave full creative permission and asked for something extraordinary, built on Apple's current Liquid Glass. There is no brand colour. The whole site is lit by the real sky over the lake he sails on, right now.

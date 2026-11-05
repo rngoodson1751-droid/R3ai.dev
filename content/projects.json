@@ -288,5 +288,14 @@
         "href": "/blog/comics-and-books-for-river/"
       }
     ]
+  },
+  {
+    "kind": "Concept demo",
+    "status": "Unlisted",
+    "unlisted": true,
+    "title": "Clarus van demo",
+    "summary": "A 3D paratransit van to explore inside and out, with a Clarus puck on every system that AI makes smarter and a build-your-own package.",
+    "section": "work",
+    "links": []
   }
 ]
