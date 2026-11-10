@@ -9,36 +9,46 @@
 <style>
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
   #player, #player iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
-  #sound {
-    position: fixed; z-index: 2;
-    bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
-    font: 600 16px/1 -apple-system, system-ui, "Inter", sans-serif; color: #fff;
-    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6);
-    padding: 14px 22px; border-radius: 999px; cursor: pointer; min-height: 44px;
+  #start {
+    position: fixed; inset: 0; z-index: 2; border: 0; padding: 0; margin: 0; width: 100%;
+    background: #000 url("https://i.ytimg.com/vi/EEOp-FaekSY/hqdefault.jpg") center / cover no-repeat;
+    cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent;
   }
-  #sound[hidden] { display: none; }
+  #start::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+  #start span {
+    position: relative; display: flex; align-items: center; gap: 14px;
+    font: 700 22px/1 -apple-system, system-ui, "Inter", sans-serif; color: #fff;
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6);
+    padding: 20px 30px; border-radius: 999px;
+  }
+  #start svg { width: 26px; height: 26px; fill: #fff; }
+  #start[hidden] { display: none; }
 </style>
 </head>
 <body>
 <div id="player">
-  <!-- Works without JavaScript: muted autoplay straight from YouTube. -->
-  <iframe src="https://www.youtube.com/embed/EEOp-FaekSY?autoplay=1&mute=1&playsinline=1&rel=0"
+  <!-- Without JavaScript, YouTube's own play button plays it with sound. -->
+  <iframe src="https://www.youtube.com/embed/EEOp-FaekSY?playsinline=1&rel=0"
     title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
 </div>
-<button id="sound" hidden>Tap for sound</button>
+<button id="start" hidden aria-label="Tap to play"><span><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>Tap to play</span></button>
 <script>
-  // Browsers only allow autoplay with the sound off, so the video starts muted and one tap turns it on.
-  var btn = document.getElementById('sound');
+  // Phones only allow sound after a tap, so the page opens on one big Tap to play.
+  var start = document.getElementById('start'), p, ready = false;
+  start.hidden = false;
   window.onYouTubeIframeAPIReady = function () {
-    var p = new YT.Player('player', {
+    p = new YT.Player('player', {
       videoId: 'EEOp-FaekSY',
-      playerVars: { autoplay: 1, mute: 1, playsinline: 1, rel: 0 },
-      events: {
-        onReady: function (e) { e.target.playVideo(); btn.hidden = false; }
-      }
+      playerVars: { playsinline: 1, rel: 0 },
+      events: { onReady: function () { ready = true; } }
     });
-    btn.onclick = function () { p.unMute(); p.setVolume(100); p.playVideo(); btn.hidden = true; };
+  };
+  start.onclick = function () {
+    if (!ready) return;
+    p.unMute(); p.setVolume(100); p.playVideo();
+    start.hidden = true;
+    // If the phone still refuses, YouTube's own play button is right underneath and plays with sound.
   };
   var s = document.createElement('script');
   s.src = 'https://www.youtube.com/iframe_api';
