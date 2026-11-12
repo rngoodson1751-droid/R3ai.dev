@@ -149,6 +149,8 @@ h2:not(:first-child){margin-top:18px}
 .rad-scale i{grid-column:1/-1;height:7px;border-radius:9px;margin-bottom:3px;background:linear-gradient(90deg,#04e9e7,#019ff4,#0300f4,#02fd02,#01c501,#008e00,#fdf802,#e5bc00,#fd9500,#fd0000,#d40000,#bc0000,#f800fd)}
 .rad-scale span:nth-child(3){text-align:center}.rad-scale span:last-child{text-align:right}
 .rad-src{font-size:.66rem;color:var(--ink-3);margin-top:4px}
+.rad-op{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.66rem;font-weight:700;color:var(--ink-3)}
+.rad-op input{flex:1;min-width:0;accent-color:var(--navy);height:1.6rem}
 .picking{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.5rem 1rem;font-weight:700;font-size:.9rem;z-index:3;box-shadow:var(--shadow);white-space:nowrap}
 .mk{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
 .bus{position:relative;width:38px;height:38px}
@@ -314,7 +316,7 @@ h2:not(:first-child){margin-top:18px}
     <div id="map"></div>
     <div class="map-msg" id="map-msg">Loading the map&hellip;</div>
     <div class="mapbtns"><button type="button" id="m-all">All routes</button><button type="button" id="m-radar" aria-pressed="false">Radar</button></div>
-    <div class="radar" id="radar" hidden><div class="rad-top"><b>Weather radar</b><span id="rad-time"></span><button type="button" id="rad-play" aria-label="Pause the radar loop">&#10073;&#10073;</button></div><div class="rad-scale" aria-hidden="true"><i></i><span>Light</span><span>Moderate</span><span>Heavy</span></div><div class="rad-src">NWS NEXRAD via Iowa Environmental Mesonet</div></div>
+    <div class="radar" id="radar" hidden><div class="rad-top"><b>Weather radar</b><span id="rad-time"></span><button type="button" id="rad-play" aria-label="Pause the radar loop">&#10073;&#10073;</button></div><div class="rad-scale" aria-hidden="true"><i></i><span>Light</span><span>Moderate</span><span>Heavy</span></div><label class="rad-op"><span>See-through</span><input type="range" id="rad-op" min="15" max="100" step="5" value="62" aria-label="Radar strength: lower to see the map through it"/><span>Solid</span></label><div class="rad-src">NWS NEXRAD via Iowa Environmental Mesonet</div></div>
     <div class="picking" id="picking" hidden></div>
   </div>
 
@@ -697,8 +699,8 @@ $('m-all').addEventListener('click', () => { clearTripMap(); select(null); });
 // University). It is redrawn every 5 minutes and keeps the last 50 minutes, so the overlay loops through 11 frames,
 // oldest to newest, and rests on the newest. On or off is remembered on this computer.
 const RADAR_FRAMES = ['m50m', 'm45m', 'm40m', 'm35m', 'm30m', 'm25m', 'm20m', 'm15m', 'm10m', 'm05m', ''];
-let radarOn = false, radarLayers = [], radarFrame = RADAR_FRAMES.length - 1, radarPlay = true, radarTimer = 0, radarStamp = 0;
-try { radarOn = localStorage.getItem('cc-radar') === '1'; } catch {}
+let radarOpacity = 0.62, radarOn = false, radarLayers = [], radarFrame = RADAR_FRAMES.length - 1, radarPlay = true, radarTimer = 0, radarStamp = 0;
+try { radarOn = localStorage.getItem('cc-radar') === '1'; const o = +localStorage.getItem('cc-radar-op'); if (o >= 0.15 && o <= 1) radarOpacity = o; } catch {}
 function radarBuild() {
   radarStamp = Math.floor(Date.now() / 300e3);   // a new set of tiles every 5 minutes, so the browser does not show old ones
   radarLayers.forEach(l => { const i = map.overlayMapTypes.getArray().indexOf(l); if (i >= 0) map.overlayMapTypes.removeAt(i); });
@@ -710,7 +712,7 @@ function radarBuild() {
 }
 function radarShowFrame(k) {
   radarFrame = k;
-  radarLayers.forEach((l, i) => l.setOpacity(i === k ? 0.62 : 0));
+  radarLayers.forEach((l, i) => l.setOpacity(i === k ? radarOpacity : 0));
   const ago = (RADAR_FRAMES.length - 1 - k) * 5;
   $('rad-time').textContent = ago ? `${ago} min ago` : 'Now';
 }
@@ -742,6 +744,13 @@ function radarShow(on) {
   } else radarLayers.forEach(l => l.setOpacity(0));
 }
 $('m-radar').addEventListener('click', () => radarShow(!radarOn));
+// how strong the radar is drawn: lower to see streets and stops through it; remembered on this computer
+$('rad-op').value = Math.round(radarOpacity * 100);
+$('rad-op').addEventListener('input', e => {
+  radarOpacity = +e.target.value / 100;
+  if (radarOn && radarLayers.length) radarLayers[radarFrame].setOpacity(radarOpacity);
+  try { localStorage.setItem('cc-radar-op', String(radarOpacity)); } catch {}
+});
 $('rad-play').addEventListener('click', () => {
   radarPlay = !radarPlay;
   $('rad-play').innerHTML = radarPlay ? '&#10073;&#10073;' : '&#9654;';
