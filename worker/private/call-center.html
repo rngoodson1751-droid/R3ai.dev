@@ -138,6 +138,17 @@ h2:not(:first-child){margin-top:18px}
 .map-msg.err code{display:inline-block;margin-top:8px;font-size:.8rem;background:#fff;border:1px solid var(--line-2);border-radius:6px;padding:2px 7px;color:var(--ink-2)}
 .mapbtns{position:absolute;left:10px;top:10px;display:flex;gap:6px;z-index:2}
 .mapbtns button{background:#fff;border:1px solid var(--line-2);border-radius:99px;padding:.4rem .85rem;font-weight:800;font-size:.85rem;box-shadow:var(--shadow);min-height:2.4rem}
+.mapbtns button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+#m-radar::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;margin-right:.4em;background:conic-gradient(#04e9e7,#019ff4,#02fd02,#fdf802,#fd9500,#fd0000,#04e9e7);vertical-align:-.02em}
+.radar{position:absolute;left:10px;bottom:28px;z-index:3;background:rgba(255,255,255,.95);border:1px solid var(--line-2);border-radius:14px;padding:8px 10px;box-shadow:var(--shadow);width:min(17rem,calc(100% - 20px));font-size:.8rem}
+.rad-top{display:flex;align-items:center;gap:8px}
+.rad-top b{font-size:.84rem}
+#rad-time{flex:1;color:var(--ink-2);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+#rad-play{border:0;background:var(--fill);border-radius:99px;width:2rem;height:2rem;font-size:.7rem;font-weight:900;color:var(--ink)}
+.rad-scale{display:grid;grid-template-columns:repeat(3,1fr);margin-top:6px;font-size:.68rem;font-weight:700;color:var(--ink-3)}
+.rad-scale i{grid-column:1/-1;height:7px;border-radius:9px;margin-bottom:3px;background:linear-gradient(90deg,#04e9e7,#019ff4,#0300f4,#02fd02,#01c501,#008e00,#fdf802,#e5bc00,#fd9500,#fd0000,#d40000,#bc0000,#f800fd)}
+.rad-scale span:nth-child(3){text-align:center}.rad-scale span:last-child{text-align:right}
+.rad-src{font-size:.66rem;color:var(--ink-3);margin-top:4px}
 .picking{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:.5rem 1rem;font-weight:700;font-size:.9rem;z-index:3;box-shadow:var(--shadow);white-space:nowrap}
 .mk{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
 .bus{position:relative;width:38px;height:38px}
@@ -302,7 +313,8 @@ h2:not(:first-child){margin-top:18px}
   <div id="mapwrap" aria-label="Map of routes, stops and live buses">
     <div id="map"></div>
     <div class="map-msg" id="map-msg">Loading the map&hellip;</div>
-    <div class="mapbtns"><button type="button" id="m-all">All routes</button></div>
+    <div class="mapbtns"><button type="button" id="m-all">All routes</button><button type="button" id="m-radar" aria-pressed="false">Radar</button></div>
+    <div class="radar" id="radar" hidden><div class="rad-top"><b>Weather radar</b><span id="rad-time"></span><button type="button" id="rad-play" aria-label="Pause the radar loop">&#10073;&#10073;</button></div><div class="rad-scale" aria-hidden="true"><i></i><span>Light</span><span>Moderate</span><span>Heavy</span></div><div class="rad-src">NWS NEXRAD via Iowa Environmental Mesonet</div></div>
     <div class="picking" id="picking" hidden></div>
   </div>
 
@@ -654,6 +666,7 @@ function mapReady() {
   map.addListener('click', e => mapClick([e.latLng.lat(), e.latLng.lng()]));
   if ($('map').offsetWidth) { framed = true; fitAll(); }
   drawBuses(); refreshStops();
+  if (radarOn) radarShow(true);
   if (lastPlan && shown != null) drawTrip(lastPlan.found[shown]);
 }
 function fitAll() { if (!map) return; const b = new G.LatLngBounds(); for (const r of NET.routes) for (const p of r.shape) b.extend({ lat: p[0], lng: p[1] }); map.fitBounds(b, 20); }
@@ -678,6 +691,66 @@ function select(id) {
   drawBuses(); renderBoard();
 }
 $('m-all').addEventListener('click', () => { clearTripMap(); select(null); });
+
+// ---------- weather radar ----------
+// The National Weather Service NEXRAD radar mosaic, as map tiles from the Iowa Environmental Mesonet (Iowa State
+// University). It is redrawn every 5 minutes and keeps the last 50 minutes, so the overlay loops through 11 frames,
+// oldest to newest, and rests on the newest. On or off is remembered on this computer.
+const RADAR_FRAMES = ['m50m', 'm45m', 'm40m', 'm35m', 'm30m', 'm25m', 'm20m', 'm15m', 'm10m', 'm05m', ''];
+let radarOn = false, radarLayers = [], radarFrame = RADAR_FRAMES.length - 1, radarPlay = true, radarTimer = 0, radarStamp = 0;
+try { radarOn = localStorage.getItem('cc-radar') === '1'; } catch {}
+function radarBuild() {
+  radarStamp = Math.floor(Date.now() / 300e3);   // a new set of tiles every 5 minutes, so the browser does not show old ones
+  radarLayers.forEach(l => { const i = map.overlayMapTypes.getArray().indexOf(l); if (i >= 0) map.overlayMapTypes.removeAt(i); });
+  radarLayers = RADAR_FRAMES.map(f => new G.ImageMapType({
+    getTileUrl: (c, z) => `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913${f ? '-' + f : ''}/${z}/${c.x}/${c.y}.png?${radarStamp}`,
+    tileSize: new G.Size(256, 256), opacity: 0, name: 'radar ' + (f || 'now'), maxZoom: 18,
+  }));
+  radarLayers.forEach(l => map.overlayMapTypes.push(l));
+}
+function radarShowFrame(k) {
+  radarFrame = k;
+  radarLayers.forEach((l, i) => l.setOpacity(i === k ? 0.62 : 0));
+  const ago = (RADAR_FRAMES.length - 1 - k) * 5;
+  $('rad-time').textContent = ago ? `${ago} min ago` : 'Now';
+}
+function radarTick() {
+  // loop: step through the frames, then hold on the newest for three steps before starting again
+  radarTimer = setTimeout(() => {
+    if (!radarOn) return;
+    if (radarPlay) {
+      if (Math.floor(Date.now() / 300e3) !== radarStamp) radarBuild();
+      radarHold = radarFrame === RADAR_FRAMES.length - 1 ? radarHold + 1 : 0;
+      radarShowFrame(radarFrame === RADAR_FRAMES.length - 1 ? (radarHold >= 3 ? 0 : radarFrame) : radarFrame + 1);
+      if (radarHold >= 3) radarHold = 0;
+    }
+    radarTick();
+  }, 650);
+}
+let radarHold = 0;
+function radarShow(on) {
+  radarOn = on;
+  try { localStorage.setItem('cc-radar', on ? '1' : '0'); } catch {}
+  $('m-radar').setAttribute('aria-pressed', String(on));
+  $('radar').hidden = !on;
+  clearTimeout(radarTimer);
+  if (!map) return;
+  if (on) {
+    if (!radarLayers.length || Math.floor(Date.now() / 300e3) !== radarStamp) radarBuild();
+    radarShowFrame(RADAR_FRAMES.length - 1);
+    radarTick();
+  } else radarLayers.forEach(l => l.setOpacity(0));
+}
+$('m-radar').addEventListener('click', () => radarShow(!radarOn));
+$('rad-play').addEventListener('click', () => {
+  radarPlay = !radarPlay;
+  $('rad-play').innerHTML = radarPlay ? '&#10073;&#10073;' : '&#9654;';
+  $('rad-play').setAttribute('aria-label', radarPlay ? 'Pause the radar loop' : 'Play the radar loop');
+  if (!radarPlay) radarShowFrame(RADAR_FRAMES.length - 1);
+});
+if (matchMedia('(prefers-reduced-motion:reduce)').matches) { radarPlay = false; $('rad-play').innerHTML = '&#9654;'; }
+$('m-radar').setAttribute('aria-pressed', String(radarOn));
+$('radar').hidden = !radarOn;
 
 function drawBuses() {
   if (!map) return;
