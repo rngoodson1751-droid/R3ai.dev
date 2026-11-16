@@ -72,6 +72,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 ## Sophie's Unicorn Cloud Race (unlisted game)
 
 - `static/games/sophie-unicorn-cloud-race/index.html` at `/games/sophie-unicorn-cloud-race/` (16 November 2026): a unicorn race over clouds designed by Sophie, Bethany Doty's daughter (about 5), with Robert and Clarus. Robert chose a plain unlisted address, no login. Keep it off `content/projects.json`, the games page and the sitemap, and keep its `noindex` tag. It keeps its own pastel look (lavender, cotton-candy pink, sky blue, mint, sunshine yellow). Keep it easy for a five-year-old: tap to jump, a bird rescues any fall, nothing that ends the race early.
+- Three levels, all open from the start (16 November 2026): 1 Cloud Race; 2 Rainbow Road Delivery, modelled on the Rainbow Bike Delivery world in River's Galactic Playground (gloomy houses to cheer up with rainbow bubbles, rainbow jump pads, puddles, Grumbleboom the storm cloud at the end); 3 Mermaid Rainbow Reef, a swimming level (tap or hold to swim up, let go to float down, no way to get stuck or lose). The chosen unicorn's colours become the mermaid's hair and tail, and the title screen has a mermaid skin choice. Level data and builders are `LEVELS`, `buildClouds`, `buildRoad` and `buildSea` in the page.
 
 ## Design rules
 
