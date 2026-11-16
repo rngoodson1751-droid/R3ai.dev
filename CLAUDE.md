@@ -69,6 +69,10 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 - `worker/private/clarus-van.html` at `/work/clarus-van/<key>/` (4 November 2026): a 3D Transit 350 paratransit van with a black Clarus puck on every smart system, product cards and a build-your-own total. It keeps its own dark studio look. Products, prices and citations live in `PRODUCTS` in the script; everything about pricing and savings is labelled illustrative because Clarus is a concept. Check it at 1280 wide and 390 wide after changes. Never change its address or key once Robert shares it.
 
+## Sophie's Unicorn Cloud Race (unlisted game)
+
+- `static/games/sophie-unicorn-cloud-race/index.html` at `/games/sophie-unicorn-cloud-race/` (16 November 2026): a unicorn race over clouds designed by Sophie, Bethany Doty's daughter (about 5), with Robert and Clarus. Robert chose a plain unlisted address, no login. Keep it off `content/projects.json`, the games page and the sitemap, and keep its `noindex` tag. It keeps its own pastel look (lavender, cotton-candy pink, sky blue, mint, sunshine yellow). Keep it easy for a five-year-old: tap to jump, a bird rescues any fall, nothing that ends the race early.
+
 ## Design rules
 
 - Concept: "Glass on the lake" (25 October 2026). Robert gave full creative permission and asked for something extraordinary, built on Apple's current Liquid Glass. There is no brand colour. The whole site is lit by the real sky over the lake he sails on, right now.
