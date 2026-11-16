@@ -31,6 +31,8 @@
   .l1{background:linear-gradient(90deg,#ff7ec0,#b79cff)}
   .l2{background:linear-gradient(90deg,#ff9f43,#ff5fa2)}
   .l3{background:linear-gradient(90deg,#3bc9db,#5c7cfa)}
+  .l4{background:linear-gradient(90deg,#f783ac,#ffa94d,#ffd43b)}
+  .new{font-size:12px;background:#fff;color:#d6336c;border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:middle}
   button.big{font:inherit;font-size:24px;font-weight:bold;border:0;border-radius:999px;padding:14px 38px;color:#fff;background:linear-gradient(90deg,#ff7ec0,#9c7cff);box-shadow:0 6px 0 #7a3fc0;cursor:pointer;margin:10px 4px 0;touch-action:manipulation}
   button.big.alt{background:#fff;color:#7a3fc0;box-shadow:0 6px 0 #d0bfff}
   button.big:active{transform:translateY(4px);box-shadow:0 2px 0 #7a3fc0}
@@ -58,6 +60,10 @@
     <p class="small">👆 Tap to jump (or swim up) · ⭐ grab stars · 🌈 zoom · 🎁 surprises</p>
     <p class="small" id="turnHint">Tip: turn your phone sideways for a bigger view.</p>
   </div>
+</div>
+
+<div class="ui hidden" id="loadUI">
+  <div class="card"><h2 id="loadTitle">🧁 Mixing the magic frosting...</h2><p id="loadMsg">Getting the 3D Cupcake Kingdom ready.</p><button class="big alt hidden" id="loadBack">Back</button></div>
 </div>
 
 <div class="ui hidden" id="doneUI">
@@ -295,7 +301,9 @@ const LEVELS = [
   { id: 'road', mode: 'run', name: 'Rainbow Road Delivery', sub: 'Bring rainbows to the gloomy houses', icon: '🏡', cls: 'l2', goal: 'Rainbow Town',
     hint: 'Jump into the rainbow bubbles to cheer up the gloomy houses!' },
   { id: 'sea', mode: 'swim', name: 'Mermaid Rainbow Reef', sub: 'Swim under the sea to the Coral Palace', icon: '🧜‍♀️', cls: 'l3', goal: 'the Coral Palace',
-    hint: 'Tap or hold to swim up. Let go to float down.' }
+    hint: 'Tap or hold to swim up. Let go to float down.' },
+  { id: 'cake', mode: '3d', name: 'Cupcake Kingdom', sub: 'A magic 3D run through cupcake land', icon: '🧁', cls: 'l4', goal: 'the Cake Castle', isNew: true,
+    hint: 'Tap left or right to change lanes. Tap the middle to jump!' }
 ];
 let L = LEVELS[0], levelIdx = 0;
 
@@ -940,7 +948,8 @@ function drawHUD(left, right) {
   if (state === 'title') return;
   const topY = 10 - offY / scale, sea = L.mode === 'swim';
   ctx.fillStyle = 'rgba(255,255,255,.85)'; rr(left + 14, topY, 118, 44, 22);
-  if (sea) { ctx.fillStyle = '#ffd0ec'; circ(left + 38, topY + 22, 12); ctx.fillStyle = '#fff'; circ(left + 34, topY + 18, 4); }
+  if (L.mode === '3d') { ctx.font = '24px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🧁', left + 38, topY + 23); }
+  else if (sea) { ctx.fillStyle = '#ffd0ec'; circ(left + 38, topY + 22, 12); ctx.fillStyle = '#fff'; circ(left + 34, topY + 18, 4); }
   else { starPath(left + 38, topY + 22, 14, 6, 0); ctx.fillStyle = '#ffd93d'; ctx.fill(); ctx.strokeStyle = '#f5a623'; ctx.lineWidth = 2.5; ctx.stroke(); }
   ctx.fillStyle = '#5a2a82'; ctx.font = 'bold 24px Trebuchet MS, system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   ctx.fillText(String(stars), left + 60, topY + 23);
@@ -954,7 +963,7 @@ function drawHUD(left, right) {
   const pg = ctx.createLinearGradient(bx, 0, bx + bw, 0); RAINBOW.forEach((c, i) => pg.addColorStop(i / 5, c));
   ctx.globalAlpha = .35; ctx.fillStyle = pg; rr(bx, by, bw, 12, 6); ctx.globalAlpha = 1;
   ctx.fillStyle = pg; rr(bx, by, Math.max(12, bw * clamp(P.x / FINISH, 0, 1)), 12, 6);
-  ctx.font = '22px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(L.id === 'sea' ? '🐚' : L.id === 'road' ? '🌈' : '🏰', bx + bw + 22, by + 6);
+  ctx.font = '22px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(L.id === 'cake' ? '🎂' : L.id === 'sea' ? '🐚' : L.id === 'road' ? '🌈' : '🏰', bx + bw + 22, by + 6);
   const dot = (v, col, s) => { ctx.fillStyle = '#fff'; circ(bx + bw * clamp(v, 0, 1), by + 6, s + 3); ctx.fillStyle = col; circ(bx + bw * clamp(v, 0, 1), by + 6, s); };
   rivals.forEach(rv => dot(rv.x / FINISH, rv.mane[0], 7));
   dot(P.x / FINISH, MANES[maneIdx].c[0], 9);
@@ -980,6 +989,437 @@ function drawHUD(left, right) {
   }
 }
 
+// ---------- level 4: Cupcake Kingdom (3D, three.js r128 loaded only when this level starts) ----------
+const M3 = (() => {
+  let T = null, renderer = null, scene, camera, sky, cv3 = null, built = false;
+  let uni = null, rv3 = [], items3 = [], sprites = [], sparkGroup = null, finishCam = 0, starTex = null;
+  const LEN = 820, LANE = 2.4;
+  const cx = s => Math.sin(s * 0.011) * 7 + Math.sin(s * 0.029 + 1) * 2.5;
+  const dcx = s => cx(s + .5) - cx(s - .5);
+  const geo = {}, matCache = {};
+  let pops3 = [];
+  const CANDY = ['#ff8ccf', '#b79cff', '#74c0fc', '#63e6be', '#ffe066', '#ffa94d', '#ff6b6b', '#e599f7'];
+  const M = (c, e) => { const k = c + '|' + (e || ''); if (!matCache[k]) matCache[k] = new T.MeshLambertMaterial({ color: c, emissive: e || '#000000' }); return matCache[k]; };
+  const mesh = (g, m, x = 0, y = 0, z = 0) => { const o = new T.Mesh(g, m); o.position.set(x, y, z); return o; };
+
+  function load() {
+    if (window.THREE) return Promise.resolve();
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.onload = () => res(); s.onerror = () => { s.remove(); rej(new Error('three.js did not load')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function stripeTex(a, b, n) {
+    const c = document.createElement('canvas'); c.width = 64; c.height = 8; const x = c.getContext('2d');
+    for (let i = 0; i < n; i++) { x.fillStyle = i % 2 ? b : a; x.fillRect(i * 64 / n, 0, 64 / n + 1, 8); }
+    const t = new T.CanvasTexture(c); t.wrapS = t.wrapT = T.RepeatWrapping; return t;
+  }
+
+  function init() {
+    T = window.THREE;
+    cv3 = document.createElement('canvas'); cv3.id = 'c3';
+    cv3.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;z-index:0';
+    document.body.insertBefore(cv3, document.body.firstChild);
+    cv.style.zIndex = '1';
+    renderer = new T.WebGLRenderer({ canvas: cv3, antialias: true });
+    scene = new T.Scene();
+    scene.fog = new T.Fog('#ffe3f1', 90, 260);
+    camera = new T.PerspectiveCamera(58, 1, .1, 900);
+    scene.add(new T.HemisphereLight('#ffffff', '#ff9fcf', .7));
+    const sun = new T.DirectionalLight('#fff6e0', .45); sun.position.set(30, 60, 20); scene.add(sun);
+    geo.sph = new T.SphereGeometry(1, 18, 14);
+    geo.sphLo = new T.SphereGeometry(1, 10, 8);
+    geo.cyl = new T.CylinderGeometry(1, 1, 1, 14);
+    geo.cup = new T.CylinderGeometry(1, .72, 1, 16, 1);
+    geo.cone = new T.ConeGeometry(1, 1, 16);
+    geo.box = new T.BoxGeometry(1, 1, 1);
+    geo.disc = new T.CylinderGeometry(1, 1, .3, 24);
+    geo.ring = new T.TorusGeometry(.62, .1, 8, 28);
+    geo.smile = new T.TorusGeometry(.2, .045, 6, 16, Math.PI);
+    const sh = new T.Shape();
+    for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 + Math.PI / 2, r = i % 2 ? .25 : .6; i ? sh.lineTo(Math.cos(a) * r, Math.sin(a) * r) : sh.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
+    geo.star = new T.ExtrudeGeometry(sh, { depth: .14, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 2 });
+    geo.star.center();
+    // glowing sparkle sprite
+    const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+    const rg = g.createRadialGradient(32, 32, 0, 32, 32, 32); rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(.25, 'rgba(255,255,255,.8)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 64, 64);
+    g.fillStyle = '#fff'; g.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? 6 : 30; g.lineTo(32 + Math.cos(a) * r, 32 + Math.sin(a) * r); } g.fill();
+    starTex = new T.CanvasTexture(c);
+    _q = new T.Quaternion(); _e = new T.Euler(); _v = new T.Vector3(); _s = new T.Vector3();
+    buildWorld();
+    built = true;
+  }
+
+  // ---- world (built once) ----
+  function inst(geom, mat, n) { const im = new T.InstancedMesh(geom, mat, n); scene.add(im); return im; }
+  let _q, _e, _v, _s; const _m = () => new T.Matrix4();
+  function setI(im, i, x, y, z, sx, sy, sz, ry = 0, rx = 0, col) {
+    _e.set(rx, ry, 0); _q.setFromEuler(_e); _v.set(x, y, z); _s.set(sx, sy, sz);
+    const m = _m().compose(_v, _q, _s); im.setMatrixAt(i, m);
+    if (col) im.setColorAt(i, new T.Color(col));
+  }
+
+  function buildWorld() {
+    const r = rng(777);
+    // sky dome
+    sky = new T.Mesh(new T.SphereGeometry(500, 32, 16), new T.ShaderMaterial({
+      side: T.BackSide, depthWrite: false, fog: false,
+      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'varying vec3 vP; void main(){ float h = vP.y; vec3 top = vec3(.53,.83,1.); vec3 mid = vec3(.84,.79,1.); vec3 hor = vec3(1.,.89,.95); vec3 c = mix(hor, mid, smoothstep(0.,.25,h)); c = mix(c, top, smoothstep(.25,.75,h)); gl_FragColor = vec4(c, 1.); }'
+    }));
+    scene.add(sky);
+    // ground
+    const ground = mesh(new T.PlaneGeometry(700, LEN + 600), M('#8fe0bd'), 0, -.02, -LEN / 2);
+    ground.rotation.x = -Math.PI / 2; scene.add(ground);
+    // frosting path
+    const half = 1.5 * LANE + 1.1, pts = [], idx = [];
+    let n = 0;
+    for (let s = -40; s <= LEN + 80; s += 2) { pts.push(cx(s) - half, .02, -s, cx(s) + half, .02, -s); if (n) idx.push(2 * n - 2, 2 * n - 1, 2 * n, 2 * n - 1, 2 * n + 1, 2 * n); n++; }
+    const pg = new T.BufferGeometry(); pg.setAttribute('position', new T.Float32BufferAttribute(pts, 3)); pg.setIndex(idx); pg.computeVertexNormals();
+    const path = new T.Mesh(pg, M('#ffa8d2')); scene.add(path);
+    // lane dots of white frosting
+    const edgeCount = Math.floor((LEN + 120) / 1.1) * 2, edges = inst(geo.sphLo, M('#ffffff'), edgeCount);
+    let k = 0;
+    for (let s = -40; k < edgeCount; s += 1.1) { for (const sd of [-1, 1]) { if (k < edgeCount) setI(edges, k++, cx(s) + sd * (half + .1), .15, -s, .42, .32, .42); } }
+    // sprinkles
+    const SPR = 1600, spr = inst(geo.box, new T.MeshLambertMaterial({ color: '#ffffff' }), SPR);
+    for (let i = 0; i < SPR; i++) { const s = -30 + r() * (LEN + 100); setI(spr, i, cx(s) + (r() * 2 - 1) * (half - .3), .06, -s, .32, .07, .07, r() * 6, 0, pick(CANDY)); }
+    // giant cupcakes and lollipops along both sides
+    const NC = 90, cw1 = inst(geo.cup, new T.MeshLambertMaterial({ color: '#fff' }), NC), cf1 = inst(geo.sph, new T.MeshLambertMaterial({ color: '#fff' }), NC), cf2 = inst(geo.cone, new T.MeshLambertMaterial({ color: '#fff' }), NC), ch1 = inst(geo.sph, M('#ff4d6d', '#400010'), NC);
+    const NL = 80, ls = inst(geo.cyl, M('#ffffff'), NL), ld = inst(geo.disc, new T.MeshLambertMaterial({ color: '#fff' }), NL), lr = inst(geo.ring, M('#ffffff'), NL);
+    let ci = 0, li = 0;
+    for (let s = -20; s < LEN + 60; s += 9 + r() * 8) {
+      for (const sd of [-1, 1]) {
+        const off = half + 4 + r() * 22, x = cx(s) + sd * off, z = -s - r() * 4;
+        if (r() < .55 && ci < NC) {
+          const S = 1.8 + r() * 3.2, fc = pick(CANDY), ry = r() * 6;
+          setI(cw1, ci, x, .35 * S, z, .9 * S, .7 * S, .9 * S, ry, 0, pick(['#ffffff', '#ffd6ec', '#d0bfff', '#c3fae8', '#fff3bf']));
+          setI(cf1, ci, x, .82 * S, z, 1.05 * S, .55 * S, 1.05 * S, ry, 0, fc);
+          setI(cf2, ci, x, 1.2 * S, z, .7 * S, .8 * S, .7 * S, ry, 0, fc);
+          setI(ch1, ci, x, 1.64 * S, z, .22 * S, .22 * S, .22 * S);
+          ci++;
+        } else if (li < NL) {
+          const S = 1.4 + r() * 1.8, col = pick(CANDY);
+          setI(ls, li, x, 1.6 * S, z, .1 * S, 3.2 * S, .1 * S);
+          setI(ld, li, x, 3.4 * S, z, 1.1 * S, 1.1 * S, 1.1 * S, 0, Math.PI / 2, col);
+          setI(lr, li, x, 3.4 * S, z + .18 * S, 1.1 * S, 1.1 * S, 1.1 * S);
+          li++;
+        }
+      }
+    }
+    cw1.count = cf1.count = cf2.count = ch1.count = ci; ls.count = ld.count = lr.count = li;
+    [cw1, cf1, cf2, ls, ld].forEach(im => { if (im.instanceColor) im.instanceColor.needsUpdate = true; });
+    // candy cane arches over the path
+    const caneTex = stripeTex('#ff4d6d', '#ffffff', 16); caneTex.repeat.set(10, 1);
+    const caneMat = new T.MeshLambertMaterial({ map: caneTex }), archGeo = new T.TorusGeometry(half + .6, .32, 10, 40, Math.PI);
+    for (let s = 60; s < LEN - 40; s += 70) { const a = mesh(archGeo, caneMat, cx(s), 0, -s); a.rotation.y = -Math.atan(dcx(s)); scene.add(a); }
+    // cotton candy clouds
+    for (let i = 0; i < 26; i++) {
+      const g = new T.Group(), col = pick(['#ffffff', '#ffd6ec', '#e5dbff']);
+      for (let j = 0; j < 5; j++) { const m = mesh(geo.sphLo, M(col), (j - 2) * 2.2, Math.sin(j) * .8, (r() - .5) * 2); m.scale.setScalar(2 + r() * 1.6); g.add(m); }
+      const s = r() * (LEN + 200); g.position.set(cx(s) + (r() - .5) * 140, 22 + r() * 22, -s - 40); scene.add(g);
+    }
+    // floating sparkles
+    const SP = 500, sp = new Float32Array(SP * 3), sc = new Float32Array(SP * 3);
+    for (let i = 0; i < SP; i++) { const s = r() * (LEN + 60); sp[i * 3] = cx(s) + (r() - .5) * 60; sp[i * 3 + 1] = 1 + r() * 14; sp[i * 3 + 2] = -s; const c = new T.Color(pick(CANDY.concat(['#ffffff', '#ffffff']))); sc[i * 3] = c.r; sc[i * 3 + 1] = c.g; sc[i * 3 + 2] = c.b; }
+    const sg = new T.BufferGeometry(); sg.setAttribute('position', new T.BufferAttribute(sp, 3)); sg.setAttribute('color', new T.BufferAttribute(sc, 3));
+    sparkGroup = new T.Points(sg, new T.PointsMaterial({ size: .55, map: starTex, vertexColors: true, transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
+    scene.add(sparkGroup);
+    // finish arch: a rainbow
+    RAINBOW.forEach((c, i) => { const a = mesh(new T.TorusGeometry(half + 2.4 - i * .45, .24, 8, 40, Math.PI), M(c, '#222222'), cx(LEN), 0, -LEN); a.rotation.y = -Math.atan(dcx(LEN)); scene.add(a); });
+    // big sky rainbow behind the castle
+    RAINBOW.forEach((c, i) => { const a = mesh(new T.TorusGeometry(120 - i * 5, 2.4, 8, 60, Math.PI), new T.MeshBasicMaterial({ color: c, transparent: true, opacity: .55, fog: false }), cx(LEN + 60), -10, -LEN - 260); scene.add(a); });
+    buildCastle(cx(LEN + 48), -LEN - 48);
+  }
+
+  function buildCastle(x, z) {
+    const g = new T.Group(); g.position.set(x, 0, z);
+    const tiers = [[11, 4, '#ffd6ec'], [8.5, 4, '#ffffff'], [6, 4, '#e5dbff']];
+    let y = 0;
+    tiers.forEach(([rad, h, col], ti) => {
+      const t = mesh(geo.cyl, M(col), 0, y + h / 2, 0); t.scale.set(rad, h, rad); g.add(t);
+      for (let a = 0; a < 24; a++) { const ang = a / 24 * Math.PI * 2, d = mesh(geo.sphLo, M(['#ff8ccf', '#b79cff', '#ffffff'][ti]), Math.cos(ang) * rad, y + h - .2 - (a % 3) * .35, Math.sin(ang) * rad); d.scale.set(.7, .9 + (a % 3) * .4, .7); g.add(d); }
+      y += h;
+    });
+    for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2, c = mesh(geo.cyl, M(pick(CANDY)), Math.cos(a) * 3, y + 1.2, Math.sin(a) * 3); c.scale.set(.3, 2.4, .3); g.add(c); const f = mesh(geo.cone, M('#ffd43b', '#ff9f00'), Math.cos(a) * 3, y + 2.8, Math.sin(a) * 3); f.scale.set(.3, .7, .3); g.add(f); }
+    [[-12, 9], [12, 9], [-10, -9], [10, -9]].forEach(([tx, tz], i) => {
+      const tw = mesh(geo.cyl, M(['#ffc9e3', '#d0bfff', '#c3fae8', '#fff3bf'][i]), tx, 7, tz); tw.scale.set(2.2, 14, 2.2); g.add(tw);
+      const rf = mesh(geo.cone, M(pick(['#ff5fa2', '#9c7cff', '#3bc9db'])), tx, 16, tz); rf.scale.set(3, 4, 3); g.add(rf);
+      const fl = mesh(geo.box, M(pick(CANDY)), tx + .7, 19, tz); fl.scale.set(1.4, .8, .08); g.add(fl);
+      const ch = mesh(geo.sph, M('#ff4d6d', '#400010'), tx, 18.3, tz); ch.scale.setScalar(.6); g.add(ch);
+    });
+    const door = mesh(geo.cyl, M('#b197fc'), 0, 2.2, 11); door.scale.set(2.2, .4, 2.2); door.rotation.x = Math.PI / 2; g.add(door);
+    const top = mesh(geo.sph, M('#ff4d6d', '#400010'), 0, y + 4.5, 0); top.scale.setScalar(1.5); g.add(top);
+    scene.add(g);
+  }
+
+  // ---- characters ----
+  function makeUnicorn(U, sc) {
+    const g = new T.Group(), inner = new T.Group(); g.add(inner);
+    const bodyM = M(U.body), hoofM = M(U.hoof);
+    const body = mesh(geo.sph, bodyM, 0, 1.55, 0); body.scale.set(.78, .72, 1.2); inner.add(body);
+    const neck = mesh(geo.cyl, bodyM, 0, 2.15, -.85); neck.scale.set(.36, 1.1, .36); neck.rotation.x = -.6; inner.add(neck);
+    const head = mesh(geo.sph, bodyM, 0, 2.75, -1.25); head.scale.setScalar(.56); inner.add(head);
+    const snout = mesh(geo.sph, bodyM, 0, 2.55, -1.72); snout.scale.set(.4, .34, .45); inner.add(snout);
+    const horn = mesh(geo.cone, M('#ffd23f', '#6a4d00'), 0, 3.52, -1.42); horn.scale.set(.13, .8, .13); horn.rotation.x = -.35; inner.add(horn);
+    for (const sx of [-1, 1]) {
+      const ear = mesh(geo.cone, bodyM, sx * .26, 3.25, -1.05); ear.scale.set(.1, .3, .1); ear.rotation.z = -sx * .25; inner.add(ear);
+      const eye = mesh(geo.sph, M('#ffffff'), sx * .34, 2.85, -1.6); eye.scale.set(.15, .18, .1); inner.add(eye);
+      const pupil = mesh(geo.sph, M('#2b1640'), sx * .37, 2.84, -1.68); pupil.scale.set(.1, .13, .06); inner.add(pupil);
+      const cheek = mesh(geo.sphLo, M('#ff9fc6'), sx * .4, 2.6, -1.56); cheek.scale.set(.09, .06, .05); inner.add(cheek);
+    }
+    const mane = [], tail = [];
+    for (let i = 0; i < 8; i++) { const k = i / 7, m = mesh(geo.sph, new T.MeshLambertMaterial({ color: U.c[i % U.c.length] }), 0, lerp(3.2, 1.95, k), lerp(-1.1, -.32, k)); m.scale.setScalar(.27 - k * .06); inner.add(m); mane.push(m); }
+    for (let i = 0; i < 6; i++) { const m = mesh(geo.sph, new T.MeshLambertMaterial({ color: U.c[i % U.c.length] }), 0, 1.8 - i * .1, 1.05 + i * .26); m.scale.setScalar(.26 - i * .015); inner.add(m); tail.push(m); }
+    const legs = [];
+    [[-.36, -.62, 0], [.36, -.62, Math.PI], [-.36, .62, Math.PI], [.36, .62, 0]].forEach(([lx, lz, ph]) => {
+      const pv = new T.Group(); pv.position.set(lx, 1.2, lz);
+      const l = mesh(geo.cyl, bodyM, 0, -.55, 0); l.scale.set(.15, 1.1, .15);
+      const h = mesh(geo.cyl, hoofM, 0, -1.08, 0); h.scale.set(.17, .18, .17);
+      pv.add(l, h); inner.add(pv); legs.push({ pv, ph });
+    });
+    const shadow = mesh(geo.sphLo, new T.MeshBasicMaterial({ color: '#c78bb0', transparent: true, opacity: .25, depthWrite: false }), 0, .03, 0); shadow.scale.set(1, .02, 1.5);
+    g.scale.setScalar(sc);
+    scene.add(g); scene.add(shadow);
+    return { g, inner, legs, mane, tail, shadow, sc, colors: U.c.slice() };
+  }
+  function poseUnicorn(u, x, h, s, t, air, spin, extraScale) {
+    u.g.position.set(x, h, -s);
+    u.g.rotation.y = -Math.atan(dcx(s)) + (spin || 0);
+    u.g.scale.setScalar(u.sc * (extraScale || 1));
+    u.inner.position.y = air ? 0 : Math.abs(Math.sin(t * 7)) * .12;
+    for (const L of u.legs) L.pv.rotation.x = air ? (L.ph ? .7 : -.7) : Math.sin(t * 14 + L.ph) * .75;
+    u.tail.forEach((m, i) => { m.position.x = Math.sin(t * 8 - i * .7) * .09 * i; m.position.y = 1.8 - i * .1 + Math.sin(t * 6 - i) * .05 * i; });
+    u.mane.forEach((m, i) => { m.position.z = lerp(-1.1, -.32, i / 7) + Math.sin(t * 9 + i) * .03; });
+    u.shadow.position.set(x, .04, -s); u.shadow.scale.set(u.sc * extraScale * (1 - Math.min(h, 3) * .15), .02, u.sc * extraScale * 1.5 * (1 - Math.min(h, 3) * .15));
+  }
+
+  // ---- items ----
+  function makeItem(type, s, lane, r) {
+    const g = new T.Group(), x = cx(s) + lane * LANE;
+    if (type === 'cupcake') {
+      const w = mesh(geo.cup, M(pick(['#ffffff', '#ffd6ec', '#d0bfff', '#c3fae8'])), 0, .3, 0); w.scale.set(.42, .6, .42); g.add(w);
+      const fc = pick(CANDY);
+      const f1 = mesh(geo.sph, M(fc), 0, .7, 0); f1.scale.set(.5, .3, .5); g.add(f1);
+      const f2 = mesh(geo.cone, M(fc), 0, 1.0, 0); f2.scale.set(.34, .45, .34); g.add(f2);
+      const ch = mesh(geo.sph, M('#ff4d6d', '#400010'), 0, 1.3, 0); ch.scale.setScalar(.13); g.add(ch);
+      g.position.set(x, .35, -s);
+    } else if (type === 'gumdrop') {
+      const col = pick(CANDY);
+      const b = mesh(geo.sph, new T.MeshLambertMaterial({ color: col, emissive: new T.Color(col).multiplyScalar(.15) }), 0, .75, 0); b.scale.set(1, .85, 1); g.add(b);
+      for (const sx of [-1, 1]) {
+        const e = mesh(geo.sph, M('#ffffff'), sx * .3, 1.0, .82); e.scale.set(.16, .19, .08); g.add(e);
+        const p = mesh(geo.sph, M('#2b1640'), sx * .3, .98, .88); p.scale.set(.09, .12, .05); g.add(p);
+        const br = mesh(geo.box, M('#2b1640'), sx * .3, 1.28, .84); br.scale.set(.26, .06, .05); br.rotation.z = sx * .45; g.add(br); g.userData['brow' + sx] = br;
+      }
+      const mouth = mesh(geo.smile, M('#2b1640'), 0, .62, .9); g.add(mouth); g.userData.mouth = mouth;
+      g.position.set(x, 0, -s);
+    } else if (type === 'wand') {
+      const st = mesh(geo.star, M('#ffd43b', '#8a6400'), 0, 0, 0); st.scale.setScalar(1.1); g.add(st);
+      const halo = new T.Sprite(new T.SpriteMaterial({ map: starTex, color: '#fff3a0', transparent: true, depthWrite: false, blending: T.AdditiveBlending })); halo.scale.setScalar(2.6); g.add(halo);
+      g.position.set(x, 1.5, -s);
+    } else if (type === 'potion') {
+      const col = pick(['#ff5fa2', '#9c7cff', '#3bc9db', '#51cf66']);
+      const b = mesh(geo.sph, new T.MeshLambertMaterial({ color: col, emissive: new T.Color(col).multiplyScalar(.35), transparent: true, opacity: .88 }), 0, 0, 0); b.scale.setScalar(.45); g.add(b);
+      const n = mesh(geo.cyl, M('#e7f5ff'), 0, .5, 0); n.scale.set(.14, .35, .14); g.add(n);
+      const c = mesh(geo.cyl, M('#c08552'), 0, .74, 0); c.scale.set(.16, .14, .16); g.add(c);
+      const hl = mesh(geo.sphLo, M('#ffffff', '#aaaaaa'), -.18, .14, .3); hl.scale.setScalar(.09); g.add(hl);
+      const halo = new T.Sprite(new T.SpriteMaterial({ map: starTex, color: col, transparent: true, opacity: .7, depthWrite: false, blending: T.AdditiveBlending })); halo.scale.setScalar(2); g.add(halo);
+      g.position.set(x, 1.3, -s);
+    }
+    scene.add(g);
+    return { type, s, lane, lx: lane * LANE, obj: g, got: false, ph: r() * 6, baseY: g.position.y };
+  }
+
+  function buildItems(seed) {
+    for (const it of items3) scene.remove(it.obj);
+    items3 = [];
+    const r = rng(seed);
+    let s = 40;
+    const add = (t, ss, ln) => items3.push(makeItem(t, ss, ln, r));
+    while (s < LEN - 25) {
+      const roll = r(), lane = Math.floor(r() * 3) - 1;
+      if (roll < .42) { const n = 3 + Math.floor(r() * 3); for (let i = 0; i < n; i++) add('cupcake', s + i * 3, lane); s += n * 3 + 7; }
+      else if (roll < .58 && s > 110) { add('gumdrop', s, lane); add('cupcake', s, lane === 0 ? 1 : 0); add('cupcake', s + 3, lane === 0 ? 1 : 0); s += 16; }
+      else if (roll < .7 && s > 70) { add('wand', s, lane); s += 13; }
+      else if (roll < .83) { add('potion', s, lane); s += 13; }
+      else { [-1, 0, 1, 0, -1].forEach((ln, i) => add('cupcake', s + i * 3.2, ln)); s += 23; }
+    }
+    totalStars = items3.filter(i => i.type === 'cupcake').length;
+  }
+
+  // ---- sparkles and pops ----
+  function spark(x, y, z, col, n) {
+    for (let i = 0; i < n; i++) {
+      let sp = sprites.find(q => !q.live);
+      if (!sp) { if (sprites.length > 120) return; sp = { s: new T.Sprite(new T.SpriteMaterial({ map: starTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending })) }; scene.add(sp.s); sprites.push(sp); }
+      sp.live = true; sp.life = .8; sp.s.visible = true; sp.s.material.color.set(col || pick(['#ffe066', '#ffffff', '#ff9fd6', '#b197fc']));
+      sp.s.position.set(x, y, z); sp.v = new T.Vector3((Math.random() - .5) * 6, Math.random() * 6 + 1, (Math.random() - .5) * 6); sp.s.scale.setScalar(.6 + Math.random() * .5);
+    }
+  }
+  function pop3(text, x, y, z, col) { pops3.push({ text, x, y, z, life: 1.4, col: col || '#7a3fc0' }); }
+
+  // ---- public ----
+  function start() { return load().then(() => { if (!built) init(); }); }
+
+  function reset() {
+    buildItems(Math.floor(Math.random() * 1e9));
+    if (uni) { scene.remove(uni.g); scene.remove(uni.shadow); }
+    rv3.forEach(u => { scene.remove(u.g); scene.remove(u.shadow); });
+    uni = makeUnicorn(MANES[maneIdx], .75);
+    rivals = RIVALS_DEF.map((d, i) => Object.assign({}, d, { x: -2 - i * 2.5, lx: (i ? 1 : -1) * LANE, done: false, doneT: -1, speed3: [18.9, 18.0][i] }));
+    rv3 = rivals.map(d => makeUnicorn({ body: d.body, hoof: d.hoof, c: d.mane }, .64));
+    P = { x: 0, lane: 0, lx: 0, h: 0, vh: 0, boost: 0, slip: 0, spin: 0, wobble: 0, size: 1, target: 1, sizeT: 0, float: 0, rainbowT: 0, done: false };
+    FINISH = LEN; stars = 0; raceT = 0; hintT = 5; finishT = 0; countT = 3.2; lastCount = -1; confetti = []; pops3 = []; finishCam = 0;
+    sprites.forEach(q => { q.live = false; q.s.visible = false; });
+    cv3.style.display = 'block';
+    state = 'count';
+  }
+  function hide() { if (cv3) cv3.style.display = 'none'; }
+
+  function move(dir) {
+    if (state !== 'play' || P.done) return;
+    const nl = clamp(P.lane + dir, -1, 1);
+    if (nl !== P.lane) { P.lane = nl; tone(500 + dir * 80, .1, 'sine', .06, 0, 1.4); }
+  }
+  function jump3() {
+    if (state !== 'play' || P.done || P.float > 0) return;
+    if (P.h <= .02) { P.vh = 11; sfx.jump(); spark(cx(P.x) + P.lx, .3, -P.x, '#ffffff', 4); }
+  }
+
+  function surprise3(x, y, z) {
+    const kind = pick(['giant', 'tiny', 'cupcakes', 'float', 'rainbow', 'honk']);
+    sfx.giggle(); spark(x, y, z, null, 14);
+    if (kind === 'giant') { P.target = 1.5; P.sizeT = 3; pop3('Giant unicorn!', x, y + 2, z, '#7a3fc0'); sfx.boing(); }
+    else if (kind === 'tiny') { P.target = .6; P.sizeT = 3; pop3('Teeny tiny unicorn!', x, y + 1, z, '#7a3fc0'); sfx.jump2(); }
+    else if (kind === 'cupcakes') { stars += 5; for (let i = 0; i < 5; i++) setTimeout(() => { sfx.star(); spark(cx(P.x) + P.lx, 2, -P.x, null, 5); }, i * 110); pop3('Cupcake shower! +5', x, y + 1.5, z, '#e67700'); }
+    else if (kind === 'float') { P.float = 2.6; P.vh = 0; pop3('Magic float!', x, y + 1.5, z, '#1c7ed6'); sfx.boost(); }
+    else if (kind === 'rainbow') { P.rainbowT = 4; pop3('Rainbow mane magic!', x, y + 1.5, z, '#d6336c'); sfx.boost(); }
+    else { P.wobble = 1; sfx.honk(); setTimeout(sfx.honk, 220); pop3('Honk honk!', x, y + 1.5, z, '#e67700'); }
+  }
+
+  function update(dt) {
+    worldT += dt;
+    if (state === 'count') {
+      countT -= dt;
+      const c = Math.ceil(countT - .2);
+      if (c !== lastCount) { lastCount = c; if (c >= 1 && c <= 3) sfx.beep(false); else if (c <= 0) sfx.beep(true); }
+      if (countT <= 0) state = 'play';
+    }
+    if (state === 'play' || state === 'done') {
+      if (state === 'play') raceT += dt;
+      hintT -= dt;
+      P.boost = Math.max(0, P.boost - dt); P.slip = Math.max(0, P.slip - dt); P.wobble = Math.max(0, P.wobble - dt); P.rainbowT = Math.max(0, P.rainbowT - dt);
+      if (P.spin) { P.spin += dt * 14; if (P.spin > Math.PI * 2) P.spin = 0; }
+      if (P.sizeT > 0) { P.sizeT -= dt; if (P.sizeT <= 0) P.target = 1; }
+      P.size = lerp(P.size, P.target, Math.min(1, dt * 8));
+      let sp = 20 * (P.boost > 0 ? 1.6 : 1) * (P.slip > 0 ? .4 : 1);
+      if (P.done) { sp = P.x < LEN + 28 ? 9 : 0; P.lane = 0; }
+      P.x += sp * dt;
+      P.lx = lerp(P.lx, P.lane * LANE, Math.min(1, dt * 12));
+      if (P.float > 0) { P.float -= dt; P.h = lerp(P.h, 2.4, Math.min(1, dt * 4)); P.vh = 0; if (Math.random() < .5) spark(cx(P.x) + P.lx, P.h + .5, -P.x, null, 1); }
+      else { P.vh -= 30 * dt; P.h += P.vh * dt; if (P.h <= 0) { P.h = 0; P.vh = 0; } }
+      if (P.boost > 0 && Math.random() < .7) spark(cx(P.x) + P.lx + (Math.random() - .5), 1 + Math.random(), -P.x + 1.2, pick(RAINBOW), 1);
+      rivals.forEach((rv, i) => {
+        if (rv.x < LEN + 20 + i * 6) rv.x += rv.speed3 * dt; else rv.done = true;
+        if (rv.x >= LEN && rv.doneT < 0) rv.doneT = raceT;
+        const want = rv.done ? (i ? 1 : -1) : Math.round(Math.sin(rv.x * .018 + i * 2.2)) * LANE;
+        rv.lx = lerp(rv.lx, want, Math.min(1, dt * 3));
+      });
+      // collisions
+      for (const it of items3) {
+        if (it.got || Math.abs(it.s - P.x) > 1.2 || Math.abs(it.lx - P.lx) > 1.3) continue;
+        const wx = cx(it.s) + it.lx, wz = -it.s;
+        if (it.type === 'cupcake') { it.got = true; it.obj.visible = false; stars++; sfx.star(); spark(wx, 1, wz, null, 7); if (stars % 10 === 0) pop3(stars + ' cupcakes!', wx, 2.5, wz, '#e67700'); }
+        else if (it.type === 'gumdrop') {
+          if (it.happy || P.h > .9) continue;
+          it.happy = true; it.squash = 1;
+          const ud = it.obj.userData; ud.mouth.rotation.z = Math.PI; ud.mouth.position.y = .72; ud['brow-1'].visible = ud.brow1.visible = false;
+          if (P.boost > 0) { pop3('Boop! Zoomed right past!', wx, 2.6, wz, '#3b9bff'); sfx.giggle(); continue; }
+          P.slip = .8; P.spin = .01; sfx.boing(); sfx.giggle();
+          pop3(pick(['Boing! Gumdrop bounce!', 'Squishy gumdrop!', 'Wobble wobble!']), wx, 2.8, wz, '#d6336c');
+          setTimeout(() => pop3('...now it is giggling!', wx, 2.2, wz, '#3b9bff'), 700);
+        }
+        else if (it.type === 'wand') { it.got = true; it.obj.visible = false; P.boost = 2.6; P.slip = 0; sfx.boost(); sfx.giggle(); spark(wx, 1.5, wz, '#ffe066', 16); pop3(pick(['Magic zoom!', 'Sparkle speed!', 'Wheee!']), wx, 3, wz, '#d6336c'); }
+        else if (it.type === 'potion') { it.got = true; it.obj.visible = false; surprise3(wx, 1.3, wz); }
+      }
+      if (!P.done && P.x >= LEN) {
+        P.done = true; finishT = raceT; state = 'done'; sfx.win();
+        for (let i = 0; i < 160; i++) confetti.push({ x: Math.random() * W, y: -20 - Math.random() * 300, vx: (Math.random() - .5) * 80, vy: 60 + Math.random() * 120, rot: Math.random() * 6, vr: (Math.random() - .5) * 10, col: pick(RAINBOW), w: 6 + Math.random() * 6 });
+        for (let i = 0; i < 6; i++) setTimeout(() => spark(cx(LEN + 48) + (Math.random() - .5) * 20, 12 + Math.random() * 10, -LEN - 48, null, 12), i * 250);
+        doneTimer = setTimeout(showDone, 1900);
+      }
+    }
+    for (const q of sprites) if (q.live) { q.life -= dt; q.v.y -= 9 * dt; q.s.position.addScaledVector(q.v, dt); q.s.material.opacity = clamp(q.life / .8, 0, 1); if (q.life <= 0) { q.live = false; q.s.visible = false; } }
+    for (const q of pops3) { q.y += 1.2 * dt; q.life -= dt; }
+    pops3 = pops3.filter(q => q.life > 0);
+    for (const q of confetti) { q.x += q.vx * dt; q.y += q.vy * dt; q.rot += q.vr * dt; }
+    confetti = confetti.filter(q => q.y < H + 40);
+  }
+
+  const camPos = { x: 0, y: 3, z: 0, ok: false };
+  function render() {
+    const w = cw, h = ch;
+    const pr = Math.min(dpr, 1.5);
+    if (renderer.getPixelRatio() !== pr) renderer.setPixelRatio(pr);
+    const sz = renderer.getSize(new T.Vector2());
+    if (sz.x !== w || sz.y !== h) { renderer.setSize(w, h, false); }
+    camera.aspect = w / h; camera.fov = h > w ? 74 : 58; camera.updateProjectionMatrix();
+    const s = P.x, x = cx(s) + P.lx;
+    const t = state === 'count' ? 0 : worldT * (P.boost > 0 ? 1.5 : 1) * (P.done && P.x >= LEN + 28 ? 0 : 1);
+    const wob = P.wobble > 0 ? Math.sin(P.wobble * 22) * .3 * P.wobble : 0;
+    poseUnicorn(uni, x, P.h, s, t, P.h > .05, P.spin + wob, P.size);
+    if (P.rainbowT > 0) uni.mane.concat(uni.tail).forEach((m, i) => m.material.color.setHSL(((worldT * .6 + i * .08) % 1), .85, .65));
+    else uni.mane.concat(uni.tail).forEach((m, i) => m.material.color.set(uni.colors[i % uni.colors.length]));
+    rivals.forEach((rv, i) => poseUnicorn(rv3[i], cx(rv.x) + rv.lx, 0, rv.x, rv.done && state === 'done' ? 0 : worldT + i, false, 0, 1));
+    for (const it of items3) {
+      if (it.got || Math.abs(it.s - s) > 160) { if (!it.got) it.obj.visible = false; continue; }
+      it.obj.visible = true;
+      if (it.type === 'cupcake') { it.obj.rotation.y = worldT * 2 + it.ph; it.obj.position.y = it.baseY + Math.sin(worldT * 3 + it.ph) * .12; }
+      else if (it.type === 'wand') { it.obj.children[0].rotation.y = worldT * 3; it.obj.position.y = it.baseY + Math.sin(worldT * 3 + it.ph) * .2; }
+      else if (it.type === 'potion') { it.obj.rotation.z = Math.sin(worldT * 3 + it.ph) * .25; it.obj.position.y = it.baseY + Math.sin(worldT * 2.5 + it.ph) * .18; }
+      else if (it.type === 'gumdrop') { it.squash = Math.max(0, (it.squash || 0) - .03); const q = 1 - Math.sin(it.squash * Math.PI * 3) * .25 * it.squash; it.obj.scale.set(1 / q, q, 1 / q); }
+    }
+    sparkGroup.position.y = Math.sin(worldT * .8) * .5;
+    // camera: starts in front of the unicorn for the countdown, swings behind on GO, and comes round to the front at the finish
+    let a = Math.PI;
+    if (state === 'count') { const k = clamp(1 - (countT - .2) / 3, 0, 1); a = Math.PI * k * k * (3 - 2 * k); }
+    if (state === 'done') { finishCam = Math.min(1, finishCam + 1 / 60 * .6); a = Math.PI * (1 - finishCam * finishCam * (3 - 2 * finishCam) * .85); }
+    const yaw = -Math.atan(dcx(s));
+    const far = h > w ? 1.55 : 1, ox = Math.sin(a) * 4 * far, oz = -Math.cos(a) * 6.5 * far, oy = (2.2 + (1 - Math.cos(a)) * .55) * (h > w ? 1.35 : 1);
+    const tx = x + ox * Math.cos(yaw) + oz * Math.sin(yaw), tz = -s - ox * Math.sin(yaw) + oz * Math.cos(yaw), ty = oy + P.h * .5;
+    const k = camPos.ok ? .12 : 1;
+    camPos.x = lerp(camPos.x, tx, k); camPos.y = lerp(camPos.y, ty, k); camPos.z = lerp(camPos.z, tz, k); camPos.ok = true;
+    camera.position.set(camPos.x, camPos.y, camPos.z);
+    const ahead = a / Math.PI;
+    camera.lookAt(lerp(x, cx(s + 4) + P.lx * .8, ahead), 1.5 + P.h * .5, -(s + 4 * ahead));
+    sky.position.copy(camera.position);
+    renderer.render(scene, camera);
+  }
+
+  function overlay() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offX, dpr * offY);
+    const left = -offX / scale, right = W + offX / scale;
+    const v = new T.Vector3();
+    for (const q of pops3) {
+      v.set(q.x, q.y, q.z).project(camera);
+      if (v.z > 1) continue;
+      const sx = ((v.x + 1) / 2 * cw - offX) / scale, sy = ((1 - v.y) / 2 * ch - offY) / scale;
+      ctx.globalAlpha = clamp(q.life * 1.5, 0, 1); label(q.text, clamp(sx, left + 150, right - 150), clamp(sy, 90, H - 90), 30, q.col, '#fff');
+    }
+    ctx.globalAlpha = 1;
+    for (const q of confetti) { ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.fillStyle = q.col; ctx.fillRect(-q.w / 2, -q.w / 4, q.w, q.w / 2); ctx.restore(); }
+    drawHUD(left, right);
+  }
+
+  return { start, reset, hide, update, render, overlay, move, jump: jump3, LEN };
+})();
+
 // ---------- screens ----------
 const titleUI = document.getElementById('titleUI'), doneUI = document.getElementById('doneUI');
 const lvlBox = document.getElementById('levels');
@@ -989,7 +1429,7 @@ function renderLevels() {
     const b = document.createElement('button');
     b.className = 'lvl ' + lv.cls;
     const best = store.get('ucr_best_' + lv.id, null);
-    b.innerHTML = `<span class="ico">${lv.icon}</span><span><b>${i + 1}. ${lv.name}</b><span>${lv.sub}</span></span><span class="num">${best ? (lv.mode === 'swim' ? '🫧 ' : '⭐ ') + best.stars : 'Play!'}</span>`;
+    b.innerHTML = `<span class="ico">${lv.icon}</span><span><b>${i + 1}. ${lv.name}${lv.isNew ? '<span class="new">3D</span>' : ''}</b><span>${lv.sub}</span></span><span class="num">${best ? (lv.mode === 'swim' ? '🫧 ' : lv.mode === '3d' ? '🧁 ' : '⭐ ') + best.stars : 'Play!'}</span>`;
     b.addEventListener('click', e => { e.stopPropagation(); startLevel(i); });
     lvlBox.appendChild(b);
   });
@@ -1003,8 +1443,25 @@ function startLevel(i) {
   levelIdx = i; L = LEVELS[i];
   document.title = "Sophie's Unicorn Cloud Race: " + L.name;
   titleUI.classList.add('hidden'); doneUI.classList.add('hidden');
+  if (L.mode === '3d') {
+    state = 'loading';
+    const lu = document.getElementById('loadUI');
+    document.getElementById('loadTitle').textContent = '🧁 Mixing the magic frosting...';
+    document.getElementById('loadMsg').textContent = 'Getting the 3D Cupcake Kingdom ready.';
+    document.getElementById('loadBack').classList.add('hidden');
+    lu.classList.remove('hidden');
+    M3.start().then(() => { lu.classList.add('hidden'); if (L.mode === '3d' && state === 'loading') M3.reset(); })
+      .catch(() => {
+        document.getElementById('loadTitle').textContent = '🧁 Oh no, the magic is stuck!';
+        document.getElementById('loadMsg').textContent = 'The Cupcake Kingdom needs the internet to load its magic. Check the connection and try again!';
+        document.getElementById('loadBack').classList.remove('hidden');
+      });
+    return;
+  }
+  M3.hide();
   reset();
 }
+document.getElementById('loadBack').addEventListener('click', e => { e.stopPropagation(); document.getElementById('loadUI').classList.add('hidden'); showTitle(); });
 document.getElementById('againBtn').addEventListener('click', e => { e.stopPropagation(); startLevel(levelIdx); });
 document.getElementById('nextBtn').addEventListener('click', e => { e.stopPropagation(); startLevel((levelIdx + 1) % LEVELS.length); });
 document.getElementById('menuLink').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); showTitle(); });
@@ -1012,22 +1469,24 @@ document.getElementById('menuLink').addEventListener('click', e => { e.preventDe
 function showTitle() {
   clearTimeout(doneTimer);
   doneUI.classList.add('hidden'); titleUI.classList.remove('hidden');
+  M3.hide();
   L = LEVELS[0]; state = 'title'; renderLevels(); titleScene();
 }
 
 function showDone() {
   const ahead = rivals.filter(rv => rv.doneT >= 0 && rv.doneT < finishT);
-  const place = ahead.length + 1, sea = L.mode === 'swim';
+  const place = ahead.length + 1, sea = L.mode === 'swim', cake = L.mode === '3d';
   document.getElementById('doneTitle').textContent = place === 1 ? 'You won! 🏆' : place === 2 ? 'Second place! 🥈' : 'You made it! 🎉';
   const where = L.goal;
   let msg = place === 1 ? `You beat Pip and Coco to ${where}!`
-    : place === 2 ? `${ahead[0].name} got there just a tiny bit first. Grab the ${sea ? 'rainbow shells' : 'rainbows'} to zoom ahead next time!`
-    : `Pip and Coco got there first, but you made it to ${where}! Grab the ${sea ? 'rainbow shells' : 'rainbows'} to zoom past them next time!`;
+    : place === 2 ? `${ahead[0].name} got there just a tiny bit first. Grab the ${sea ? 'rainbow shells' : cake ? 'magic stars' : 'rainbows'} to zoom ahead next time!`
+    : `Pip and Coco got there first, but you made it to ${where}! Grab the ${sea ? 'rainbow shells' : cake ? 'magic stars' : 'rainbows'} to zoom past them next time!`;
   if (L.id === 'road') msg += delivered === totalHouses ? ` And every single house got a rainbow!` : ` You brought rainbows to ${delivered} of ${totalHouses} houses.`;
   if (L.id === 'clouds' && place === 1) msg += ' The unicorns are throwing a sparkle party for you.';
   if (sea && place === 1) msg += ' The fish are having a bubble party for you.';
+  if (cake && place === 1) msg += ' The whole kingdom is having a cupcake party for you!';
   document.getElementById('doneMsg').textContent = msg;
-  document.getElementById('doneStats').textContent = `${sea ? '🫧' : '⭐'} ${stars} of ${totalStars} ${sea ? 'pearls' : 'stars'}   ⏱️ ${finishT.toFixed(1)} s`;
+  document.getElementById('doneStats').textContent = `${sea ? '🫧' : cake ? '🧁' : '⭐'} ${stars} of ${totalStars} ${sea ? 'pearls' : cake ? 'cupcakes' : 'stars'}   ⏱️ ${finishT.toFixed(1)} s`;
   const key = 'ucr_best_' + L.id, b = store.get(key, null);
   if (!b || stars > b.stars || (stars === b.stars && finishT < b.time)) store.set(key, { stars, time: finishT });
   const next = LEVELS[(levelIdx + 1) % LEVELS.length];
@@ -1036,13 +1495,18 @@ function showDone() {
 }
 
 // ---------- input ----------
-function onTap() {
+function onTap(e) {
   audioInit();
   if (paused) { paused = false; last = performance.now(); return; }
+  if (L.mode === '3d') {
+    const fx = e && e.clientX !== undefined ? e.clientX / cw : .5;
+    if (fx < .36) M3.move(-1); else if (fx > .64) M3.move(1); else M3.jump();
+    return;
+  }
   holding = true;
   jump();
 }
-cv.addEventListener('pointerdown', e => { e.preventDefault(); onTap(); });
+cv.addEventListener('pointerdown', e => { e.preventDefault(); onTap(e); });
 window.addEventListener('pointerup', () => { holding = false; });
 window.addEventListener('pointercancel', () => { holding = false; });
 window.addEventListener('keydown', e => {
@@ -1052,6 +1516,10 @@ window.addEventListener('keydown', e => {
     if (state === 'done' && !doneUI.classList.contains('hidden')) { startLevel((levelIdx + 1) % LEVELS.length); return; }
     if (state === 'title') return;
     onTap();
+  }
+  if (L.mode === '3d' && state === 'play') {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); M3.move(-1); }
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); M3.move(1); }
   }
 });
 window.addEventListener('keyup', e => { if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') holding = false; });
@@ -1084,8 +1552,11 @@ function frame(now) {
     const p = platUnder(P.x); if (p) P.y = p.y; P.ground = !!p;
     rivals.forEach((rv, i) => { rv.x = P.x - 110 - i * 90; rv.y = trackY(rv.x); });
     drawPreview(dt);
-  } else if (!paused) update(dt);
-  draw();
+    draw();
+  } else if (L.mode === '3d') {
+    if (state === 'loading') { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#ffd6ec'; ctx.fillRect(0, 0, cv.width, cv.height); }
+    else { if (!paused) M3.update(dt); M3.render(); M3.overlay(); }
+  } else { if (!paused) update(dt); draw(); }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
