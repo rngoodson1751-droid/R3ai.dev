@@ -213,3 +213,8 @@ The everyday digital cards, without the jet, are `worker/private/bethany-doty.ht
 ## Clarus van demo (unlisted)
 
 A sales demo for Clarus (4 November 2026): a white Transit 350 High Roof paratransit van, Unit 609-011, built in three.js with studio lighting, that visitors can turn all the way around, sit in the driver's seat, walk the cabin and watch the rear wheelchair lift deploy. Black Clarus pucks (Robert's Clarus logo) mark 18 systems; tapping one "scans" it and opens a card with what Clarus does there, the rules it helps with, and illustrative pricing. Visitors add modules to a build that totals equipment, monthly service, compliance coverage and payback. It is `worker/private/clarus-van.html`, served read only at `/work/clarus-van/<key>/` through the `UNLISTED` list. The City logo on the doors is the one from the tracker page; both logos are embedded in the file. three.js loads from jsDelivr. The products, prices and rule citations are the `PRODUCTS` list near the top of the script. Keep its address and key once Robert shares the link.
+
+
+### Council briefing (unlisted)
+
+The LC Transit Mission Control presentation for Councilman Matt Young (20 November 2026), copied from Robert's Claude artifact. It is `worker/private/council-briefing.html`, served read only at `/work/council-briefing/<key>/` through the `UNLISTED` list, with `noindex` in the page and the header. It scales a 1920 by 1080 stage to any screen: arrow keys or swipes change sections, N shows speaker notes, T starts the timer, F goes full screen. It is not linked from anywhere on the site.

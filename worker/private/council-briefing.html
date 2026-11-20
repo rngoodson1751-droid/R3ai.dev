@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>LC Transit Mission Control: Council Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#07152b; --navy2:#0d2347; --panel:rgba(18,42,82,.72); --line:rgba(120,170,255,.18);
+  --yellow:#ffc72c; --cyan:#4fd1ff; --violet:#b78cff; --green:#46e39a; --pink:#ff6b9a;
+  --text:#eaf1ff; --dim:#9db0d3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#020812;overflow:hidden;font-family:'Space Grotesk',system-ui,sans-serif;color:var(--text)}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1920px;height:1080px;position:relative;flex:none;transform-origin:center center;
+  background:radial-gradient(1200px 700px at 75% 20%,#123063 0%,transparent 60%),radial-gradient(900px 600px at 10% 90%,#0e2a55 0%,transparent 60%),var(--navy);overflow:hidden}
+#gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.35;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%)}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* HUD */
+#hud{position:absolute;left:0;right:0;top:0;height:78px;display:flex;align-items:center;padding:0 44px;gap:28px;border-bottom:1px solid var(--line);background:linear-gradient(#07152bee,#07152b88);z-index:20}
+.logo{display:flex;align-items:center;gap:14px;font-weight:700;letter-spacing:.14em;font-size:24px}
+.logo .bus{width:44px;height:28px;border-radius:7px;background:var(--navy2);border:2px solid var(--yellow);position:relative}
+.logo .bus:before{content:"";position:absolute;left:4px;right:4px;top:5px;height:8px;background:var(--yellow);border-radius:2px}
+.logo .bus:after{content:"";position:absolute;left:6px;right:6px;bottom:-6px;height:8px;background:radial-gradient(circle at 6px 4px,#fff 3px,transparent 4px),radial-gradient(circle at calc(100% - 6px) 4px,#fff 3px,transparent 4px)}
+.logo small{color:var(--dim);font-weight:500;letter-spacing:.2em;font-size:14px;margin-left:6px}
+.hud-sp{flex:1}
+.chip{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--dim);display:flex;gap:10px;align-items:center}
+.chip b{color:var(--text);font-weight:600}
+.dot-live{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.35}}
+#timerBox{display:flex;align-items:center;gap:14px;padding:8px 16px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:rgba(0,0,0,.2)}
+#budgetBar{width:160px;height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+#budgetFill{height:100%;width:0;background:var(--green);transition:width .5s,background .5s}
+
+/* nav */
+#nav{position:absolute;bottom:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:center;gap:10px;z-index:20;border-top:1px solid var(--line);background:linear-gradient(#07152b55,#07152bee)}
+.navbtn{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--dim);padding:8px 14px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:.3s;white-space:nowrap}
+.navbtn:hover{color:var(--text)}
+.navbtn.on{color:var(--navy);background:var(--yellow);font-weight:600}
+.navbtn.done{color:var(--text)}
+#keys{position:absolute;right:30px;bottom:20px;font-size:12px;color:#5f7398;z-index:21}
+
+/* scenes */
+.scene{position:absolute;left:0;right:0;top:78px;bottom:64px;padding:50px 80px;opacity:0;pointer-events:none;transform:translateY(30px) scale(.985);transition:opacity .7s ease,transform .7s ease}
+.scene.on{opacity:1;pointer-events:auto;transform:none}
+.kicker{font-family:'JetBrains Mono',monospace;color:var(--yellow);letter-spacing:.22em;font-size:18px;text-transform:uppercase;margin-bottom:14px}
+h1{font-size:76px;line-height:1.02;font-weight:700;letter-spacing:-.02em}
+h2{font-size:58px;line-height:1.05;font-weight:700;letter-spacing:-.015em}
+.lede{font-size:28px;color:var(--dim);line-height:1.4;max-width:1100px;margin-top:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(6px)}
+.hl{color:var(--yellow)}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:.12em;padding:5px 10px;border-radius:6px}
+.t-live{background:rgba(70,227,154,.16);color:var(--green)}
+.t-pilot{background:rgba(79,209,255,.16);color:var(--cyan)}
+.t-build{background:rgba(255,199,44,.16);color:var(--yellow)}
+.t-plan{background:rgba(183,140,255,.18);color:var(--violet)}
+
+/* scene 0 */
+#s0 svg.routes{position:absolute;inset:-78px 0 -64px 0;width:100%;height:1080px;opacity:.55}
+.routes path{fill:none;stroke-width:5;stroke-linecap:round;stroke-dasharray:2200;stroke-dashoffset:2200}
+.scene.on .routes path{animation:draw 4.5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.routes circle{fill:#fff;opacity:0}
+.scene.on .routes circle{animation:pop .5s ease forwards}
+@keyframes pop{to{opacity:.9}}
+.s0wrap{position:relative;display:grid;grid-template-columns:1.25fr .9fr;gap:70px;height:100%;align-items:center}
+.agenda{padding:36px 40px}
+.agenda h3{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.2em;color:var(--dim);margin-bottom:18px}
+.agenda li{list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:25px;padding:13px 0;border-bottom:1px dashed var(--line)}
+.agenda li span.m{font-family:'JetBrains Mono',monospace;color:var(--yellow);font-size:18px}
+.agenda .tot{display:flex;justify-content:space-between;margin-top:18px;font-family:'JetBrains Mono',monospace;color:var(--dim);font-size:17px}
+.press{margin-top:44px;font-family:'JetBrains Mono',monospace;color:var(--dim);font-size:18px;display:flex;gap:14px;align-items:center}
+.kbd{border:1px solid var(--dim);border-radius:6px;padding:3px 10px;color:var(--text)}
+
+/* scene 1 stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:46px}
+.stat{padding:30px 30px 26px;min-height:250px;display:flex;flex-direction:column}
+.stat .num{font-size:92px;font-weight:700;line-height:1;color:var(--yellow);font-variant-numeric:tabular-nums}
+.stat .num small{font-size:40px;color:var(--text);margin-left:6px}
+.stat .lbl{font-size:24px;font-weight:600;margin-top:14px}
+.stat .sub{font-size:18px;color:var(--dim);margin-top:8px;line-height:1.35}
+.stat.c2 .num{color:var(--cyan)} .stat.c3 .num{color:var(--green)} .stat.c4 .num{color:var(--violet)}
+
+/* scene 2 constellation */
+.s2wrap{display:grid;grid-template-columns:1040px 1fr;gap:40px;height:100%}
+#const{width:1040px;height:820px;margin-top:-20px}
+#const .ring{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 8}
+#const .spoke{stroke-width:1.5;opacity:.35;transition:opacity .4s}
+#const .spoke.on{opacity:1;stroke-width:3}
+.node{cursor:pointer}
+.node circle.core{transition:r .3s}
+.node text{font-family:'Space Grotesk';font-size:17px;fill:var(--text);font-weight:600;pointer-events:none}
+.node .halo{opacity:0;transition:opacity .3s}
+.node.on .halo{opacity:1;animation:halo 1.6s infinite}
+@keyframes halo{0%{r:18}100%{r:44;opacity:0}}
+#hub text{font-family:'JetBrains Mono';font-weight:600;fill:var(--navy);font-size:20px}
+.legend{display:flex;gap:24px;font-size:18px;color:var(--dim);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+#card{padding:40px 44px;margin-top:20px;min-height:560px;position:relative;overflow:hidden}
+#card .cat{font-family:'JetBrains Mono';letter-spacing:.2em;font-size:15px;text-transform:uppercase}
+#card h3{font-size:46px;line-height:1.1;margin:14px 0 18px}
+#card .what{font-size:25px;line-height:1.45}
+#card .why{margin-top:26px;padding-top:22px;border-top:1px solid var(--line);font-size:22px;color:var(--dim);line-height:1.45}
+#card .why b{color:var(--text)}
+#card .fade{animation:cardIn .5s ease}
+@keyframes cardIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.tourbtn{margin-top:22px;display:flex;gap:14px}
+.btn{font-family:'JetBrains Mono';font-size:16px;padding:12px 20px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer}
+.btn.on{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+#tourProg{height:4px;background:var(--yellow);width:0;position:absolute;left:0;bottom:0}
+
+/* scene 3 sim */
+.simgrid{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:26px}
+.simcol{padding:22px 24px}
+.simhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.simhead h3{font-size:30px}
+.simhead .sub{font-size:18px;color:var(--dim)}
+canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122a}
+.simstats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.ss{background:rgba(0,0,0,.22);border-radius:12px;padding:12px 16px}
+.ss .v{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
+.ss .k{font-size:15px;color:var(--dim);font-family:'JetBrains Mono'}
+.simfoot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:var(--dim);font-size:17px}
+
+/* scene 4 phone */
+.s4wrap{display:grid;grid-template-columns:520px 1fr;gap:90px;align-items:center;height:100%}
+.phone{width:400px;height:800px;border-radius:60px;background:#0a0f1c;border:3px solid #2b3c5e;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 10px #111a2e;position:relative;overflow:hidden;margin:auto}
+.phone .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:120px;height:30px;background:#000;border-radius:20px;z-index:3}
+.pmap{position:absolute;inset:0;background:#0f2140}
+.pmap svg{width:100%;height:100%}
+.psheet{position:absolute;left:14px;right:14px;bottom:14px;border-radius:30px;background:#f5f8ff;color:#0a1630;padding:24px 24px 28px;z-index:2}
+.psheet .st{font-size:15px;font-weight:700;letter-spacing:.12em;color:#5a6b8c;font-family:'JetBrains Mono'}
+.psheet .big{font-size:34px;font-weight:700;margin:6px 0 4px}
+.psheet .sm{font-size:18px;color:#46597d}
+.psheet .pbtn{margin-top:16px;background:#0d2347;color:#fff;border-radius:16px;text-align:center;padding:14px;font-weight:600;font-size:19px}
+.steps{display:flex;flex-direction:column;gap:22px;margin-top:34px}
+.step{display:flex;gap:26px;padding:24px 28px;align-items:flex-start;transition:.4s;opacity:.45}
+.step.on{opacity:1;border-color:var(--yellow);transform:translateX(10px)}
+.step .n{font-family:'JetBrains Mono';font-size:30px;font-weight:600;color:var(--yellow);width:50px}
+.step h4{font-size:30px}
+.step p{font-size:21px;color:var(--dim);margin-top:6px;line-height:1.4}
+.para{margin-top:26px;padding:22px 28px;font-size:21px;line-height:1.45;border-left:5px solid var(--cyan)}
+
+/* scene 5 money */
+.s5wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:34px}
+.zero{display:flex;align-items:center;gap:30px;padding:30px 36px}
+.zero .z{font-size:120px;font-weight:700;color:var(--green);line-height:1}
+.zero .zt{font-size:30px;font-weight:600}
+.zero .zs{font-size:20px;color:var(--dim);margin-top:6px}
+.stack{margin-top:24px;display:flex;flex-direction:column;gap:14px}
+.blk{padding:22px 28px;border-radius:16px;font-size:24px;font-weight:600;display:flex;justify-content:space-between;align-items:center;transform:translateX(-40px);opacity:0;transition:.6s}
+.scene.on .blk{transform:none;opacity:1}
+.blk small{display:block;font-size:17px;font-weight:400;opacity:.8;margin-top:4px}
+.b1{background:linear-gradient(90deg,#1b4fa0,#2a6ad1)} .b2{background:linear-gradient(90deg,#16685a,#1f9a7e)} .b3{background:rgba(255,255,255,.05);border:1px dashed var(--line);color:var(--dim)}
+.chain{padding:30px 34px}
+.chain h3,.opts h3{font-family:'JetBrains Mono';font-size:16px;letter-spacing:.2em;color:var(--dim);margin-bottom:16px}
+.link{display:flex;gap:18px;align-items:flex-start;padding:12px 0;position:relative}
+.link .ic{flex:none;width:40px;height:40px;border-radius:50%;border:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:600;color:var(--yellow)}
+.link .tx{font-size:21px;line-height:1.35} .link .tx small{display:block;color:var(--dim);font-size:17px}
+.opts{padding:26px 34px;margin-top:22px}
+.opt{display:flex;gap:18px;align-items:center;padding:12px 0;font-size:21px}
+.opt .tag{flex:none;width:150px;text-align:center}
+
+/* scene 6 proof */
+.proof{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:50px}
+.pc{padding:36px 36px;min-height:420px}
+.pc .ico{font-size:58px;margin-bottom:18px}
+.pc h3{font-size:34px;line-height:1.15}
+.pc p{font-size:22px;color:var(--dim);line-height:1.45;margin-top:14px}
+.pc .date{font-family:'JetBrains Mono';color:var(--yellow);font-size:17px;margin-top:20px}
+
+/* scene 7 timeline */
+.tl{position:relative;margin-top:70px;height:250px}
+.tl .bar{position:absolute;left:40px;right:40px;top:78px;height:6px;background:rgba(255,255,255,.1);border-radius:3px}
+.tl .fill{position:absolute;left:40px;top:78px;height:6px;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:3px;width:0;transition:width 2.5s ease .3s}
+.scene.on .tl .fill{width:calc(100% - 80px)}
+.ms{position:absolute;top:0;width:300px;transform:translateX(-50%);text-align:center}
+.ms .pin{width:30px;height:30px;border-radius:50%;margin:44px auto 20px;background:var(--navy);border:4px solid var(--yellow)}
+.ms.now .pin{background:var(--yellow);box-shadow:0 0 0 10px rgba(255,199,44,.2)}
+.ms.goal .pin{border-color:var(--green);background:var(--green);box-shadow:0 0 30px var(--green)}
+.ms .when{font-family:'JetBrains Mono';color:var(--yellow);font-size:17px}
+.ms .what{font-size:22px;font-weight:600;margin-top:6px;line-height:1.3}
+.help{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:90px}
+.hc{padding:28px 32px;font-size:23px;line-height:1.4}
+.hc b{display:block;font-size:28px;margin-bottom:10px;color:var(--yellow)}
+
+/* scene 8 */
+.s8wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center}
+.s8wrap h1{font-size:130px}
+.contact{margin-top:50px;padding:30px 50px;display:flex;gap:60px;font-size:24px;text-align:left}
+.contact div small{display:block;font-family:'JetBrains Mono';color:var(--dim);font-size:14px;letter-spacing:.2em;margin-bottom:6px}
+
+
+/* AI startup scene */
+.aiwrap{display:grid;grid-template-columns:1.05fr .95fr;gap:50px;margin-top:30px}
+.vs{padding:26px 32px}
+.vs h3,.team h3{font-family:'JetBrains Mono';font-size:16px;letter-spacing:.2em;color:var(--dim);margin-bottom:10px;display:flex;justify-content:space-between}
+.vrow{display:grid;grid-template-columns:1fr 50px 1.15fr;align-items:center;padding:13px 0;border-bottom:1px dashed var(--line);opacity:0;transform:translateY(12px);transition:.5s}
+.scene.on .vrow{opacity:1;transform:none}
+.vrow .old{font-size:20px;color:#7e90b3;text-decoration:line-through;text-decoration-color:rgba(255,107,154,.6)}
+.vrow .arr{color:var(--yellow);font-size:26px;text-align:center}
+.vrow .new{font-size:21px;font-weight:600}
+.vrow .new small{display:block;font-weight:400;color:var(--dim);font-size:16px;margin-top:2px}
+.team{padding:26px 32px}
+.teamviz{position:relative;height:255px}
+.teamviz svg{position:absolute;inset:0;width:100%;height:100%}
+.agent{position:absolute;z-index:1;transform:translate(-50%,-50%);padding:12px 16px;border-radius:14px;background:#0b1a36;border:1px solid var(--line);text-align:center;width:230px}
+.agent b{display:block;font-size:19px}
+.agent span{font-size:15px;color:var(--dim)}
+.agent.human{border-color:var(--yellow);background:#2a2a24;width:250px;box-shadow:0 0 30px rgba(255,199,44,.25)}
+.agent.human b{color:var(--yellow)}
+.pkt{fill:var(--cyan)}
+.loop{display:flex;gap:10px;margin-top:18px;align-items:center}
+.lp{flex:1;text-align:center;padding:14px 8px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-family:'JetBrains Mono';font-size:16px;transition:.4s}
+.lp.on{background:var(--yellow);color:var(--navy);border-color:var(--yellow);font-weight:600}
+.loopnote{font-size:17px;color:var(--dim);margin-top:10px;text-align:center}
+.ship{display:flex;gap:22px;align-items:center;padding:16px 22px;margin-top:14px;border-color:var(--green)}
+.ship .clock{flex:none;width:96px;height:96px;border-radius:50%;border:4px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(70,227,154,.3)}
+.ship .clock b{font-size:40px;line-height:1;color:var(--green)}
+.ship .clock span{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.12em;color:var(--dim)}
+.sh-k{font-family:'JetBrains Mono';font-size:13px;letter-spacing:.18em;color:var(--green)}
+.sh-t{font-size:22px;display:block;margin-top:2px}
+.ship p{font-size:17px;color:var(--dim);line-height:1.35;margin-top:4px}
+.aibadge{font-family:'JetBrains Mono';font-size:12px;font-weight:600;padding:3px 7px;border-radius:5px;background:linear-gradient(90deg,#4fd1ff,#b78cff);color:#07152b;margin-left:8px;vertical-align:3px}
+
+
+/* field report */
+.fwrap{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:30px}
+.chat{padding:28px 30px;display:flex;flex-direction:column;gap:12px;min-height:600px}
+.chat h3,.pts h3{font-family:'JetBrains Mono';font-size:15px;letter-spacing:.2em;color:var(--dim);margin-bottom:6px;display:flex;justify-content:space-between}
+.bub{max-width:82%;padding:12px 18px;border-radius:18px;font-size:21px;line-height:1.35;opacity:0;transform:translateY(10px);transition:.45s}
+.bub.show{opacity:1;transform:none}
+.bub small{display:block;font-family:'JetBrains Mono';font-size:12px;letter-spacing:.12em;opacity:.7;margin-bottom:3px}
+.bub.en{align-self:flex-start;background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.bub.es{align-self:flex-end;background:linear-gradient(90deg,rgba(79,209,255,.22),rgba(183,140,255,.22));border:1px solid rgba(79,209,255,.4)}
+.bub.rider{align-self:flex-start;background:rgba(255,199,44,.16);border:1px solid var(--yellow);font-size:30px;font-weight:700}
+.bub.rider em{display:block;font-style:normal;font-size:18px;font-weight:400;color:var(--dim)}
+.pts{display:flex;flex-direction:column;gap:14px}
+.pt{padding:18px 24px;display:flex;gap:18px;align-items:flex-start}
+.pt .ico{font-size:30px;flex:none;width:40px;text-align:center}
+.pt b{font-size:23px;display:block}
+.pt p{font-size:18px;color:var(--dim);line-height:1.4;margin-top:3px}
+.langs{display:flex;gap:10px;align-items:center;font-size:18px;color:var(--dim);margin-top:4px}
+.lang{font-family:'JetBrains Mono';font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--text)}
+
+/* notes */
+#notes{position:absolute;left:80px;right:80px;bottom:84px;z-index:30;padding:22px 30px;background:rgba(3,10,24,.94);border:1px solid var(--yellow);border-radius:16px;font-size:22px;line-height:1.5;display:none}
+#notes.show{display:block}
+#notes .h{font-family:'JetBrains Mono';color:var(--yellow);font-size:14px;letter-spacing:.2em;margin-bottom:6px}
+#notes li{margin-left:24px}
+/* phones: turn sideways hint */
+#rotate{display:none}
+@media (orientation:portrait) and (max-width:820px){
+  #rotate{display:flex;position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:99;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:rgba(7,21,43,.92);border:1px solid rgba(255,199,44,.5);color:#eaf1ff;font:500 15px/1.35 'Space Grotesk',system-ui,sans-serif}
+  #rotate b{font-size:24px;color:#ffc72c}
+  #rotate button{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.25);color:#eaf1ff;border-radius:999px;padding:6px 12px;font:inherit}
+}
+</style>
+</head>
+<body>
+<div id="rotate" role="note"><b>&#x21bb;</b><span>Turn your phone sideways for the full view. Swipe left or right to change sections.</span><button type="button" onclick="this.parentNode.remove()">OK</button></div>
+<div id="viewport"><div id="stage">
+<div id="gridbg"></div>
+
+<header id="hud">
+  <div class="logo"><div class="bus"></div>LC TRANSIT <small>MISSION CONTROL</small></div>
+  <div class="hud-sp"></div>
+  <div class="chip"><span class="dot-live"></span><span id="clock">--:--</span></div>
+  <div id="timerBox" title="Click or press T to start / pause the meeting timer">
+    <div class="chip">MEETING <b id="elapsed">00:00</b> / <span id="totalBudget">54:00</span></div>
+    <div id="budgetBar"><div id="budgetFill"></div></div>
+    <div class="chip" id="sceneBudget">2 min</div>
+  </div>
+</header>
+
+<!-- 0 WELCOME -->
+<section class="scene" id="s0" data-min="2" data-name="Welcome">
+  <svg class="routes" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+    <path d="M-20 820 C 300 760, 420 600, 700 620 S 1100 760, 1400 560 S 1800 300, 1960 340" stroke="#ffc72c"/>
+    <path d="M200 -20 C 260 240, 520 300, 640 480 S 760 900, 1000 1100" stroke="#4fd1ff" style="animation-delay:.4s"/>
+    <path d="M1960 820 C 1700 860, 1500 700, 1300 760 S 900 980, 600 940 S 200 1000, -20 1040" stroke="#46e39a" style="animation-delay:.8s"/>
+    <path d="M1100 -20 C 1080 200, 1260 300, 1240 460 S 1500 700, 1600 1100" stroke="#b78cff" style="animation-delay:1.2s"/>
+    <path d="M-20 300 C 300 330, 500 200, 800 240 S 1300 140, 1960 120" stroke="#ff6b9a" style="animation-delay:1.6s"/>
+    <circle cx="700" cy="620" r="9" style="animation-delay:2s"/><circle cx="640" cy="480" r="9" style="animation-delay:2.3s"/>
+    <circle cx="1300" cy="760" r="9" style="animation-delay:2.6s"/><circle cx="1240" cy="460" r="9" style="animation-delay:2.9s"/><circle cx="800" cy="240" r="9" style="animation-delay:3.2s"/>
+  </svg>
+  <div class="s0wrap">
+    <div>
+      <div class="kicker">Council briefing · Tuesday, Nov 24, 2026 · 8:00 AM</div>
+      <h1>Moving Lake Charles<br><span class="hl">forward, one stop</span><br>at a time.</h1>
+      <p class="lede">A tour of what the Transit Division has built since April, and an introduction to Via Microtransit: the bus that comes to you.</p>
+      <p class="lede" style="font-size:24px;margin-top:26px">Prepared for <b style="color:var(--text)">Councilman Matt Young</b> by Robert Goodson, Manager, Transit Division</p>
+      <div class="press"><span class="kbd">→</span> to begin <span style="opacity:.5">·</span> <span class="kbd">T</span> start timer <span style="opacity:.5">·</span> <span class="kbd">N</span> notes <span style="opacity:.5">·</span> <span class="kbd">1-0</span> jump <span style="opacity:.5">·</span> <span class="kbd">F</span> full screen</div>
+    </div>
+    <div class="panel agenda">
+      <h3>MISSION PLAN</h3>
+      <ul id="agendaList"></ul>
+      <div class="tot"><span>TOTAL</span><span id="agendaTotal"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 1 SINCE APRIL -->
+<section class="scene" id="s1" data-min="5" data-name="Since April">
+  <div class="kicker">Status report · since April 20, 2026</div>
+  <h2>A small fleet running on <span class="hl">big-city tools.</span></h2>
+  <p class="lede">Ten buses, five routes, and a team that builds its own technology when off-the-shelf tools fall short.</p>
+  <div class="stats">
+    <div class="panel stat"><div class="num" data-count="10">0</div><div class="lbl">Buses in the fleet</div><div class="sub">35' Gillig fixed-route buses with wheelchair ramps, plus the paratransit vans.</div></div>
+    <div class="panel stat c2"><div class="num" data-count="2">0</div><div class="lbl">GPS systems, fused</div><div class="sub">Zonar and Geotab combined into one live tracker for redundancy.</div></div>
+    <div class="panel stat c3"><div class="num" data-count="161" data-prefix="v">0</div><div class="lbl">GTFS feed on Google Maps</div><div class="sub">Our schedule is live in Google Maps, the app riders already have.</div></div>
+    <div class="panel stat c4"><div class="num" data-count="11">0</div><div class="lbl">Daily trips per route</div><div class="sub">Schedule reset so every driver now gets a lunch break.</div></div>
+    <div class="panel stat c2"><div class="num" data-count="4">0</div><div class="lbl">FTA grants to closeout</div><div class="sub">Fully disbursed grants moving to closeout amendments by Nov 30.</div></div>
+    <div class="panel stat"><div class="num" data-count="15" data-suffix="+">0</div><div class="lbl">In-house tech projects</div><div class="sub">From rider apps to a 3D digital twin of the city.</div></div>
+    <div class="panel stat c3"><div class="num" data-count="100" data-suffix="%">0</div><div class="lbl">Triennial Review response</div><div class="sub">FTA corrective actions answered by the Aug 24 deadline.</div></div>
+    <div class="panel stat c4"><div class="num" data-count="1">0</div><div class="lbl">Big next step</div><div class="sub">Via Microtransit, coming to Council in December.</div></div>
+  </div>
+</section>
+
+<!-- AI STARTUP -->
+<section class="scene" id="sAI" data-min="5" data-name="AI startup">
+  <div class="kicker">Operating model</div>
+  <h2>A tech start-up <span class="hl">inside City Hall.</span></h2>
+  <p class="lede" style="font-size:25px;max-width:1500px">We run Transit like a small AI company: a lean human team working with AI agents, building our own tools, shipping in days, and improving them every week.</p>
+  <div class="aiwrap">
+    <div class="panel vs">
+      <h3><span>THE OLD WAY</span><span>THE LC TRANSIT WAY</span></h3>
+      <div class="vrow" style="transition-delay:.2s"><div class="old">Buy a vendor system, wait a budget cycle</div><div class="arr">→</div><div class="new">Prototype in-house in days<small>Paratransit prepayments added in 10 minutes</small></div></div>
+      <div class="vrow" style="transition-delay:.45s"><div class="old">Voicemails and paper trip logs</div><div class="arr">→</div><div class="new">AI listens, transcribes, and queues the trip<small>A person confirms every request</small></div></div>
+      <div class="vrow" style="transition-delay:.7s"><div class="old">Retyping numbers into old systems</div><div class="arr">→</div><div class="new">AI agents handle the repetitive work<small>Daily fare deposits entered and receipted automatically</small></div></div>
+      <div class="vrow" style="transition-delay:.95s"><div class="old">"Where's my bus?" answered by guesswork</div><div class="arr">→</div><div class="new">Live data from two GPS systems<small>Lobby, call center, and Google Maps all see the same feed</small></div></div>
+      <div class="vrow" style="transition-delay:1.2s"><div class="old">Hire a consultant to model a change</div><div class="arr">→</div><div class="new">Test it in our own digital twin first<small>3D model of Lake Charles for routes and traffic</small></div></div>
+      <div class="vrow" style="transition-delay:1.45s;border:none"><div class="old">Interpreter not available</div><div class="arr">→</div><div class="new">Live AI translation, piloted on a real trip<small>Spanish and Ukrainian riders so far; helps close a Title VI gap</small></div></div>
+    </div>
+    <div>
+      <div class="panel team">
+        <h3><span>THE TEAM: HUMANS LEAD, AI BUILDS</span></h3>
+        <div class="teamviz">
+          <svg viewBox="0 0 760 330" preserveAspectRatio="none" id="teamSvg">
+            <path id="tp1" d="M380 165 L130 60" stroke="rgba(79,209,255,.35)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+            <path id="tp2" d="M380 165 L630 60" stroke="rgba(79,209,255,.35)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+            <path id="tp3" d="M380 165 L130 275" stroke="rgba(79,209,255,.35)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+            <path id="tp4" d="M380 165 L630 275" stroke="rgba(79,209,255,.35)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+          </svg>
+          <div class="agent human" style="left:50%;top:50%"><b>Transit staff</b><span>Robert, Bethany and the team set the goals and approve every change</span></div>
+          <div class="agent" style="left:17%;top:18%"><b>Claude</b><span>Cloud hosting, apps, automation</span></div>
+          <div class="agent" style="left:83%;top:18%"><b>ChatGPT</b><span>Simulator and mapping code</span></div>
+          <div class="agent" style="left:17%;top:83%"><b>Meta AI</b><span>Data pipelines for the twin</span></div>
+          <div class="agent" style="left:83%;top:83%"><b>Cloud stack</b><span>Runs 24/7 for a low monthly fee</span></div>
+        </div>
+      </div>
+      <div class="loop"><div class="lp" data-k="0">BUILD</div><div class="lp" data-k="1">SHIP</div><div class="lp" data-k="2">MEASURE</div><div class="lp" data-k="3">IMPROVE</div></div>
+      <div class="panel ship"><div class="clock"><b>10</b><span>MINUTES</span></div><div><div class="sh-k">SHIP IN DAYS · CASE STUDY</div><b class="sh-t">Paratransit prepayments: asked, built, shipped.</b><p>We were asked whether we could accept prepayments for paratransit trips. The app had no way to track them. AI built and shipped prepayment tracking in about 10 minutes.</p></div></div>
+      <div class="loopnote">Via is the next step in this playbook: partnering with a transit tech company.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FIELD REPORT -->
+<section class="scene" id="sField" data-min="3" data-name="From the field">
+  <div class="kicker">From the field · Friday, Nov 20, 2026</div>
+  <h2>Live AI translation, <span class="hl">on a real bus trip.</span></h2>
+  <div class="fwrap">
+    <div class="panel chat" id="chatBox">
+      <h3><span>ENGLISH ⇄ ESPAÑOL · ROUTE 1</span><span>RECREATED EXAMPLE</span></h3>
+      <div class="bub en"><small>STAFF</small>Route 1 is running late this afternoon.</div>
+      <div class="bub es"><small>CLARUS · ES</small>La Ruta 1 viene con retraso esta tarde.</div>
+      <div class="bub en"><small>STAFF</small>A smaller van will run this afternoon's service. If it can't, we'll arrange your pickup.</div>
+      <div class="bub es"><small>CLARUS · ES</small>Una camioneta más pequeña dará el servicio esta tarde. Si no puede, coordinaremos su recogida.</div>
+      <div class="bub en"><small>STAFF</small>Call the transit station anytime to find out where your vehicle is. We're testing this translation. Was it helpful?</div>
+      <div class="bub rider"><small>RIDER</small>"Sí, está bueno."<em>"Yes, it's good."</em></div>
+    </div>
+    <div class="pts">
+      <div class="panel pt"><div class="ico">♿</div><div><b>Accessibility first</b><p>Riders understood a delay, a vehicle change, and how to reach staff, despite the language barrier.</p></div></div>
+      <div class="panel pt"><div class="ico">🚌</div><div><b>Used on a real trip</b><p>Not a demo: it ran during actual service, with real riders and a real problem to explain.</p></div></div>
+      <div class="panel pt"><div class="ico">💲</div><div><b>Potential cost advantage</b><p>Could reduce paid interpretation for routine exchanges. Savings not yet quantified.</p></div></div>
+      <div class="panel pt"><div class="ico">🛡️</div><div><b>Responsible safeguards</b><p>Verify key details, protect rider privacy, and keep qualified human interpreters for safety, medical, legal and other critical matters.</p></div></div>
+      <div class="langs">Languages so far: <span class="lang">Español</span><span class="lang">Українська</span><span style="margin-left:auto">Next: log use cases, feedback, accuracy and cost</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 CONSTELLATION -->
+<section class="scene" id="s2" data-min="10" data-name="Projects">
+  <div class="s2wrap">
+    <div>
+      <div class="kicker">Project constellation</div>
+      <div class="legend"><span><i style="background:var(--yellow)"></i>For riders</span><span><i style="background:var(--cyan)"></i>Operations</span><span><i style="background:var(--violet)"></i>What's next</span><span><i style="background:#fff;border:3px solid var(--cyan)"></i>AI-powered</span><span style="margin-left:auto;font-family:'JetBrains Mono';font-size:15px">click any node</span></div>
+      <svg id="const" viewBox="0 0 1040 820"></svg>
+    </div>
+    <div>
+      <div class="panel" id="card"><div id="cardIn"></div><div id="tourProg"></div></div>
+      <div class="tourbtn"><button class="btn" id="tourBtn">▶ Auto tour</button><button class="btn" id="prevNode">◀ Prev</button><button class="btn" id="nextNode">Next ▶</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 SIM -->
+<section class="scene" id="s3" data-min="8" data-name="Via: The idea">
+  <div class="kicker">Introducing Via Microtransit</div>
+  <h2 style="font-size:50px">Same city. Same riders. <span class="hl">Two ways to get them there.</span></h2>
+  <div class="simgrid">
+    <div class="panel simcol">
+      <div class="simhead"><h3>Today: fixed route</h3><span class="sub">Walk to the line, wait for the bus</span></div>
+      <canvas id="cvA" width="752" height="416"></canvas>
+      <div class="simstats"><div class="ss"><div class="v" id="aAvg">--</div><div class="k">AVG DOOR TO DOOR</div></div><div class="ss"><div class="v" id="aWalk">--</div><div class="k">AVG WALKING</div></div><div class="ss"><div class="v" id="aDone">0</div><div class="k">TRIPS COMPLETED</div></div></div>
+    </div>
+    <div class="panel simcol">
+      <div class="simhead"><h3>With Via: on demand</h3><span class="sub">Book a ride, a van comes to you</span></div>
+      <canvas id="cvB" width="752" height="416"></canvas>
+      <div class="simstats"><div class="ss"><div class="v" id="bAvg" style="color:var(--green)">--</div><div class="k">AVG DOOR TO DOOR</div></div><div class="ss"><div class="v" id="bWalk" style="color:var(--green)">--</div><div class="k">AVG WALKING</div></div><div class="ss"><div class="v" id="bDone">0</div><div class="k">TRIPS COMPLETED</div></div></div>
+    </div>
+  </div>
+  <div class="simfoot"><span>Illustrative simulation only, not a ridership or performance forecast. Pink dots are riders; yellow is the bus line; cyan are on-demand vans.</span><span><button class="btn" id="simSpeed">Speed 3x</button> <button class="btn" id="simReset">↺ Reset</button></span></div>
+</section>
+
+<!-- 4 HOW IT WORKS -->
+<section class="scene" id="s4" data-min="4" data-name="Via: How it works">
+  <div class="s4wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="pmap"><svg viewBox="0 0 400 800" id="pmapSvg">
+        <g stroke="#1d3a6b" stroke-width="10">
+          <line x1="0" y1="140" x2="400" y2="140"/><line x1="0" y1="300" x2="400" y2="300"/><line x1="0" y1="460" x2="400" y2="460"/>
+          <line x1="80" y1="0" x2="80" y2="800"/><line x1="220" y1="0" x2="220" y2="800"/><line x1="340" y1="0" x2="340" y2="800"/>
+        </g>
+        <rect x="235" y="155" width="90" height="130" rx="8" fill="#163a2c"/>
+        <path id="vanPath" d="M80 520 L80 300 L220 300 L220 140 L340 140" fill="none" stroke="#4fd1ff" stroke-width="6" stroke-dasharray="10 10" opacity=".8"/>
+        <circle cx="340" cy="140" r="16" fill="#ff6b9a"/><circle cx="340" cy="140" r="30" fill="none" stroke="#ff6b9a" stroke-width="3" opacity=".6"><animate attributeName="r" values="16;40" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".7;0" dur="1.6s" repeatCount="indefinite"/></circle>
+        <g id="pvan"><rect x="-22" y="-14" width="44" height="28" rx="8" fill="#4fd1ff"/><rect x="-14" y="-8" width="28" height="9" rx="2" fill="#07152b"/></g>
+      </svg></div>
+      <div class="psheet"><div class="st" id="pst">REQUESTING</div><div class="big" id="pbig">Finding your ride</div><div class="sm" id="psm">Matching you with a nearby van</div><div class="pbtn" id="pbtn">Track my ride</div></div>
+    </div>
+    <div>
+      <div class="kicker">How it works</div>
+      <h2>Tap. Share. Ride.</h2>
+      <div class="steps">
+        <div class="panel step" data-i="0"><div class="n">01</div><div><h4>Request a ride</h4><p>Book in the app, online, or with a phone call. Riders without a smartphone are never left out.</p></div></div>
+        <div class="panel step" data-i="1"><div class="n">02</div><div><h4>Share the van</h4><p>Software groups riders headed the same way, so one van does the work of many trips.</p></div></div>
+        <div class="panel step" data-i="2"><div class="n">03</div><div><h4>Ride and track</h4><p>Pickup at a nearby corner, live tracking on the phone, drop-off close to the destination.</p></div></div>
+      </div>
+      <div class="panel para"><b style="color:var(--cyan)">Paratransit too.</b> The same platform can book and dispatch ADA paratransit trips, replacing phone tag and voicemail with real-time scheduling.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 FUNDING -->
+<section class="scene" id="s5" data-min="6" data-name="Via: Funding">
+  <div class="kicker">Funding and procurement</div>
+  <h2>Paid for with <span class="hl">transit dollars,</span> bought the legal way.</h2>
+  <div class="s5wrap">
+    <div>
+      <div class="panel zero"><div class="z">$0</div><div><div class="zt">General Fund dollars</div><div class="zs">No money from the General Fund or any other department.</div></div></div>
+      <div class="stack">
+        <div class="blk b1" style="transition-delay:.3s"><div>Federal FTA Section 5307 funds<small>Asking FTA to shift our pending 5307 application toward operating assistance</small></div><span class="mono">FEDERAL</span></div>
+        <div class="blk b2" style="transition-delay:.6s"><div>City 401 Fund<small>The local share, already dedicated</small></div><span class="mono">LOCAL</span></div>
+        <div class="blk b3" style="transition-delay:.9s"><div>FY2025 suballocated 5307 funds<small>Being added to the same request</small></div><span class="mono">PENDING</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel chain">
+        <h3>THE LEGAL PATH</h3>
+        <div class="link"><div class="ic">1</div><div class="tx">Act 665 of 2026 (effective Aug 1)<small>Amends R.S. 38:2212.1(Q) so services, not just goods, can be bought through purchasing cooperatives</small></div></div>
+        <div class="link"><div class="ic">2</div><div class="tx">City joined the 791 Purchasing Cooperative<small>With the City Attorney's agreement</small></div></div>
+        <div class="link"><div class="ic">3</div><div class="tx">Via contract purchased through 791<small>Competitively procured, no new bid cycle needed</small></div></div>
+        <div class="link"><div class="ic" style="border-color:var(--green);color:var(--green)">✓</div><div class="tx">City Council approval<small>Required because of the annual contract price</small></div></div>
+      </div>
+      <div class="panel opts">
+        <h3>TWO OPTIONS ON THE TABLE</h3>
+        <div class="opt"><span class="tag t-live">RECOMMENDED</span><span>2-year contract: <b>microtransit as a service</b> (vans, drivers, software)</span></div>
+        <div class="opt"><span class="tag t-plan">FALLBACK</span><span>Dispatch software only, under $50k, from the Paratransit Support capital line</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 PROOF -->
+<section class="scene" id="s6" data-min="3" data-name="Via: Proof">
+  <div class="kicker">Proof and momentum</div>
+  <h2>We've seen it work. <span class="hl">Via wants us.</span></h2>
+  <div class="proof">
+    <div class="panel pc"><div class="ico">🚐</div><h3>We rode it in Sugar Land, Texas</h3><p>Transit staff visited Sugar Land's live Via microtransit service to see booking, dispatch, and the rider experience firsthand.</p><div class="date">SITE VISIT · JULY 24, 2026</div></div>
+    <div class="panel pc"><div class="ico">📊</div><h3>A free, comprehensive study</h3><p>Via's executive team has offered a full service study at no cost if the partnership is established before year end. That study can back up the Council vote.</p><div class="date">OFFERED · NOV 17, 2026</div></div>
+    <div class="panel pc"><div class="ico">⭐</div><h3>Lake Charles is Via's regional priority</h3><p>Via has told us this project is its top priority in the region and has committed support through launch.</p><div class="date">LAUNCH · ~6 MONTHS AFTER APPROVAL</div></div>
+  </div>
+</section>
+
+<!-- 7 PATH -->
+<section class="scene" id="s7" data-min="4" data-name="Path to a Yes">
+  <div class="kicker">The path to a yes</div>
+  <h2>From this room to the <span class="hl">first ride.</span></h2>
+  <div class="tl">
+    <div class="bar"></div><div class="fill"></div>
+    <div class="ms now" style="left:6%"><div class="when">NOV 24</div><div class="pin"></div><div class="what">This briefing</div></div>
+    <div class="ms" style="left:27%"><div class="when">LATE NOV</div><div class="pin"></div><div class="what">Via study package to Director Robinson</div></div>
+    <div class="ms" style="left:50%"><div class="when">DECEMBER</div><div class="pin"></div><div class="what">City Council vote</div></div>
+    <div class="ms" style="left:73%"><div class="when">WINTER</div><div class="pin"></div><div class="what">Contract through 791, FTA funding revision</div></div>
+    <div class="ms goal" style="left:94%"><div class="when">2027</div><div class="pin"></div><div class="what">Microtransit launch</div></div>
+  </div>
+  <div class="help">
+    <div class="panel hc"><b>Champion it</b>Help carry the item with your Council colleagues ahead of the December agenda.</div>
+    <div class="panel hc"><b>Stress-test it</b>Tell us the questions Council will ask, so the packet answers them before they come up.</div>
+    <div class="panel hc"><b>Point us to the gaps</b>Which neighborhoods do your constituents say the bus can't reach today?</div>
+  </div>
+</section>
+
+<!-- 8 Q&A -->
+<section class="scene" id="s8" data-min="8" data-name="Q&amp;A">
+  <div class="s8wrap">
+    <div class="kicker">Open floor</div>
+    <h1>Questions<span class="hl">?</span></h1>
+    <p class="lede" style="text-align:center">Thank you, Matt. Every project on today's tour is open for a closer look.</p>
+    <div class="panel contact">
+      <div><small>CONTACT</small>Robert Goodson<br><span style="color:var(--dim)">Manager, Transit Division</span></div>
+      <div><small>OFFICE</small>(337) 491-1253</div>
+      <div><small>EMAIL</small>robert.goodson@cityoflc.us</div>
+    </div>
+  </div>
+</section>
+
+<nav id="nav"></nav>
+<div id="notes"><div class="h">PRESENTER NOTES</div><div id="notesBody"></div></div>
+</div></div>
+
+<script>
+(function(){
+/* ---------- scaling ---------- */
+const stage=document.getElementById('stage');
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform='scale('+s+')';}
+addEventListener('resize',fit);fit();
+
+/* ---------- scenes ---------- */
+const scenes=[...document.querySelectorAll('.scene')];
+const nav=document.getElementById('nav');
+let cur=0;
+const NOTES=[
+ ["Thank Matt for the time; this runs about 54 minutes with room for questions.","Two goals: show what the team has built since April, and introduce Via before it reaches Council in December."],
+ ["Promoted to Transit Manager April 20, 2026.","Small fleet, but we built our own tracker because the fare system hardware couldn't hold a reliable internet connection.","Lunch-break schedule change: 12 trips down to 11 per route."],
+ ["Frame the whole department this way: small team, AI agents as force multipliers, build and iterate fast.","Stress that humans approve everything; AI does the drafting, coding and repetitive entry.","Low cost: the cloud hosting runs for a modest monthly fee instead of large vendor contracts.","Ship-in-days example: asked if we could accept paratransit prepayments; the app had no tracking for it; AI shipped the update in about 10 minutes."],
+ ["Today's real example: Route 1 delay explained to Spanish-speaking riders with Clarus (our ChatGPT assistant). Rider said \"Sí, está bueno.\"","Earlier use with a Ukrainian-speaking rider.","Be clear it is an early pilot, not a replacement for professional interpreters. Next step is documenting use cases, feedback, accuracy and cost."],
+ ["Use Auto tour or click nodes. Pick the 5 or 6 Matt reacts to most.","Good live demos if time allows: the tracker, Google Maps transit directions, the simulator."],
+ ["Let the sim run 30 to 60 seconds. Point out riders outside the yellow loop walking a long way.","Be clear it is illustrative, not a forecast."],
+ ["Phone booking keeps it accessible for riders without smartphones.","Paratransit modernization is half the value: today trip requests arrive as voicemails."],
+ ["Key line: no General Fund money.","Act 665 is what makes the 791 cooperative purchase legal for services. Legal (Corey Rubin) is on the procurement.","Primary: 2-year microtransit as a service. Fallback: SaaS dispatch only, under $50k."],
+ ["Via's free study offer depends on establishing the partnership before year end, which is why December matters."],
+ ["Close with the ask. Renee in the Clerk's office can help schedule briefings with other members."],
+ ["Offer follow-up demos or a ride-along. Leave the tracker up on the TV if useful."]
+];
+let total=0;
+const agendaList=document.getElementById('agendaList');
+scenes.forEach((s,i)=>{
+  const m=+s.dataset.min; total+=m;
+  const b=document.createElement('div');b.className='navbtn';b.textContent=(i+1)+' · '+s.dataset.name;b.onclick=()=>go(i);nav.appendChild(b);
+  if(i>0){const li=document.createElement('li');li.innerHTML='<span>'+s.dataset.name+'</span><span class="m">'+m+' min</span>';agendaList.appendChild(li);}
+});
+document.getElementById('agendaTotal').textContent=total+' min';
+document.getElementById('totalBudget').textContent=String(total).padStart(2,'0')+':00';
+
+function go(i){
+  if(i<0||i>=scenes.length)return;
+  scenes[cur].classList.remove('on');
+  cur=i;
+  scenes[cur].classList.add('on');
+  [...nav.children].forEach((b,k)=>{b.classList.toggle('on',k===i);b.classList.toggle('done',k<i);});
+  document.getElementById('sceneBudget').textContent=scenes[i].dataset.min+' min';
+  document.getElementById('notesBody').innerHTML='<ul>'+NOTES[i].map(n=>'<li>'+n+'</li>').join('')+'</ul>';
+  const id=scenes[i].id;
+  if(id==='s1')countUp();
+  if(id==='s3')Sim.start();else Sim.stop();
+  if(id==='s4')Phone.start();else Phone.stop();
+  if(id==='sAI')Team.start();else Team.stop();
+  if(id==='sField')Chat.start();else Chat.stop();
+  if(id!=='s2')Tour.stop();
+  if(location.hash!=='#s'+i){try{history.replaceState(null,'','#s'+i)}catch(e){}}
+}
+
+/* ---------- clock + timer ---------- */
+let tStart=null,tAccum=0,running=false;
+function fmt(ms){const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function toggleTimer(){if(running){tAccum+=Date.now()-tStart;running=false;}else{tStart=Date.now();running=true;}}
+document.getElementById('timerBox').onclick=toggleTimer;
+setInterval(()=>{
+  const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  const el=tAccum+(running?Date.now()-tStart:0);
+  document.getElementById('elapsed').textContent=fmt(el);
+  // where should we be? planned minutes through end of current scene
+  let planned=0;for(let k=0;k<=cur;k++)planned+=+scenes[k].dataset.min;
+  const pct=Math.min(100,el/(total*60000)*100);
+  const f=document.getElementById('budgetFill');f.style.width=pct+'%';
+  const over=el>planned*60000;f.style.background=el>total*60000?'var(--pink)':(over?'var(--yellow)':'var(--green)');
+},500);
+
+/* ---------- keys ---------- */
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(cur-1);}
+  else if(/^[1-9]$/.test(e.key))go(+e.key-1);
+  else if(e.key==='0')go(scenes.length-1);
+  else if(e.key==='t'||e.key==='T')toggleTimer();
+  else if(e.key==='n'||e.key==='N')document.getElementById('notes').classList.toggle('show');
+  else if(e.key==='f'||e.key==='F'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(err){}}
+  else if(scenes[cur].id==='s2'&&(e.key==='ArrowDown'))Tour.step(1);
+  else if(scenes[cur].id==='s2'&&(e.key==='ArrowUp'))Tour.step(-1);
+});
+/* ---------- swipe (phones and tablets) ---------- */
+let tx=null,ty=0;
+addEventListener('touchstart',e=>{if(e.touches.length!==1){tx=null;return;}tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+addEventListener('touchend',e=>{if(tx===null)return;const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;tx=null;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)go(cur+(dx<0?1:-1));},{passive:true});
+document.getElementById('s0').addEventListener('click',e=>{if(!e.target.closest('.agenda'))go(1);});
+
+/* ---------- count up ---------- */
+function countUp(){
+  document.querySelectorAll('#s1 .num').forEach((n,idx)=>{
+    const t=+n.dataset.count,pre=n.dataset.prefix||'',suf=n.dataset.suffix||'';const t0=performance.now()+idx*120;
+    (function tick(now){const p=Math.max(0,Math.min(1,(now-t0)/1400));const v=Math.round(t*(1-Math.pow(1-p,3)));
+      n.innerHTML=pre+v+(suf?'<small>'+suf+'</small>':'');if(p<1)requestAnimationFrame(tick);})(performance.now());
+  });
+}
+
+/* ---------- constellation ---------- */
+const CAT={r:{c:'#ffc72c',n:'For riders'},o:{c:'#4fd1ff',n:'Operations'},x:{c:'#b78cff',n:"What's next"}};
+const ST={live:['LIVE','t-live'],pilot:['PILOT','t-pilot'],build:['BUILDING','t-build'],plan:['PLANNED','t-plan']};
+const P=[
+ {c:'r',s:'live',n:'Live Bus Tracker',w:'"LC TRANSIT" shows every bus in real time, combining Zonar and Geotab GPS, identifying each bus by number and working out its route from its location.',y:'Built in-house because our fare system hardware could not hold a reliable connection. It already runs our lobby display, with a public City web app planned.'},
+ {c:'r',s:'live',n:'Google Maps Transit',w:'Our full schedule is published as a GTFS feed (version 161) and live in Google Maps transit directions.',y:'Riders plan trips in an app they already use. A real-time vehicle feed to Google is next.'},
+ {c:'r',s:'pilot',n:'City Navigator',w:'A daylight-readable rider web app built for the Leadership SWLA class, whose members navigated the city using only our buses.',y:'Proved out step-by-step trip directions that now power other tools.'},
+ {c:'r',s:'pilot',n:'Language Access',ai:1,w:'Live AI translation, piloted Nov 20 on a real Route 1 trip with Spanish-speaking riders (and earlier with a Ukrainian-speaking rider). City iPhones with AirPods will make it available at every contact point.',y:'More riders who do not speak English are using our buses. This helps close a Title VI language access gap at low cost, with human interpreters kept for critical matters.'},
+ {c:'r',s:'build',n:'Smart Bus Stops',w:'Real-time stop display prototype on low-cost hardware, low-power bus information signs, and solar power for shelters.',y:'Next-bus information at the curb, without trenching power to every stop.'},
+ {c:'r',s:'plan',n:'On-Bus Screens',w:'Onboard tracking and upcoming-stop announcements, purchased with remaining federal grant funds (LA-2016-014).',y:'Better accessibility for riders with vision or hearing needs, funded by money already awarded.'},
+ {c:'r',s:'live',n:'Rider Story App',w:'A community engagement app where kids and riders color buses and tell stories.',y:'Builds goodwill and familiarity with transit for the next generation of riders.'},
+ {c:'o',s:'live',n:'Paratransit App',ai:1,w:'Our own scheduling system for ADA paratransit. Voicemail trip requests are transcribed by AI and queued for staff to confirm. When we were asked to accept prepayments, AI added prepayment tracking in about 10 minutes.',y:'Fewer missed requests, cleaner trip records for federal reporting, and new features the same day they are requested.'},
+ {c:'o',s:'live',n:'Call Center Console',w:'A secure site for the Public Works call center with live bus locations and step-by-step trip directions.',y:'Transit calls now go to the call center; agents can answer "where is my bus?" in seconds.'},
+ {c:'o',s:'live',n:'Dispatch Board',w:'A complete driver scheduling system with a digital dispatch board.',y:'Replaces paper and whiteboards; every shift and assignment is visible at a glance.'},
+ {c:'o',s:'live',n:'Procurement Wizard',w:'Walks staff through each purchase and generates the required federal micro-purchase and small-purchase forms.',y:'Keeps every purchase FTA-compliant while saving Purchasing staff time.'},
+ {c:'o',s:'pilot',n:'Deposit Automation',ai:1,w:'An AI assistant enters the daily fare deposits into the City finance system and saves the receipt for Accounting.',y:'A repetitive daily task done the same way every time.'},
+ {c:'o',s:'build',n:'Clean Federal Data',w:'Rebuilt National Transit Database reporting with documented methods, and started measuring passenger miles traveled.',y:'Accurate data protects our federal funding and could qualify Lake Charles for additional 5307 STIC dollars.'},
+ {c:'x',s:'build',n:'Lake Charles Digital Twin',ai:1,w:'A browser-based 3D model of the city for route planning and traffic simulation, using public City GIS data and aerial imagery.',y:'Test a route change on screen before trying it on the street. Scope now spans all of Public Works.'},
+ {c:'x',s:'live',n:'LC Transit Simulator',w:'A 3D bus-driving experience on our real routes, with the Gillig bus and the classic trolley.',y:'Great for public outreach and the foundation of our training tools.'},
+ {c:'x',s:'plan',n:'Virtual CDL Training',w:'3D CDL training plus an interactive bus familiarization tool where every component is clickable.',y:'Faster, safer onboarding for new operators in a hard-to-hire field.'},
+ {c:'x',s:'plan',n:'2027 Bus Stop Program',w:'Evaluate and improve hard-to-reach stops: shelters, sidewalk repairs, and new sidewalk connections.',y:'A safe walk to the stop is part of the trip.'},
+ {c:'x',s:'build',n:'Via Microtransit',w:'On-demand shared rides plus modern paratransit dispatch, in partnership with Via Transportation.',y:'The centerpiece of this briefing. Up next.',via:true}
+];
+const svg=document.getElementById('const'),NS='http://www.w3.org/2000/svg';
+const cx=520,cy=410;
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e;}
+el('ellipse',{cx,cy,rx:215,ry:255,class:'ring'});el('ellipse',{cx,cy,rx:305,ry:360,class:'ring'});
+const spokes=[],nodes=[];
+P.forEach((p,i)=>{
+  const a=-Math.PI/2+i*(2*Math.PI/P.length);const o=i%2;
+  p.X=cx+(o?215:305)*Math.cos(a);p.Y=cy+(o?255:360)*Math.sin(a);
+  spokes.push(el('line',{x1:cx,y1:cy,x2:p.X,y2:p.Y,stroke:CAT[p.c].c,class:'spoke'}));
+});
+const hub=el('g',{id:'hub'});
+el('circle',{cx,cy,r:74,fill:'#ffc72c'},hub);el('circle',{cx,cy,r:92,fill:'none',stroke:'#ffc72c','stroke-opacity':.3,'stroke-width':2},hub);
+const ht=el('text',{x:cx,y:cy-4,'text-anchor':'middle'},hub);ht.textContent='LC';
+const ht2=el('text',{x:cx,y:cy+22,'text-anchor':'middle'},hub);ht2.textContent='TRANSIT';
+P.forEach((p,i)=>{
+  const g=el('g',{class:'node'});
+  if(p.ai)el('circle',{cx:p.X,cy:p.Y,r:21,fill:'none',stroke:'#fff','stroke-width':2.5,'stroke-dasharray':'3 4'},g);
+  el('circle',{cx:p.X,cy:p.Y,r:18,fill:'none',stroke:CAT[p.c].c,'stroke-width':3,class:'halo'},g);
+  el('circle',{cx:p.X,cy:p.Y,r:p.via?20:14,fill:p.via?'#fff':CAT[p.c].c,stroke:p.via?CAT[p.c].c:'none','stroke-width':5,class:'core'},g);
+  const below=(i%2===1)&&p.Y>cy+10;const left=!below&&p.X<cx-20,right=i===0||(!below&&p.X>cx+20);
+  const t=el('text',{x:p.X+(right?26:left?-26:0),y:p.Y+(left||right?6:(p.Y<cy?-28:40)),'text-anchor':right?'start':left?'end':'middle'},g);t.textContent=p.n;
+  g.onclick=()=>{Tour.stop();select(i);};
+  nodes.push(g);
+});
+let sel=-1;
+function select(i){
+  sel=(i+P.length)%P.length;const p=P[sel];
+  nodes.forEach((n,k)=>n.classList.toggle('on',k===sel));spokes.forEach((s,k)=>s.classList.toggle('on',k===sel));
+  const st=ST[p.s];
+  document.getElementById('cardIn').innerHTML='<div class="fade"><div class="cat" style="color:'+CAT[p.c].c+'">'+CAT[p.c].n+'</div><h3>'+p.n+(p.ai?'<span class="aibadge">AI</span>':'')+'</h3><span class="tag '+st[1]+'">'+st[0]+'</span><p class="what" style="margin-top:20px">'+p.w+'</p><p class="why"><b>Why it matters: </b>'+p.y+'</p>'+(p.via?'<p style="margin-top:22px"><button class="btn on" id="jumpVia">Go to Via ▶</button></p>':'')+'</div>';
+  const j=document.getElementById('jumpVia');if(j)j.onclick=()=>go(scenes.findIndex(x=>x.id==='s3'));
+}
+document.getElementById('cardIn').innerHTML='<div class="fade"><div class="cat" style="color:var(--yellow)">18 projects · 3 orbits</div><h3>Everything we\'re building, in one view.</h3><p class="what">Yellow serves riders directly. Cyan makes the operation run. Violet is what comes next. Pick a node, or start the auto tour.</p></div>';
+const Tour={t:null,prog:null,
+  start(){this.stop();document.getElementById('tourBtn').classList.add('on');document.getElementById('tourBtn').textContent='❚❚ Pause tour';this.step(1);this.t=setInterval(()=>this.step(1),9000);},
+  stop(){clearInterval(this.t);this.t=null;const b=document.getElementById('tourBtn');b.classList.remove('on');b.textContent='▶ Auto tour';const pr=document.getElementById('tourProg');pr.style.transition='none';pr.style.width='0';},
+  step(d){select(sel+d);if(this.t!==null||d){const pr=document.getElementById('tourProg');pr.style.transition='none';pr.style.width='0';if(this.t){void pr.offsetWidth;pr.style.transition='width 9s linear';pr.style.width='100%';}}}
+};
+document.getElementById('tourBtn').onclick=()=>Tour.t?Tour.stop():Tour.start();
+document.getElementById('nextNode').onclick=()=>{Tour.stop();select(sel+1);};
+document.getElementById('prevNode').onclick=()=>{Tour.stop();select(sel-1);};
+
+/* ---------- simulation ---------- */
+const Sim=(function(){
+  const S=56,M=40,GW=12,GH=6;
+  const px=i=>M+i*S,py=j=>M+j*S;
+  const loopPts=[[2,1],[10,1],[10,5],[2,5],[2,1]].map(([i,j])=>[px(i),py(j)]);
+  const segs=[];let L=0;
+  for(let k=0;k<4;k++){const a=loopPts[k],b=loopPts[k+1];const len=Math.hypot(b[0]-a[0],b[1]-a[1]);segs.push({a,b,s0:L,len});L+=len;}
+  function posAt(s){s=((s%L)+L)%L;for(const g of segs){if(s<=g.s0+g.len){const t=(s-g.s0)/g.len;return[g.a[0]+(g.b[0]-g.a[0])*t,g.a[1]+(g.b[1]-g.a[1])*t];}}return loopPts[0];}
+  const stops=[];for(let s=0;s<L-1;s+=S*2)stops.push({s,p:posAt(s)});
+  function nearestStop(x,y){let b=0,bd=1e9;stops.forEach((st,k)=>{const d=Math.hypot(st.p[0]-x,st.p[1]-y);if(d<bd){bd=d;b=k;}});return b;}
+  const WALK=.7,BUS=2.4,VAN=2.4,SPAWN=105,TPM=12;
+  let rng,tick,A,B,raf=null,speed=3;
+  function mkRng(seed){return()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};}
+  function reset(){rng=mkRng(42);tick=0;
+    A={riders:[],bus:[{s:0},{s:L/2}],done:[],walk:[]};
+    B={riders:[],vans:[0,1,2,3].map(k=>({x:px([1,11,4,8][k]),y:py([1,5,3,2][k]),q:[]})),done:[],walk:[]};}
+  function spawn(){
+    let o,d;do{o=[Math.floor(rng()*(GW+1)),Math.floor(rng()*(GH+1))];d=[Math.floor(rng()*(GW+1)),Math.floor(rng()*(GH+1))];}while(Math.abs(o[0]-d[0])+Math.abs(o[1]-d[1])<4);
+    const ox=px(o[0]),oy=py(o[1]),dx=px(d[0]),dy=py(d[1]);
+    // fixed
+    const so=nearestStop(ox,oy),sd=nearestStop(dx,dy);
+    const ra={x:ox,y:oy,t0:tick,dx,dy,so,sd,walked:0};
+    if(so===sd){ra.state='walk2';}else{ra.state='walk1';ra.tx=stops[so].p[0];ra.ty=stops[so].p[1];}
+    if(ra.state==='walk2'){ra.tx=dx;ra.ty=dy;}
+    A.riders.push(ra);
+    // via
+    const rb={x:ox,y:oy,t0:tick,dx,dy,state:'wait'};B.riders.push(rb);
+    let best=null,bc=1e18;
+    B.vans.forEach(v=>{let cx=v.x,cy=v.y,c=0;v.q.forEach(t=>{c+=Math.abs(t.x-cx)+Math.abs(t.y-cy);cx=t.x;cy=t.y;});c+=Math.abs(ox-cx)+Math.abs(oy-cy);if(c<bc){bc=c;best=v;}});
+    best.q.push({x:ox,y:oy,r:rb,type:'pick'},{x:dx,y:dy,r:rb,type:'drop'});
+  }
+  function moveTo(o,tx,ty,sp){const ddx=tx-o.x,ddy=ty-o.y,d=Math.hypot(ddx,ddy);if(d<=sp){o.x=tx;o.y=ty;return d;}o.x+=ddx/d*sp;o.y+=ddy/d*sp;return sp;}
+  function step(){
+    tick++;if(tick%SPAWN===1)spawn();
+    // A
+    A.bus.forEach(b=>{const s0=b.s;b.s+=BUS;
+      stops.forEach((st,k)=>{let ss=st.s;while(ss<s0)ss+=L;if(ss>s0&&ss<=b.s){
+        A.riders.forEach(r=>{if(r.state==='ride'&&r.bus===b&&r.sd===k){r.state='walk2';const p=st.p;r.x=p[0];r.y=p[1];r.tx=r.dx;r.ty=r.dy;}});
+        A.riders.forEach(r=>{if(r.state==='wait'&&r.so===k){r.state='ride';r.bus=b;}});
+      }});
+      if(b.s>L*1000)b.s-=L*1000;});
+    A.riders.forEach(r=>{
+      if(r.state==='walk1'||r.state==='walk2'){r.walked+=moveTo(r,r.tx,r.ty,WALK);if(r.x===r.tx&&r.y===r.ty){if(r.state==='walk1')r.state='wait';else{r.state='done';A.done.push(tick-r.t0);A.walk.push(r.walked);r.flash=30;}}}
+    });
+    // B
+    B.vans.forEach(v=>{const t=v.q[0];if(!t)return;
+      if(v.x!==t.x)v.x+=Math.sign(t.x-v.x)*Math.min(VAN,Math.abs(t.x-v.x));else v.y+=Math.sign(t.y-v.y)*Math.min(VAN,Math.abs(t.y-v.y));
+      if(v.x===t.x&&v.y===t.y){v.q.shift();if(t.type==='pick')t.r.state='ride';else{t.r.state='done';t.r.x=t.x;t.r.y=t.y;B.done.push(tick-t.r.t0);B.walk.push(0);t.r.flash=30;}}
+      B.riders.forEach(r=>{if(r.state==='ride'&&v.q.find(q=>q.r===r))r.vx=v;});
+    });
+  }
+  function drawBase(ctx){
+    ctx.clearRect(0,0,752,416);ctx.strokeStyle='#15305c';ctx.lineWidth=7;ctx.lineCap='round';
+    for(let i=0;i<=GW;i++){ctx.beginPath();ctx.moveTo(px(i),py(0));ctx.lineTo(px(i),py(GH));ctx.stroke();}
+    for(let j=0;j<=GH;j++){ctx.beginPath();ctx.moveTo(px(0),py(j));ctx.lineTo(px(GW),py(j));ctx.stroke();}
+  }
+  function rider(ctx,r,col){
+    if(r.state==='done'){if(r.flash>0){r.flash--;ctx.strokeStyle='rgba(70,227,154,'+(r.flash/30)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.x,r.y,8+(30-r.flash)*.6,0,7);ctx.stroke();}return;}
+    if(r.state==='ride')return;
+    const pulse=r.state==='wait'?4+Math.sin(tick/8)*2:0;
+    ctx.fillStyle=col;ctx.beginPath();ctx.arc(r.x,r.y,6+pulse*.5,0,7);ctx.fill();
+    if(r.state==='walk1'||r.state==='walk2'){ctx.setLineDash([3,5]);ctx.strokeStyle='rgba(255,107,154,.55)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.tx,r.ty);ctx.stroke();ctx.setLineDash([]);}
+    if(r.state==='wait'&&r.vx===undefined){ctx.strokeStyle='rgba(255,107,154,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(r.x,r.y,13+pulse,0,7);ctx.stroke();}
+  }
+  function draw(){
+    const a=document.getElementById('cvA').getContext('2d'),b=document.getElementById('cvB').getContext('2d');
+    drawBase(a);a.strokeStyle='#ffc72c';a.lineWidth=6;a.beginPath();loopPts.forEach((p,k)=>k?a.lineTo(p[0],p[1]):a.moveTo(p[0],p[1]));a.stroke();
+    stops.forEach(st=>{a.fillStyle='#fff';a.beginPath();a.arc(st.p[0],st.p[1],6,0,7);a.fill();});
+    A.riders.forEach(r=>rider(a,r,'#ff6b9a'));
+    A.bus.forEach(bs=>{const p=posAt(bs.s),q=posAt(bs.s+2);const ang=Math.atan2(q[1]-p[1],q[0]-p[0]);a.save();a.translate(p[0],p[1]);a.rotate(ang);a.fillStyle='#ffc72c';a.fillRect(-22,-11,44,22);a.fillStyle='#07152b';a.fillRect(-16,-6,32,7);a.restore();
+      const n=A.riders.filter(r=>r.state==='ride'&&r.bus===bs).length;if(n){a.fillStyle='#fff';a.font='600 14px JetBrains Mono';a.fillText(n,p[0]+16,p[1]-14);}});
+    drawBase(b);
+    B.vans.forEach(v=>{if(v.q.length){b.strokeStyle='rgba(79,209,255,.3)';b.lineWidth=3;b.setLineDash([6,6]);b.beginPath();b.moveTo(v.x,v.y);let x=v.x,y=v.y;v.q.slice(0,2).forEach(t=>{b.lineTo(t.x,y);b.lineTo(t.x,t.y);x=t.x;y=t.y;});b.stroke();b.setLineDash([]);}});
+    B.riders.forEach(r=>rider(b,r,'#ff6b9a'));
+    B.riders.forEach(r=>{if(r.state==='ride'){}});
+    B.vans.forEach(v=>{b.fillStyle='#4fd1ff';b.beginPath();b.roundRect?b.roundRect(v.x-15,v.y-11,30,22,6):b.rect(v.x-15,v.y-11,30,22);b.fill();b.fillStyle='#07152b';b.fillRect(v.x-9,v.y-6,18,6);
+      const n=B.riders.filter(r=>r.state==='ride'&&v.q.find(q=>q.r===r)).length;if(n){b.fillStyle='#fff';b.font='600 14px JetBrains Mono';b.fillText(n,v.x+14,v.y-12);}});
+    const avg=arr=>arr.length?arr.reduce((x,y)=>x+y,0)/arr.length:null;
+    const am=avg(A.done),bm=avg(B.done),aw=avg(A.walk),bw=avg(B.walk);
+    document.getElementById('aAvg').textContent=am?Math.round(am/TPM)+' min':'--';
+    document.getElementById('bAvg').textContent=bm?Math.round(bm/TPM)+' min':'--';
+    document.getElementById('aWalk').textContent=aw!==null?Math.round(aw/WALK/TPM)+' min':'--';
+    document.getElementById('bWalk').textContent=bw!==null?'~0 min':'--';
+    document.getElementById('aDone').textContent=A.done.length;document.getElementById('bDone').textContent=B.done.length;
+    // prune
+    if(A.riders.length>200){A.riders=A.riders.filter(r=>r.state!=='done'||r.flash>0);B.riders=B.riders.filter(r=>r.state!=='done'||r.flash>0);}
+  }
+  function loop(){for(let k=0;k<speed;k++)step();draw();raf=requestAnimationFrame(loop);}
+  reset();
+  document.getElementById('simSpeed').onclick=e=>{speed=speed===3?6:speed===6?1:3;e.target.textContent='Speed '+speed+'x';};
+  document.getElementById('simReset').onclick=()=>reset();
+  return{start(){if(!raf)loop();},stop(){cancelAnimationFrame(raf);raf=null;},_step:step,_state:()=>({A,B})};
+})();
+
+/* ---------- phone ---------- */
+const Phone=(function(){
+  let raf=null,t0=0;const path=document.getElementById('vanPath'),van=document.getElementById('pvan');const len=path.getTotalLength?path.getTotalLength():600;
+  const states=[['REQUESTING','Finding your ride','Matching you with a nearby van','Cancel'],['MATCHED · 2 SHARING','Van 12 is on the way','Pickup at the corner in 6 min','Track my ride'],['ARRIVING','Your ride is here','Look for the Lake Charles Transit van','I\'m on board']];
+  function frame(now){const T=((now-t0)/1000)%12;
+    const si=T<3?0:T<10?1:2;const p=si===0?0:si===1?(T-3)/7:1;
+    const pt=path.getPointAtLength(p*len);van.setAttribute('transform','translate('+pt.x+','+pt.y+')');
+    const s=states[si];document.getElementById('pst').textContent=s[0];document.getElementById('pbig').textContent=s[1];document.getElementById('psm').textContent=s[2];document.getElementById('pbtn').textContent=s[3];
+    document.querySelectorAll('.step').forEach((e,k)=>e.classList.toggle('on',k===si));
+    raf=requestAnimationFrame(frame);}
+  return{start(){if(!raf){t0=performance.now();raf=requestAnimationFrame(frame);}},stop(){cancelAnimationFrame(raf);raf=null;}};
+})();
+
+/* ---------- team / loop ---------- */
+const Team=(function(){let raf=null,t0=0;const paths=[1,2,3,4].map(k=>document.getElementById('tp'+k));const svgT=document.getElementById('teamSvg');
+  const dots=paths.map(()=>{const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('r',6);c.setAttribute('class','pkt');svgT.appendChild(c);return c;});
+  const lps=[...document.querySelectorAll('.lp')];
+  function f(now){const t=(now-t0)/1000;paths.forEach((p,k)=>{const L=p.getTotalLength();let u=((t*0.45+k*0.25)%1);u=u<.5?u*2:2-u*2;const pt=p.getPointAtLength(u*L);dots[k].setAttribute('cx',pt.x);dots[k].setAttribute('cy',pt.y);});
+    const a=Math.floor(t/1.6)%4;lps.forEach((e,k)=>e.classList.toggle('on',k===a));raf=requestAnimationFrame(f);}
+  return{start(){if(!raf){t0=performance.now();raf=requestAnimationFrame(f);}},stop(){cancelAnimationFrame(raf);raf=null;}};})();
+
+/* ---------- chat ---------- */
+const Chat=(function(){let ts=[];const bs=[...document.querySelectorAll('#chatBox .bub')];
+  return{start(){this.stop();bs.forEach(b=>b.classList.remove('show'));bs.forEach((b,k)=>ts.push(setTimeout(()=>b.classList.add('show'),600+k*1500)));},stop(){ts.forEach(clearTimeout);ts=[];}};})();
+
+/* ---------- start ---------- */
+const h=parseInt((location.hash||'').replace('#s',''),10);
+go(isNaN(h)?0:Math.min(h,scenes.length-1));
+window._dbg={Sim,go};
+})();
+</script>
+</body>
+</html>

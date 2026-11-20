@@ -69,6 +69,10 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 - `worker/private/clarus-van.html` at `/work/clarus-van/<key>/` (4 November 2026): a 3D Transit 350 paratransit van with a black Clarus puck on every smart system, product cards and a build-your-own total. It keeps its own dark studio look. Products, prices and citations live in `PRODUCTS` in the script; everything about pricing and savings is labelled illustrative because Clarus is a concept. Check it at 1280 wide and 390 wide after changes. Never change its address or key once Robert shares it.
 
+## Council briefing (unlisted)
+
+- `worker/private/council-briefing.html` at `/work/council-briefing/<key>/` (20 November 2026): the LC Transit Mission Control presentation Robert shows on his office TV to Councilman Matt Young (projects since April, AI translation pilot, Via Microtransit). It is a copy of Robert's Claude artifact of the same presentation; keep its own dark navy and yellow look and 1920 by 1080 stage. Keys and swipes change sections; phones in portrait get a turn-sideways hint. Never change its address or key once Robert shares it.
+
 ## Sophie's Unicorn Cloud Race (unlisted game)
 
 - `static/games/sophie-unicorn-cloud-race/index.html` at `/games/sophie-unicorn-cloud-race/` (16 November 2026): a unicorn race over clouds designed by Sophie, Bethany Doty's daughter (about 5), with Robert and Clarus. Robert chose a plain unlisted address, no login. Keep it off `content/projects.json`, the games page and the sitemap, and keep its `noindex` tag. It keeps its own pastel look (lavender, cotton-candy pink, sky blue, mint, sunshine yellow). Keep it easy for a five-year-old: tap to jump, a bird rescues any fall, nothing that ends the race early.

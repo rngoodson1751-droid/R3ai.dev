@@ -21,6 +21,7 @@ import wendyGuide from './private/wendy-guide.html';
 import bethanyCard from './private/bethany-card.html';
 import bethanyDoty from './private/bethany-doty.html';
 import clarusVan from './private/clarus-van.html';
+import councilBriefing from './private/council-briefing.html';
 
 // Unlisted pages. They are not in ./dist, the sitemap, the search or any list on the site. Each one
 // opens only at /work/<name>/<key>/. This file holds the SHA-256 of the key, never the key itself,
@@ -42,6 +43,8 @@ const UNLISTED = {
   'bethany-card': { keyHash: '5f781dcb7f53243dd909ee25b3efe45173171ee0b355aaf2596b19ff5d783ba5', html: bethanyCard },
   // Clarus van demo: a 3D Transit 350 paratransit van with a Clarus puck on every smart system (4 November 2026). Read only.
   'clarus-van': { keyHash: 'bfd38cfc0d0d8ce7c5dddfb4a42359dc1128954c280ad0d643408081a2073d6d', html: clarusVan },
+  // Council briefing: the LC Transit "Mission Control" presentation for Councilman Matt Young's 24 November 2026 meeting. Read only.
+  'council-briefing': { keyHash: '73b497b269c87959be11a1db47eca6d26438c2078b63c3195eb69c5c588bca13', html: councilBriefing },
 };
 function riderLive(request, env, url, ctx) {
   if (url.searchParams.has('vans') || url.searchParams.has('debug')) return json({ error: 'Not found.' }, 404);
