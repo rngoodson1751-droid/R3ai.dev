@@ -130,6 +130,14 @@ Claude played it before any of us did. It ran the game in a browser with pretend
 - Sound sometimes stays off until you click the game once. Browsers do that.
 - It does not rival the latest Mario. Nintendo can relax.
 
+## Update: a twelfth world with a monster truck
+
+River asked for a monster truck called Flash, and he was specific. Flash has to smash cars, Dino Robots and giant stinky cheese mountains covered in pizza.
+
+So there is now a red gate behind the starting spot. Walk into it and you are on a desert planet under a ringed moon, behind the wheel of a red monster truck with lightning bolts down the side, racing two other trucks for three laps. Flash drives forward by himself. You steer, jump and fire a Lightning Boost. Cars flatten, Dino Robots burst into bolts and gears, and the cheese mountains go up in a green cloud while the screen gets splattered. Three new stars come with it, so the playground now has 36.
+
+It plays with the Xbox controller, a keyboard or on a phone. It also has the best graphics in the playground, which was River's other requirement.
+
 ## About that astrophysics
 
 The Secret Satellite has low gravity. You jump higher and come down slower. If that leads to one real question about why, I'll count the phase as on schedule.

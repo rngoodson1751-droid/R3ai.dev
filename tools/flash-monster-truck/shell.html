@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a0c3a">
+<title>Flash's Monster Truck Smash: River's Galactic Playground</title>
+<style>
+:root{--ink:#fff;--glass:rgba(22,10,60,.66);--line:rgba(255,255,255,.32);--gold:#ffd21e;--cyan:#6ff3ff;--red:#ff3b30;--font:ui-rounded,"Arial Rounded MT Bold","Nunito","Trebuchet MS",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#1a0c3a;color:var(--ink);font-family:var(--font);font-weight:800;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;overscroll-behavior:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.glass{background:var(--glass);border:2px solid var(--line);border-radius:20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(10,4,40,.45)}
+.k{display:inline-grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;font-size:.8em;font-weight:900;color:#fff;margin:0 .15em;box-shadow:inset 0 -3px 0 rgba(0,0,0,.28);vertical-align:middle}
+.k.a{background:#3fbf4a}.k.b{background:#e6453c}.k.x{background:#2f86ff}.k.y{background:#f0b400;color:#3a2a00}.k.lt{border-radius:7px;width:auto;padding:0 .4em;background:#5a6a9a}
+#loading{position:fixed;inset:0;display:grid;place-items:center;font-size:26px;background:#1a0c3a;z-index:20}
+#nogl{position:fixed;inset:0;display:none;place-items:center;text-align:center;padding:30px;font-size:22px;background:#1a0c3a;z-index:21}
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#hud.show{opacity:1}
+#tl{position:absolute;left:calc(14px + env(safe-area-inset-left));top:calc(12px + env(safe-area-inset-top));padding:8px 16px 10px;display:flex;align-items:center;gap:14px}
+#place{font-size:46px;font-style:italic;font-weight:900;line-height:1;background:linear-gradient(180deg,#fff7b0,#ffd21e 55%,#ff8a1e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #2a0a60)}
+#place[data-p="2"]{background-image:linear-gradient(180deg,#fff,#cfe0ff 55%,#8aa0d0)}#place[data-p="3"]{background-image:linear-gradient(180deg,#ffe0c0,#e0905a 55%,#a05a2a)}
+#lapbox{display:flex;flex-direction:column;gap:2px}
+#lap{font-size:18px;letter-spacing:1px}
+#spd{font-size:13px;opacity:.85}#speed{font-size:20px;color:var(--cyan)}
+#tr{position:absolute;right:calc(14px + env(safe-area-inset-right));top:calc(12px + env(safe-area-inset-top));padding:8px 14px;display:flex;flex-direction:column;gap:4px}
+.ms{display:flex;align-items:center;gap:8px;font-size:18px}
+.ms i{font-style:normal;font-size:22px;width:28px;text-align:center}
+.ms b{min-width:52px}
+.ms span{font-size:20px;color:rgba(255,255,255,.28)}
+.ms.got span{color:var(--gold);text-shadow:0 0 12px rgba(255,210,30,.9)}
+#meterBox{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(340px,46vw);height:30px;border-radius:99px;background:rgba(20,8,50,.7);border:2px solid var(--line);overflow:hidden}
+#meter{position:absolute;inset:0;width:calc(var(--v,0)*100%);background:linear-gradient(90deg,#2f86ff,#6ff3ff);transition:width .2s}
+#meterBox.ready #meter{background:linear-gradient(90deg,#ffd21e,#ff8a1e);animation:pulse .5s infinite}
+#meterBox span{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;letter-spacing:1.5px;text-shadow:0 1px 3px #000}
+#topbtns{position:absolute;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);display:flex;gap:8px;pointer-events:auto}
+.sbtn{pointer-events:auto;cursor:pointer;border:2px solid var(--line);background:var(--glass);color:#fff;font:900 15px var(--font);border-radius:14px;height:42px;min-width:48px;padding:0 12px;backdrop-filter:blur(8px)}
+#big{position:fixed;left:0;right:0;top:24%;text-align:center;pointer-events:none;opacity:0;transform:scale(.6);transition:opacity .2s,transform .35s cubic-bezier(.2,1.7,.4,1)}
+#big.show{opacity:1;transform:scale(1)}
+#big b{display:block;font-size:clamp(44px,9vw,120px);font-style:italic;font-weight:900;letter-spacing:1px;background:linear-gradient(180deg,#fff 15%,#ffd21e 55%,#ff7a1e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 #2a0a70) drop-shadow(0 10px 22px rgba(10,4,50,.7))}
+#big small{display:block;font-size:clamp(18px,2.6vw,32px);margin-top:4px;text-shadow:0 2px 0 #2a0a70,0 4px 14px rgba(10,4,50,.9)}
+#splat{position:fixed;inset:0;pointer-events:none;opacity:0}
+#splat.show{animation:splat 2.6s ease-out forwards}
+#splat i{position:absolute;border-radius:48% 52% 60% 40%/50% 45% 55% 50%;background:radial-gradient(circle at 35% 35%,#fff4a0,#ffd23a 45%,#f0a010 80%);box-shadow:0 0 0 6px rgba(255,200,40,.35),inset -8px -10px 0 rgba(200,120,0,.35);opacity:.92}
+#splat::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(120,255,60,0),rgba(120,255,60,.35))}
+@keyframes splat{0%{opacity:0;transform:scale(1.15)}8%{opacity:1;transform:scale(1)}65%{opacity:.9}100%{opacity:0;transform:translateY(40px)}}
+@keyframes pulse{50%{opacity:.6}}
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:5;display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;padding:16px}
+.overlay.show{opacity:1;visibility:visible}
+#title{background:radial-gradient(ellipse at 50% 120%,rgba(10,4,40,.85),rgba(10,4,40,0) 70%)}
+#title .box{text-align:center;max-width:960px;align-self:end;padding-bottom:4vh}
+.logo{line-height:.9}
+.logo .l0{display:block;font-size:clamp(14px,2vw,22px);letter-spacing:3px;opacity:.9;text-shadow:0 2px 8px #000}
+.logo .l1{display:block;font-size:clamp(70px,15vw,190px);font-style:italic;font-weight:900;letter-spacing:2px;background:linear-gradient(180deg,#fffbe0 5%,#ffe14d 35%,#ffb000 62%,#ff5a1e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 #6a0a10) drop-shadow(0 0 30px rgba(255,180,0,.55))}
+.logo .l2{display:inline-block;font-size:clamp(18px,3vw,36px);color:#fff;background:linear-gradient(180deg,#ff5a4a,#d0141e);padding:4px 24px 6px;border-radius:99px;box-shadow:0 5px 0 #6a0a10,0 12px 24px rgba(10,4,40,.6);transform:rotate(-2deg);margin-top:4px}
+#missions{list-style:none;padding:0;margin:16px auto 0;display:inline-block;text-align:left}
+li{font-size:18px;margin:6px 0;display:flex;gap:10px;align-items:center}
+li span{font-size:24px;color:rgba(255,255,255,.35)}
+li.got span{color:var(--gold);text-shadow:0 0 12px rgba(255,210,30,.85)}
+li em{font-style:normal;font-size:14px;opacity:.75;margin-left:auto;padding-left:14px}
+.btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.btn{pointer-events:auto;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;border:2px solid var(--line);background:rgba(255,255,255,.12);color:#fff;font:900 19px var(--font);border-radius:99px;padding:12px 24px}
+.btn.go{background:linear-gradient(180deg,#ffe14d,#ff9a1e);color:#3a1400;border-color:#fff;box-shadow:0 5px 0 #a04a00,0 10px 24px rgba(255,150,0,.4);font-size:24px;padding:14px 34px;animation:pulse 1.6s infinite}
+.small{margin-top:12px;font-size:14px;opacity:.85;line-height:1.6;font-weight:700;text-shadow:0 1px 6px #000}
+#results .box,#pause .box{padding:22px 30px;min-width:min(420px,92vw);max-width:94vw;max-height:94vh;overflow:auto;text-align:center}
+#results h2{margin:0;font-size:clamp(34px,6vw,64px);font-style:italic;background:linear-gradient(180deg,#fff,#ffd21e 60%,#ff8a1e);-webkit-background-clip:text;background-clip:text;color:transparent}
+#results .sub{margin:6px 0 4px;font-size:18px}
+#results ul{list-style:none;padding:0;margin:10px auto;display:inline-block;text-align:left;min-width:300px}
+.tip{font-size:13px;opacity:.7;margin:12px 0 0}
+#pause h2{margin:0 0 12px;color:var(--cyan);font-size:30px}
+#pause .btns{flex-direction:column;align-items:stretch}
+/* touch controls */
+#touch{position:fixed;inset:0;pointer-events:none;display:none;z-index:3}
+body.touch.playing #touch{display:block}
+.tb{position:absolute;pointer-events:auto;border:3px solid rgba(255,255,255,.55);color:#fff;font:900 16px var(--font);border-radius:50%;display:grid;place-items:center;opacity:.88;box-shadow:0 6px 0 rgba(0,0,0,.3),0 10px 20px rgba(0,0,0,.35);touch-action:none;transition:transform .06s}
+.tb.on{transform:scale(.9) translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.3);filter:brightness(1.25)}
+.tb b{font-size:34px;line-height:1}
+.tb.l,.tb.r{width:104px;height:104px;bottom:calc(22px + env(safe-area-inset-bottom));background:rgba(40,20,110,.72)}
+.tb.l{left:calc(18px + env(safe-area-inset-left))}.tb.r{left:calc(134px + env(safe-area-inset-left))}
+.tb.j{width:92px;height:92px;right:calc(130px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));background:#3fbf4a}
+.tb.bo{width:110px;height:110px;right:calc(16px + env(safe-area-inset-right));bottom:calc(64px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#ffe14d,#ff9a1e);color:#3a1400}
+.tb small{font-size:12px;display:block;margin-top:-4px}
+body.touch #meterBox{bottom:auto;top:calc(64px + env(safe-area-inset-top))}
+body.touch #title .pc,body:not(.touch) #title .mob{display:none}
+@media (max-height:520px){
+  #place{font-size:34px}#tl{padding:5px 12px;top:8px}#lap{font-size:14px}#tr{top:8px;padding:5px 10px}.ms{font-size:14px}.ms i{font-size:17px}.ms span{font-size:16px}
+  .logo .l1{font-size:clamp(56px,13vw,120px)}.logo .l2{font-size:18px}#missions{margin-top:6px}li{font-size:14px;margin:3px 0}li span{font-size:18px}.btn{font-size:16px;padding:8px 18px}.btn.go{font-size:19px;padding:10px 26px}.btns{margin-top:8px}.small{margin-top:6px;font-size:12px}
+  .tb.l,.tb.r{width:86px;height:86px}.tb.r{left:calc(116px + env(safe-area-inset-left))}.tb.j{width:76px;height:76px;right:calc(112px + env(safe-area-inset-right))}.tb.bo{width:92px;height:92px;bottom:calc(52px + env(safe-area-inset-bottom))}
+  #results .box{padding:12px 20px}#results h2{font-size:34px}#results .sub{font-size:15px}
+}
+@media (orientation:portrait){
+  #tr{top:calc(74px + env(safe-area-inset-top))}
+  body.touch #meterBox{top:calc(88px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));transform:none;width:52vw}
+  body.touch #tr{top:calc(124px + env(safe-area-inset-top))}
+  #topbtns{left:auto;right:calc(12px + env(safe-area-inset-right));transform:none}
+  #tr{right:calc(12px + env(safe-area-inset-right))}
+  .tb.l,.tb.r{width:88px;height:88px}.tb.r{left:calc(116px + env(safe-area-inset-left))}.tb.j{width:78px;height:78px;right:calc(16px + env(safe-area-inset-right));bottom:calc(132px + env(safe-area-inset-bottom))}.tb.bo{width:96px;height:96px;bottom:calc(22px + env(safe-area-inset-bottom))}
+}
+@media (prefers-reduced-motion:reduce){.btn.go,#meterBox.ready #meter{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="loading">Revving up Flash...</div>
+<div id="nogl">This game needs 3D graphics (WebGL).<br>Please open it in Chrome, Edge or Safari.</div>
+<div id="hud">
+  <div id="tl" class="glass"><div id="place" data-p="1">1st</div><div id="lapbox"><div id="lap">LAP 1/3</div><div id="spd"><span id="speed">0</span> MPH</div></div></div>
+  <div id="tr" class="glass">
+    <div class="ms" id="m0"><i>🚗</i><b id="c0">0/20</b><span>★</span></div>
+    <div class="ms" id="m1"><i>🦖</i><b id="c1">0/5</b><span>★</span></div>
+    <div class="ms" id="m2"><i>🧀</i><b id="c2">0/3</b><span>★</span></div>
+  </div>
+  <div id="topbtns"><button class="sbtn" id="tPause" aria-label="Pause">II</button><button class="sbtn" id="camBtn" aria-label="Change camera">🎥</button></div>
+  <div id="meterBox"><div id="meter"></div><span>⚡ LIGHTNING BOOST</span></div>
+</div>
+<div id="big"></div>
+<div id="splat"></div>
+<div id="touch">
+  <button class="tb l" data-t="left" aria-label="Steer left"><b>◀</b></button>
+  <button class="tb r" data-t="right" aria-label="Steer right"><b>▶</b></button>
+  <button class="tb j" data-t="jump" aria-label="Jump"><div><b>⤒</b><small>JUMP</small></div></button>
+  <button class="tb bo" data-t="boost" aria-label="Boost"><div><b>⚡</b><small>BOOST</small></div></button>
+</div>
+<div id="title" class="overlay show"><div class="box">
+  <div class="logo"><span class="l0">RIVER'S GALACTIC PLAYGROUND</span><span class="l1">FLASH</span><span class="l2">⚡ MONSTER TRUCK SMASH ⚡</span></div>
+  <ul id="missions"></ul>
+  <div class="btns"><button class="btn go" id="startBtn">Start your engine!</button><a class="btn" href="/games/rivers-galactic-playground/">◀ Playground</a></div>
+  <div class="small"><span class="pc">Steer with the left stick or arrow keys. <b class="k a">A</b> or Space to jump, <b class="k x">X</b> or Shift for Lightning Boost, <b class="k lt">LT</b> or Down to slow down.<br>Flash drives forward by itself. Smash cars, Dino Robots and stinky cheese mountains!</span><span class="mob">Flash drives by itself. Tap ◀ ▶ to steer, JUMP to hop and ⚡ to boost.<br>Smash cars, Dino Robots and stinky cheese mountains!</span></div>
+</div></div>
+<div id="pause" class="overlay"><div class="box glass">
+  <h2>Paused</h2>
+  <div class="btns"><button class="btn go" id="resume">Keep driving</button><button class="btn" id="restart">Start the race again</button><button class="btn" id="musicBtn">Music: On</button><a class="btn" href="/games/rivers-galactic-playground/">Back to the Playground</a></div>
+</div></div>
+<div id="results" class="overlay"><div class="box glass" id="resultsBox"></div></div>
+<script>/*GAME*/</script>
+</body>
+</html>
