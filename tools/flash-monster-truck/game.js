@@ -1064,7 +1064,7 @@ document.querySelectorAll('[data-t]').forEach(b => {
 const pressed = { jump: false, boost: false };
 let padPrev = {};
 function readPad() {
-  const out = { steer: 0, gas: 0, brake: 0, jump: false, boost: false, start: false, a: false, b: false };
+  const out = { steer: 0, gas: 0, brake: 0, jump: false, boost: false, start: false, a: false, b: false, nav: 0 };
   const pads = navigator.getGamepads ? navigator.getGamepads() : [];
   for (const p of pads) {
     if (!p || !p.connected) continue;
@@ -1072,23 +1072,40 @@ function readPad() {
     const bt = i => p.buttons[i] && (p.buttons[i].pressed || p.buttons[i].value > .5);
     if (bt(14)) out.steer -= 1; if (bt(15)) out.steer += 1;
     out.brake = Math.max(out.brake, p.buttons[6] ? p.buttons[6].value : 0);
-    const now = { a: bt(0), b: bt(1), x: bt(2), y: bt(3), st: bt(9), rb: bt(5) };
+    const ay = p.axes[1] || 0;
+    const now = { a: bt(0), b: bt(1), x: bt(2), y: bt(3), st: bt(9), rb: bt(5), up: bt(12) || ay < -.55 || ax < -.55, dn: bt(13) || ay > .55 || ax > .55 || bt(15) };
+    if (bt(14)) now.up = true;
     const prev = padPrev[p.index] || {};
     if (now.a && !prev.a) { out.jump = true; out.a = true; }
     if ((now.x && !prev.x) || (now.rb && !prev.rb) || (now.b && !prev.b)) out.boost = true;
     if (now.b && !prev.b) out.b = true;
     if (now.st && !prev.st) out.start = true;
+    if (now.up && !prev.up) out.nav = -1;
+    if (now.dn && !prev.dn) out.nav = 1;
+    if (now.up || now.dn || now.a || now.b || now.st) document.body.classList.add('nav');
     if (now.a || now.x) AU.init();
     padPrev[p.index] = now;
   }
   return out;
 }
+const menu = { i: 0 };
+function menuOpen() { return ['pause', 'results', 'title'].map(id => $(id)).find(o => o.classList.contains('show')); }
+function menuItems() { const ov = menuOpen(); return ov ? [...ov.querySelectorAll('button, a.btn')].filter(b => b.offsetParent) : []; }
+function drawSel() { menuItems().forEach((b, k) => b.classList.toggle('sel', k === menu.i)); }
+function menuReset() { menu.i = 0; drawSel(); }
+function menuMove(d) { const it = menuItems(); if (!it.length) return; menu.i = (menu.i + d + it.length) % it.length; drawSel(); AU.tone(880, 880, .06, .06, 'triangle'); }
+function menuPress() { const b = menuItems()[menu.i]; if (b) { AU.sfx('bolt'); b.click(); } }
 function onPress(code) {
+  if (menuOpen() && code !== 'Escape' && code !== 'KeyP') {
+    document.body.classList.add('nav');
+    if (code === 'ArrowUp' || code === 'ArrowLeft' || code === 'KeyW' || code === 'KeyA') menuMove(-1);
+    else if (code === 'ArrowDown' || code === 'ArrowRight' || code === 'KeyS' || code === 'KeyD') menuMove(1);
+    else if (code === 'Enter' || code === 'Space') menuPress();
+    return;
+  }
   if (code === 'Space' || code === 'KeyW' || code === 'ArrowUp' || code === 'KeyJ') pressed.jump = true;
   if (code === 'ShiftLeft' || code === 'ShiftRight' || code === 'KeyB' || code === 'KeyK') pressed.boost = true;
   if (code === 'Escape' || code === 'KeyP') togglePause();
-  if ((code === 'Enter' || code === 'Space') && state === 'title') startRace();
-  if ((code === 'Enter') && state === 'results') startRace();
 }
 
 // ---------------------------------------------------------------- save
@@ -1157,9 +1174,9 @@ function finish() {
   $('resultsBox').innerHTML = `<h2>${msg}</h2><p class="sub">${['Champion driving', 'Awesome driving', 'Wild driving'][place - 1]}, ${esc(nm)}! Flash is the smashiest truck on the planet.</p>
     <ul>${MISSIONS.map((m, i) => `<li class="${stars[i] ? 'got' : ''}"><span>${stars[i] ? '★' : '☆'}</span>${m} <em>${Math.min(counts[i], 999)} smashed</em></li>`).join('')}</ul>
     <div class="btns"><button class="btn go" id="again">Race again</button><a class="btn" href="${HUB}">Back to the Playground</a></div>
-    <p class="tip">${TOUCH ? 'Tap a button' : 'Press A or Enter to race again'}</p>`;
+    <p class="tip">${TOUCH ? 'Tap a button' : 'Pick with the stick or arrows, then press A or Enter'}</p>`;
   $('again').onclick = () => startRace();
-  setTimeout(() => $('results').classList.add('show'), 1400);
+  setTimeout(() => { $('results').classList.add('show'); menuReset(); }, 1400);
   for (let i = 0; i < 6; i++) setTimeout(() => firework(), 300 + i * 450);
 }
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
@@ -1172,11 +1189,12 @@ function firework() {
 function togglePause(force) {
   if (state !== 'race' && state !== 'countdown') return;
   paused = force ?? !paused; $('pause').classList.toggle('show', paused);
+  if (paused) menuReset();
 }
 $('tPause').onclick = () => { AU.init(); togglePause(); };
 $('resume').onclick = () => togglePause(false);
 $('restart').onclick = () => { togglePause(false); state = 'title'; startRace(); };
-$('musicBtn').onclick = () => { AU.setMusic(!AU.music); $('musicBtn').textContent = 'Music: ' + (AU.music ? 'On' : 'Off'); };
+$('musicBtn').onclick = () => { AU.init(); AU.setMusic(!AU.music); $('musicBtn').textContent = 'Music: ' + (AU.music ? 'On' : 'Off'); };
 $('startBtn').onclick = () => startRace();
 $('camBtn').onclick = () => { camMode = (camMode + 1) % 2; };
 $('title').addEventListener('pointerdown', e => { if (e.target.closest('a,button')) return; AU.init(); });
@@ -1185,6 +1203,7 @@ function drawTitleMissions() {
   $('missions').innerHTML = MISSIONS.map((m, i) => `<li class="${stars[i] ? 'got' : ''}"><span>${stars[i] ? '★' : '☆'}</span>${m}</li>`).join('');
 }
 drawTitleMissions();
+menuReset();
 
 // ---------------------------------------------------------------- smashing
 const tmpV = new V3();
@@ -1463,9 +1482,12 @@ function loop(now) {
   fpsAcc += dt; fpsN++;
   if (fpsAcc > 2) { const fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; if (fps < 40 && quality > 1) { quality = Math.max(1, quality - .25); renderer.setPixelRatio(Math.min(devicePixelRatio, quality)); resize(); lowT++; } if (lowT > 3 && bloom.enabled && fps < 30) bloom.enabled = false; }
   const pad = readPad();
-  if (pad.start) { if (state === 'title' || state === 'results') startRace(); else togglePause(); }
-  if (pad.a && (state === 'title' || (state === 'results' && $('results').classList.contains('show')))) { startRace(); pad.jump = false; }
-  if (pad.b && paused) togglePause(false);
+  if (menuOpen()) {
+    if (pad.nav) menuMove(pad.nav);
+    if (pad.a) { menuPress(); pad.jump = false; pad.a = false; }
+    else if (pad.b && paused) togglePause(false);
+    else if (pad.start) { if (paused) togglePause(false); else menuPress(); }
+  } else if (pad.start) togglePause();
   if (paused) { composer.render(); return; }
   tick(dt, pad);
   composer.render();

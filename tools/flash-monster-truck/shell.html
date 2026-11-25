@@ -64,6 +64,8 @@ li.got span{color:var(--gold);text-shadow:0 0 12px rgba(255,210,30,.85)}
 li em{font-style:normal;font-size:14px;opacity:.75;margin-left:auto;padding-left:14px}
 .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 .btn{pointer-events:auto;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;border:2px solid var(--line);background:rgba(255,255,255,.12);color:#fff;font:900 19px var(--font);border-radius:99px;padding:12px 24px}
+body.nav .btn.sel{outline:4px solid #6ff3ff;outline-offset:4px;box-shadow:0 0 24px rgba(111,243,255,.8);transform:scale(1.06)}
+.btn{transition:transform .12s}
 .btn.go{background:linear-gradient(180deg,#ffe14d,#ff9a1e);color:#3a1400;border-color:#fff;box-shadow:0 5px 0 #a04a00,0 10px 24px rgba(255,150,0,.4);font-size:24px;padding:14px 34px;animation:pulse 1.6s infinite}
 .small{margin-top:12px;font-size:14px;opacity:.85;line-height:1.6;font-weight:700;text-shadow:0 1px 6px #000}
 #results .box,#pause .box{padding:22px 30px;min-width:min(420px,92vw);max-width:94vw;max-height:94vh;overflow:auto;text-align:center}
@@ -73,6 +75,8 @@ li em{font-style:normal;font-size:14px;opacity:.75;margin-left:auto;padding-left
 .tip{font-size:13px;opacity:.7;margin:12px 0 0}
 #pause h2{margin:0 0 12px;color:var(--cyan);font-size:30px}
 #pause .btns{flex-direction:column;align-items:stretch}
+#pause .btn{justify-content:center}
+body.touch #pause .tip{display:none}
 /* touch controls */
 #touch{position:fixed;inset:0;pointer-events:none;display:none;z-index:3}
 body.touch.playing #touch{display:block}
@@ -132,7 +136,7 @@ body.touch #title .pc,body:not(.touch) #title .mob{display:none}
   <div class="small"><span class="pc">Steer with the left stick or arrow keys. <b class="k a">A</b> or Space to jump, <b class="k x">X</b> or Shift for Lightning Boost, <b class="k lt">LT</b> or Down to slow down.<br>Flash drives forward by itself. Smash cars, Dino Robots and stinky cheese mountains!</span><span class="mob">Flash drives by itself. Tap ◀ ▶ to steer, JUMP to hop and ⚡ to boost.<br>Smash cars, Dino Robots and stinky cheese mountains!</span></div>
 </div></div>
 <div id="pause" class="overlay"><div class="box glass">
-  <h2>Paused</h2>
+  <h2>Paused</h2><p class="tip" style="margin:-6px 0 10px">Stick or arrows to choose, A or Enter to pick, B to keep driving</p>
   <div class="btns"><button class="btn go" id="resume">Keep driving</button><button class="btn" id="restart">Start the race again</button><button class="btn" id="musicBtn">Music: On</button><a class="btn" href="/games/rivers-galactic-playground/">Back to the Playground</a></div>
 </div></div>
 <div id="results" class="overlay"><div class="box glass" id="resultsBox"></div></div>
