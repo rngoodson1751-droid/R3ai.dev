@@ -152,6 +152,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .zero .z{font-size:120px;font-weight:700;color:var(--green);line-height:1}
 .zero .zt{font-size:30px;font-weight:600}
 .zero .zs{font-size:20px;color:var(--dim);margin-top:6px}
+.stlabel{font-family:'JetBrains Mono';font-size:15px;letter-spacing:.2em;color:var(--dim);margin:22px 0 -10px}
 .stack{margin-top:24px;display:flex;flex-direction:column;gap:14px}
 .blk{padding:22px 28px;border-radius:16px;font-size:24px;font-weight:600;display:flex;justify-content:space-between;align-items:center;transform:translateX(-40px);opacity:0;transition:.6s}
 .scene.on .blk{transform:none;opacity:1}
@@ -272,7 +273,8 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .ctab td{padding:15px 14px;text-align:right;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctab tr.tot td{font-weight:700;border-bottom:1px solid var(--line)}
 .ctab tr.fed td{color:var(--cyan)}
-.ctab tr.loc td{color:var(--yellow);font-weight:700;border-bottom:none}
+.ctab tr.loc td{color:var(--yellow);font-weight:700}
+.ctab tr.gf td{color:var(--pink);border-bottom:none}
 .cside{display:flex;flex-direction:column;gap:20px}
 .cbig{padding:26px 30px}.cbig .v{font-size:96px;font-weight:700;color:var(--green);line-height:1}.cbig .k{font-size:24px;margin-top:6px}
 .cnote{padding:20px 26px;font-size:20px;line-height:1.45;color:var(--dim)}.cnote b{color:var(--text)}
@@ -292,8 +294,16 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .capsave small{font-size:20px;color:var(--dim);font-weight:400;margin-left:8px}
 .capsplit{display:flex;gap:40px;margin-top:16px;font-size:26px;font-weight:600}
 .capsplit small{display:block;font-family:'JetBrains Mono';font-size:13px;letter-spacing:.18em;color:var(--dim);font-weight:400}
-.capsplit div:last-child{color:var(--yellow)}
+.capsplit div:nth-child(2){color:var(--yellow)}
+.capsplit .gfc{color:var(--pink)}
 .capfoot{margin-top:28px;font-size:20px;color:var(--dim);line-height:1.45;max-width:1500px}
+.cmp{padding:22px 26px}
+.cmp h3{font-family:'JetBrains Mono';font-size:15px;letter-spacing:.2em;color:var(--dim);margin-bottom:8px}
+.cr{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:19px}
+.cr:last-child{border-bottom:none}
+.cr small{display:block;font-size:14px;color:var(--dim)}
+.cr b{font-size:23px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cr.hl2 b{color:var(--text)}.cr.hl3 b{color:var(--green)}
 /* notes */
 #notes{position:absolute;left:80px;right:80px;bottom:84px;z-index:30;padding:22px 30px;background:rgba(3,10,24,.94);border:1px solid var(--yellow);border-radius:16px;font-size:22px;line-height:1.5;display:none}
 #notes.show{display:block}
@@ -357,8 +367,8 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
   <div class="kicker">The short version</div>
   <h2>One project. <span class="hl">Three winners.</span></h2>
   <div class="wins">
-    <div class="panel win"><div class="wh"><span class="wi">🏛️</span><div><small>FOR THE CITY</small>Better service, no new local burden</div></div>
-      <ul><li><b>$0 from the General Fund.</b> Paid with federal transit funds and the City's 401 Fund.</li><li><b>Bought legally, without a new bid cycle,</b> through the 791 Purchasing Cooperative.</li><li><b>A 2-year contract,</b> not a permanent commitment. Council approves it and decides what comes next.</li></ul></div>
+    <div class="panel win"><div class="wh"><span class="wi">🏛️</span><div><small>FOR THE CITY</small>Better service at a known cost</div></div>
+      <ul><li><b>Mostly federal dollars.</b> Yearly service is paid with federal transit funds and the City's 401 Transit Fund. The $148,300 startup comes from unspent FY26 Transit capital funds.</li><li><b>Bought legally, without a new bid cycle,</b> through the 791 Purchasing Cooperative.</li><li><b>A 2-year contract,</b> not a permanent commitment. Council approves it and decides what comes next.</li></ul></div>
     <div class="panel win"><div class="wh"><span class="wi">🚌</span><div><small>FOR THE TRANSIT DEPARTMENT</small>More reach from the same team</div></div>
       <ul><li><b>Vans, drivers and software</b> provided by Via as a service.</li><li><b>Paratransit modernized:</b> real-time booking and dispatch instead of voicemail and phone tag.</li><li><b>Trip-by-trip data</b> to plan service and back up our federal reporting.</li></ul></div>
     <div class="panel win hot"><div class="wh"><span class="wi">🏘️</span><div><small>FOR YOUR CONSTITUENTS</small>A ride from near the front door</div></div>
@@ -418,10 +428,11 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 <!-- 5 FUNDING -->
 <section class="scene" id="s5" data-min="4" data-name="How we pay for it">
   <div class="kicker">Funding and procurement</div>
-  <h2>Paid for with <span class="hl">transit dollars,</span> bought the legal way.</h2>
+  <h2>Paid for mostly with <span class="hl">federal transit dollars.</span></h2>
   <div class="s5wrap">
     <div>
-      <div class="panel zero"><div class="z">$0</div><div><div class="zt">General Fund dollars</div><div class="zs">No money from the General Fund or any other department.</div></div></div>
+      <div class="panel zero"><div class="z" style="color:var(--yellow);font-size:76px">$148,300</div><div><div class="zt">One-time startup</div><div class="zs">From unspent FY26 Transit capital funds (General Fund), already allocated to Transit.</div></div></div>
+      <div class="stlabel">EVERY YEAR AFTER THAT</div>
       <div class="stack">
         <div class="blk b1" style="transition-delay:.3s"><div>Federal FTA Section 5307 funds<small>Asking FTA to shift our pending 5307 application toward operating assistance</small></div><span class="mono">FEDERAL</span></div>
         <div class="blk b2" style="transition-delay:.6s"><div>City 401 Fund<small>The local share, already dedicated</small></div><span class="mono">LOCAL</span></div>
@@ -458,15 +469,21 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
           <tr><td>One-time startup<small>retrofits, wraps, software</small></td><td>$88,590</td><td>$59,710</td><td>$148,300</td></tr>
           <tr><td>Service, year one<small>$63.41 per vehicle hour</small></td><td>$979,304</td><td>$2,285,043</td><td>$3,264,347</td></tr>
           <tr class="tot"><td>Year one total</td><td>$1,067,894</td><td>$2,344,753</td><td>$3,412,647</td></tr>
-          <tr class="fed"><td>Federal transit funds pay</td><td>$854,315 <small>80%</small></td><td>$1,533,046 <small>65%</small></td><td>$2,387,361</td></tr>
-          <tr class="loc"><td>City 401 Transit Fund pays</td><td>$213,579</td><td>$811,707</td><td>$1,025,286</td></tr>
+          <tr class="fed"><td>Federal transit funds<small>service hours</small></td><td>$783,443 <small>80%</small></td><td>$1,485,278 <small>65%</small></td><td>$2,268,721</td></tr>
+          <tr class="loc"><td>City 401 Transit Fund<small>service hours</small></td><td>$195,861</td><td>$799,765</td><td>$995,626</td></tr>
+          <tr class="gf"><td>General Fund<small>startup, unspent FY26 Transit capital</small></td><td>$88,590</td><td>$59,710</td><td>$148,300</td></tr>
         </tbody>
       </table>
     </div>
     <div class="cside">
-      <div class="panel cbig"><div class="v">$0</div><div class="k">from the General Fund</div></div>
-      <div class="panel cnote"><b>For scale:</b> today's transit operation is $4,367,486 in the FY27 approved budget. In-house paratransit alone runs about $737,854 a year.</div>
-      <div class="panel cnote"><b>Hours:</b> 6 am to 9 pm weekdays, 8 am to 8 pm weekends. 5,148 hours a year per vehicle.</div>
+      <div class="panel cmp">
+        <h3>COMPARED WITH TODAY</h3>
+        <div class="cr"><span>FY27 transit budget<small>401-0609 + 401-0610, approved</small></span><b>$4,367,486</b></div>
+        <div class="cr"><span>Current on-demand paratransit<small>FY26 estimate, inside that budget</small></span><b>$737,854</b></div>
+        <div class="cr hl2"><span>Via, year one, full use<small>78% of today's transit budget</small></span><b>$3,412,647</b></div>
+        <div class="cr hl3"><span>Via, year one, contract cap<small>50% of today's transit budget</small></span><b>$2,181,836</b></div>
+      </div>
+      <div class="panel cnote"><b>If Via replaces on-demand paratransit,</b> the added year-one cost, startup included, is $1,443,982 at the contract cap or $2,674,793 at full use.</div>
     </div>
   </div>
 </section>
@@ -483,7 +500,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
         <div class="brow"><span>Not-to-exceed</span><div class="bar real" style="width:63.9%"><b>$2,181,836</b></div></div>
       </div>
       <div class="capsave">$1,230,811 <small>below the full-use estimate</small></div>
-      <div class="capsplit"><div><small>FEDERAL</small>$1,531,948</div><div><small>401 FUND</small>$649,888</div></div>
+      <div class="capsplit"><div><small>FEDERAL</small>$1,413,308</div><div><small>401 FUND</small>$620,228</div><div class="gfc"><small>GENERAL FUND</small>$148,300</div></div>
     </div>
     <div class="panel capc hot">
       <h3>2-YEAR TERM <span class="rec">RECOMMENDED</span></h3>
@@ -492,10 +509,10 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
         <div class="brow"><span>Not-to-exceed</span><div class="bar real" style="width:63.1%"><b>$4,296,341</b></div></div>
       </div>
       <div class="capsave">$2,511,412 <small>below the full-use estimate</small></div>
-      <div class="capsplit"><div><small>FEDERAL</small>$3,001,529</div><div><small>401 FUND</small>$1,294,812</div></div>
+      <div class="capsplit"><div><small>FEDERAL</small>$2,882,888</div><div><small>401 FUND</small>$1,265,153</div><div class="gfc"><small>GENERAL FUND</small>$148,300</div></div>
     </div>
   </div>
-  <div class="capfoot">Via cannot bill past the cap without a contract amendment. The cap covers about 32,000 vehicle hours a year: the same as 6 of the 10 vehicles running every scheduled hour. Year two price is locked at $65.95 an hour.</div>
+  <div class="capfoot">Via cannot bill past the cap without a contract amendment. The cap covers about 32,000 vehicle hours a year: the same as 6 of the 10 vehicles running every scheduled hour. Year two price is locked at $65.95 an hour. For scale, the 2-year cap averages about $2.15 million a year, half of today's $4,367,486 transit budget.</div>
 </section>
 
 <!-- 6 PROOF -->
@@ -558,10 +575,10 @@ const nav=document.getElementById('nav');
 let cur=0;
 const NOTES=[
  ["About 25 minutes, Via only.","Goal: answer three questions. What is it, how do we pay for it, what does it do for the City, the department and their districts."],
- ["If they remember one slide, it is this one.","Lead with $0 General Fund and the 2-year term: Council keeps control.","Constituent column: ask which trips their residents struggle to make today."],
+ ["If they remember one slide, it is this one.","Lead with the 2-year term and the contract cap: Council keeps control.","Say it plainly: the $148,300 startup comes from unspent FY26 Transit capital, which is General Fund money. Yearly service is federal plus 401.","Constituent column: ask which trips their residents struggle to make today."],
  ["Let the sim run 30 to 60 seconds. Point out riders outside the yellow line walking a long way.","Illustrative only, not a forecast."],
  ["Phone booking keeps it open to riders without smartphones.","Paratransit is half the value: today trip requests arrive as voicemails."],
- ["Key line: no General Fund money.","Be plain about what is still pending: FTA approval of the funding shift and the final service zone.","Act 665 is what makes the 791 purchase legal for services. Legal (Corey Rubin) is on the procurement.","Primary: 2-year microtransit as a service. Fallback: dispatch software only, under $50k."],
+ ["Startup: unspent FY26 Transit capital (General Fund). Yearly service: federal 5307 plus the 401 Transit Fund.","Be plain about what is still pending: FTA approval of the funding shift and the final service zone.","Act 665 is what makes the 791 purchase legal for services. Legal (Corey Rubin) is on the procurement.","Primary: 2-year microtransit as a service. Fallback: dispatch software only, under $50k."],
  ["Full use = all 10 vehicles every scheduled hour. Real use will be lower; Via scales vehicles to demand.","Startup per the service order: 3 wheelchair retrofits at $21,000, 10 wraps at $3,000, software setup.","80% on paratransit depends on the ADA cap (10% or 20% of the yearly apportionment)."],
  ["Not-to-exceed amounts from Via's Sept 1 service orders.","Be plain: the cap limits what we can be billed. If we ever needed all 10 vehicles every hour, we would hit the cap and come back to Council.","Year 2 rate is locked at $65.95 per hour. $25,000 monthly minimum."],
  ["Via's free study depends on the partnership being in place before year end, which is why December matters.","Thomas: Dec 2 meeting ideal, Dec 16 second choice."],
