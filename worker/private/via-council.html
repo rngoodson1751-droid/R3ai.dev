@@ -35,8 +35,8 @@ html,body{width:100%;height:100%;background:#020812;overflow:hidden;font-family:
 @keyframes blink{50%{opacity:.35}}
 
 /* nav */
-#nav{position:absolute;bottom:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:center;gap:10px;z-index:20;border-top:1px solid var(--line);background:linear-gradient(#07152b55,#07152bee)}
-.navbtn{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--dim);padding:8px 14px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:.3s;white-space:nowrap}
+#nav{position:absolute;bottom:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:center;gap:4px;z-index:20;border-top:1px solid var(--line);background:linear-gradient(#07152b55,#07152bee)}
+.navbtn{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--dim);padding:7px 10px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:.3s;white-space:nowrap}
 .navbtn:hover{color:var(--text)}
 .navbtn.on{color:var(--navy);background:var(--yellow);font-weight:600}
 .navbtn.done{color:var(--text)}
@@ -309,6 +309,35 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .gt{font-size:19px;line-height:1.35;color:var(--dim)}.gt b{color:var(--text)}
 .gt small{display:block;font-size:15px;margin-top:4px;color:var(--cyan)}
 .gsnote{font-size:16px;line-height:1.45;color:var(--dim)}
+/* focus */
+.focgrid{display:grid;grid-template-columns:1fr 70px 1fr;gap:20px;margin-top:34px;align-items:stretch}
+.foc{padding:26px 34px}
+.foc h3{font-family:'JetBrains Mono';font-size:16px;letter-spacing:.2em;color:var(--dim);margin-bottom:10px}
+.foc.next{border-color:rgba(70,227,154,.45)}
+.foc.next h3{color:var(--green)}
+.fr{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+.fr:last-child{border-bottom:none}
+.fv{font-size:36px;font-weight:700;color:var(--text);white-space:nowrap}
+.foc.next .fv{color:var(--green)}
+.fl{font-size:21px;line-height:1.35;color:var(--dim)}
+.arrowcol{display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--yellow)}
+.vision{margin-top:26px;display:flex;gap:18px;align-items:flex-start;padding:22px 30px;border-radius:18px;background:linear-gradient(90deg,rgba(255,199,44,.14),rgba(255,199,44,.03));border:1px solid rgba(255,199,44,.4)}
+.vq{font-size:80px;line-height:.8;color:var(--yellow);font-weight:700}
+.vision div{font-size:30px;line-height:1.3}
+.vision b{color:var(--yellow)}
+.vision small{display:block;font-size:17px;color:var(--dim);margin-top:8px;font-family:'JetBrains Mono';letter-spacing:.08em}
+/* peers */
+.ptab{margin-top:30px;padding:14px 26px}
+.ptab table{width:100%;border-collapse:collapse;font-size:21px}
+.ptab th{text-align:left;font-family:'JetBrains Mono';font-size:14px;letter-spacing:.16em;color:var(--dim);font-weight:400;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ptab td{padding:13px 14px;border-bottom:1px dashed var(--line);vertical-align:top;line-height:1.35;color:var(--dim)}
+.ptab td:first-child{color:var(--text);font-weight:600;white-space:nowrap}
+.ptab td:nth-child(2){white-space:nowrap}
+.ptab td small{display:block;font-family:'JetBrains Mono';font-size:12px;font-weight:400;color:var(--cyan);margin-top:3px}
+.ptab td:last-child{color:var(--text)} .ptab td b{color:var(--green)}
+.ptab tr:last-child td{border-bottom:none}
+.ptab tr.me td{color:var(--yellow);background:rgba(255,199,44,.06)}
+.psrc{margin-top:14px;font-size:15px;color:var(--dim)}
 /* notes */
 #notes{position:absolute;left:80px;right:80px;bottom:84px;z-index:30;padding:22px 30px;background:rgba(3,10,24,.94);border:1px solid var(--yellow);border-radius:16px;font-size:22px;line-height:1.5;display:none}
 #notes.show{display:block}
@@ -429,8 +458,33 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
   </div>
 </section>
 
+<!-- FOCUS -->
+<section class="scene" id="sFocus" data-min="3" data-name="Our focus">
+  <div class="kicker">What Via frees us to do</div>
+  <h2>Via takes paratransit. <span class="hl">Our team takes on the bus network.</span></h2>
+  <div class="focgrid">
+    <div class="panel foc">
+      <h3>TODAY</h3>
+      <div class="fr"><span class="fv">5</span><span class="fl">fixed routes, weekdays only</span></div>
+      <div class="fr"><span class="fv">12 hrs</span><span class="fl">of service a day, 5:45 am to 5:45 pm</span></div>
+      <div class="fr"><span class="fv">1 hour</span><span class="fl">between buses on each route</span></div>
+      <div class="fr"><span class="fv">90,658</span><span class="fl">fixed-route rides a year, plus 2,354 paratransit rides (2025 NTD report)</span></div>
+      <div class="fr"><span class="fv">Split</span><span class="fl">our drivers and staff cover both the bus routes and on-demand paratransit</span></div>
+    </div>
+    <div class="arrowcol">&rarr;</div>
+    <div class="panel foc next">
+      <h3>WITH VIA ON PARATRANSIT</h3>
+      <div class="fr"><span class="fv">100%</span><span class="fl">of our team focused on the fixed routes</span></div>
+      <div class="fr"><span class="fv">30 min</span><span class="fl">our goal: a bus every 30 minutes instead of every hour</span></div>
+      <div class="fr"><span class="fv">More City</span><span class="fl">our goal: expand the routes to reach more of Lake Charles</span></div>
+      <div class="fr"><span class="fv">All</span><span class="fl">better quality and more service for the whole City, not just the part the buses reach today</span></div>
+    </div>
+  </div>
+  <div class="vision"><span class="vq">&ldquo;</span><div><b>Our vision:</b> when anyone in Lake Charles asks, &ldquo;How will we get there?&rdquo; the answer comes without a second thought: &ldquo;We'll take City transit, of course!&rdquo;<small>Robert Goodson and Bethany Doty, Transit Division</small></div></div>
+</section>
+
 <!-- 5 FUNDING -->
-<section class="scene" id="s5" data-min="4" data-name="How we pay for it">
+<section class="scene" id="s5" data-min="4" data-name="Paying for it">
   <div class="kicker">Funding and procurement</div>
   <h2>Paid for mostly with <span class="hl">federal transit dollars.</span></h2>
   <div class="s5wrap">
@@ -491,7 +545,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 </section>
 
 <!-- CAP -->
-<section class="scene" id="sCap" data-min="3" data-name="The contract cap">
+<section class="scene" id="sCap" data-min="3" data-name="Contract cap">
   <div class="kicker">What Via has proposed</div>
   <h2>The contract <span class="hl">caps the bill.</span></h2>
   <div class="capgrid">
@@ -515,6 +569,26 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
     </div>
   </div>
   <div class="capfoot">Via cannot bill past the cap without a contract amendment. The cap covers about 32,000 vehicle hours a year: the same as 6 of the 10 vehicles running every scheduled hour. Year two price is locked at $65.95 an hour. For scale, the 2-year cap averages about $2.15 million a year, half of today's $4,367,486 transit budget.</div>
+</section>
+
+<!-- PEERS -->
+<section class="scene" id="sPeers" data-min="3" data-name="Cities like ours">
+  <div class="kicker">Ridership in cities like ours</div>
+  <h2>Where Via launched, <span class="hl">more people rode.</span></h2>
+  <div class="panel ptab">
+    <table>
+      <thead><tr><th>City</th><th>Population</th><th>Before Via</th><th>After Via</th></tr></thead>
+      <tbody>
+        <tr class="me"><td>Lake Charles, LA</td><td>about 85,000</td><td>90,658 bus rides a year, 2,354 paratransit rides</td><td>Our goal</td></tr>
+        <tr><td>Sugar Land, TX<small>we rode it on July 24</small></td><td>about 111,000</td><td>About 665 in-city on-demand trips a month on the county service</td><td><b>5,454 trips</b> in January 2026; cost per trip fell from $94 to $21</td></tr>
+        <tr><td>Gastonia, NC</td><td>about 80,000</td><td>Fixed-route buses averaging 7 riders an hour</td><td><b>100,000 trips</b> in the first 8 months; ridership up nearly every month over the buses</td></tr>
+        <tr><td>Wilson, NC</td><td>about 48,000</td><td>Fixed-route buses</td><td>About <b>3,700 trips a week</b>, more than 2.5 times the old bus ridership</td></tr>
+        <tr><td>Green Bay, WI<small>Via for paratransit and on-demand</small></td><td>about 107,000</td><td>Paratransit plus an underperforming bus line</td><td><b>15% more riders</b> each year; 20% cheaper than the bus line it replaced</td></tr>
+        <tr><td>Sioux Falls, SD<small>buses kept and redesigned</small></td><td>about 193,000</td><td>Buses and paratransit in the city core</td><td><b>37% more fixed-route riders</b>; cost per ride down 25%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="psrc">Sources: Community Impact and Mass Transit (Sugar Land); WFAE and WSOC (Gastonia); WFAE/NPR (Wilson); Via case studies (Green Bay, Sioux Falls). Populations from the 2020 Census.</div>
 </section>
 
 <!-- 6 PROOF -->
@@ -587,9 +661,11 @@ const NOTES=[
  ["If they remember one slide, it is this one.","Lead with the 2-year term and the contract cap: Council keeps control.","Say it plainly: the City Share includes the $148,300 startup, from unspent FY26 Transit capital funds.","Constituent column: ask which trips their residents struggle to make today.","District numbers: every stop in our GTFS feed placed on the council district map (the feed routes line up with the map routes). Straight-line distance to the nearest stop; median is about 0.3 mile in District F and 0.66 mile in District C. District C runs past the map edge, so its figure covers only what the map shows."],
  ["Let the sim run 30 to 60 seconds. Point out riders outside the yellow line walking a long way.","Illustrative only, not a forecast."],
  ["Phone booking keeps it open to riders without smartphones.","Paratransit is half the value: today trip requests arrive as voicemails."],
+ ["Via's contract covers drivers and vehicles for paratransit, so our own operators and staff move to the fixed routes.","Goals, not promises yet: 30-minute buses and expanded routes are what the freed-up team works toward.","Ridership is from the 2025 NTD report (Bus 90,658, Demand Response 2,354).","Close on the vision: City transit becomes the obvious, exciting answer to how will we get there."],
  ["Startup: unspent FY26 Transit capital funds. Yearly service: federal 5307 plus the City Share.","Be plain about what is still pending: FTA approval of the funding shift and the final service zone.","Act 665 is what makes the 791 purchase legal for services. Legal (Corey Rubin) is on the procurement."],
  ["Full use = all 10 vehicles every scheduled hour. Real use will be lower; Via scales vehicles to demand.","Startup per the service order: 3 wheelchair retrofits at $21,000, 10 wraps at $3,000, software setup.","80% on paratransit depends on the ADA cap (10% or 20% of the yearly apportionment)."],
  ["Not-to-exceed amounts from Via's Sept 1 service orders.","Be plain: the cap limits what we can be billed. If we ever needed all 10 vehicles every hour, we would hit the cap and come back to Council.","Year 2 rate is locked at $65.95 per hour. $25,000 monthly minimum."],
+ ["Before/after in similar cities. Sugar Land and Gastonia are the best size matches; we saw Sugar Land in person.","Green Bay and Sioux Falls figures come from Via's own case studies; the others are from local news.","Gastonia replaced all its buses and says it now leans more on its city budget; we keep our fixed routes and their federal formula funding.","Sioux Falls is the closest to our plan: buses kept, redesigned, and ridership up."],
  ["Via's free study depends on the partnership being in place before year end, which is why December matters.","Thomas: Dec 2 meeting ideal, Dec 16 second choice."],
  ["Close with the asks. Offer to come back with answers to anything they raise."],
  ["Offer a ride-along or a follow-up with Via."]
