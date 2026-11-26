@@ -74,6 +74,10 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 - `worker/private/council-briefing.html` at `/work/council-briefing/<key>/` (20 November 2026): the LC Transit Mission Control presentation Robert shows on his office TV to Councilman Matt Young (projects since April, AI translation pilot, Via Microtransit). It is a copy of Robert's Claude artifact of the same presentation; keep its own dark navy and yellow look and 1920 by 1080 stage. Keys and swipes change sections; phones in portrait get a turn-sideways hint. Never change its address or key once Robert shares it.
 
+## Via council briefing (unlisted)
+
+- `worker/private/via-council.html` at `/work/via-council/<key>/` (25 November 2026): a short, Via-only version of the council briefing for Council President Craig Marks and Councilman Tommy Bilbo (meeting 30 November 2026). Copy of Robert's Claude artifact of the same name; same look and controls as the council briefing. Never change its address or key once Robert shares it.
+
 ## Sophie's Unicorn Cloud Race (unlisted game)
 
 - `static/games/sophie-unicorn-cloud-race/index.html` at `/games/sophie-unicorn-cloud-race/` (16 November 2026): a unicorn race over clouds designed by Sophie, Bethany Doty's daughter (about 5), with Robert and Clarus. Robert chose a plain unlisted address, no login. Keep it off `content/projects.json`, the games page and the sitemap, and keep its `noindex` tag. It keeps its own pastel look (lavender, cotton-candy pink, sky blue, mint, sunshine yellow). Keep it easy for a five-year-old: tap to jump, a bird rescues any fall, nothing that ends the race early.
