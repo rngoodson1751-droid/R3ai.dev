@@ -260,6 +260,40 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .win li b{color:var(--text);font-weight:600}
 .pend{margin-top:18px;padding:18px 24px;font-size:19px;line-height:1.4;color:var(--dim)}
 .pend b{color:var(--yellow)}
+/* costs */
+.costwrap{display:grid;grid-template-columns:1.9fr .9fr;gap:30px;margin-top:34px}
+.ctab{padding:20px 28px}
+.ctab table{width:100%;border-collapse:collapse;font-size:23px}
+.ctab th{text-align:right;font-weight:600;font-size:20px;padding:12px 14px;border-bottom:1px solid var(--line);color:var(--text)}
+.ctab th:first-child,.ctab td:first-child{text-align:left}
+.ctab th small,.ctab td small{display:block;font-family:'JetBrains Mono';font-size:13px;color:var(--dim);font-weight:400;letter-spacing:.06em;margin-top:3px}
+.ctab td small{display:inline;margin-left:6px}
+.ctab td:first-child small{display:block;margin-left:0}
+.ctab td{padding:15px 14px;text-align:right;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ctab tr.tot td{font-weight:700;border-bottom:1px solid var(--line)}
+.ctab tr.fed td{color:var(--cyan)}
+.ctab tr.loc td{color:var(--yellow);font-weight:700;border-bottom:none}
+.cside{display:flex;flex-direction:column;gap:20px}
+.cbig{padding:26px 30px}.cbig .v{font-size:96px;font-weight:700;color:var(--green);line-height:1}.cbig .k{font-size:24px;margin-top:6px}
+.cnote{padding:20px 26px;font-size:20px;line-height:1.45;color:var(--dim)}.cnote b{color:var(--text)}
+.capgrid{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:40px}
+.capc{padding:30px 36px}
+.capc.hot{border-color:rgba(255,199,44,.5)}
+.capc h3{font-family:'JetBrains Mono';font-size:17px;letter-spacing:.2em;color:var(--dim);display:flex;align-items:center;gap:14px}
+.rec{font-size:13px;color:#07152b;background:var(--yellow);padding:4px 10px;border-radius:999px;letter-spacing:.12em}
+.bars{margin-top:24px;display:flex;flex-direction:column;gap:16px}
+.brow span{display:block;font-size:18px;color:var(--dim);margin-bottom:6px}
+.bar{height:52px;border-radius:12px;display:flex;align-items:center;padding:0 18px;font-size:24px;transform-origin:left;transition:transform 1.2s ease .3s;transform:scaleX(.02)}
+.scene.on .bar{transform:none}
+.bar b{white-space:nowrap}
+.bar.ghost{background:rgba(255,255,255,.06);border:1px dashed var(--line)}
+.bar.real{background:linear-gradient(90deg,#16685a,#1f9a7e)}
+.capsave{margin-top:24px;font-size:44px;font-weight:700;color:var(--green)}
+.capsave small{font-size:20px;color:var(--dim);font-weight:400;margin-left:8px}
+.capsplit{display:flex;gap:40px;margin-top:16px;font-size:26px;font-weight:600}
+.capsplit small{display:block;font-family:'JetBrains Mono';font-size:13px;letter-spacing:.18em;color:var(--dim);font-weight:400}
+.capsplit div:last-child{color:var(--yellow)}
+.capfoot{margin-top:28px;font-size:20px;color:var(--dim);line-height:1.45;max-width:1500px}
 /* notes */
 #notes{position:absolute;left:80px;right:80px;bottom:84px;z-index:30;padding:22px 30px;background:rgba(3,10,24,.94);border:1px solid var(--yellow);border-radius:16px;font-size:22px;line-height:1.5;display:none}
 #notes.show{display:block}
@@ -284,7 +318,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
   <div class="hud-sp"></div>
   <div class="chip"><span class="dot-live"></span><span id="clock">--:--</span></div>
   <div id="timerBox" title="Click or press T to start / pause the meeting timer">
-    <div class="chip">MEETING <b id="elapsed">00:00</b> / <span id="totalBudget">25:00</span></div>
+    <div class="chip">MEETING <b id="elapsed">00:00</b> / <span id="totalBudget">26:00</span></div>
     <div id="budgetBar"><div id="budgetFill"></div></div>
     <div class="chip" id="sceneBudget">2 min</div>
   </div>
@@ -319,7 +353,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 
 <!-- 1 SINCE APRIL -->
 <!-- WHY -->
-<section class="scene" id="sWin" data-min="4" data-name="Why it matters">
+<section class="scene" id="sWin" data-min="3" data-name="Why it matters">
   <div class="kicker">The short version</div>
   <h2>One project. <span class="hl">Three winners.</span></h2>
   <div class="wins">
@@ -333,7 +367,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 </section>
 
 <!-- 3 VIA IDEA -->
-<section class="scene" id="s3" data-min="3" data-name="The idea">
+<section class="scene" id="s3" data-min="2" data-name="The idea">
   <div class="kicker">Introducing Via Microtransit</div>
   <h2 style="font-size:50px">Same city. Same riders. <span class="hl">Two ways to get them there.</span></h2>
   <div class="simgrid">
@@ -352,7 +386,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 </section>
 
 <!-- 4 HOW IT WORKS -->
-<section class="scene" id="s4" data-min="3" data-name="How it works">
+<section class="scene" id="s4" data-min="2" data-name="How it works">
   <div class="s4wrap">
     <div class="phone">
       <div class="notch"></div>
@@ -382,7 +416,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 </section>
 
 <!-- 5 FUNDING -->
-<section class="scene" id="s5" data-min="5" data-name="How we pay for it">
+<section class="scene" id="s5" data-min="4" data-name="How we pay for it">
   <div class="kicker">Funding and procurement</div>
   <h2>Paid for with <span class="hl">transit dollars,</span> bought the legal way.</h2>
   <div class="s5wrap">
@@ -410,6 +444,58 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
       </div>
     </div>
   </div>
+</section>
+
+<!-- COSTS -->
+<section class="scene" id="sCost" data-min="3" data-name="What it costs">
+  <div class="kicker">The numbers, at full use</div>
+  <h2>All 10 vehicles, every hour: <span class="hl">$3.41M in year one.</span></h2>
+  <div class="costwrap">
+    <div class="panel ctab">
+      <table>
+        <thead><tr><th></th><th>3 paratransit vans<small>wheelchair lifts</small></th><th>7 microtransit vehicles<small>shared rides for anyone</small></th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>One-time startup<small>retrofits, wraps, software</small></td><td>$88,590</td><td>$59,710</td><td>$148,300</td></tr>
+          <tr><td>Service, year one<small>$63.41 per vehicle hour</small></td><td>$979,304</td><td>$2,285,043</td><td>$3,264,347</td></tr>
+          <tr class="tot"><td>Year one total</td><td>$1,067,894</td><td>$2,344,753</td><td>$3,412,647</td></tr>
+          <tr class="fed"><td>Federal transit funds pay</td><td>$854,315 <small>80%</small></td><td>$1,533,046 <small>65%</small></td><td>$2,387,361</td></tr>
+          <tr class="loc"><td>City 401 Transit Fund pays</td><td>$213,579</td><td>$811,707</td><td>$1,025,286</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cside">
+      <div class="panel cbig"><div class="v">$0</div><div class="k">from the General Fund</div></div>
+      <div class="panel cnote"><b>For scale:</b> today's transit operation is $4,367,486 in the FY27 approved budget. In-house paratransit alone runs about $737,854 a year.</div>
+      <div class="panel cnote"><b>Hours:</b> 6 am to 9 pm weekdays, 8 am to 8 pm weekends. 5,148 hours a year per vehicle.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CAP -->
+<section class="scene" id="sCap" data-min="3" data-name="The contract cap">
+  <div class="kicker">What Via has proposed</div>
+  <h2>The contract <span class="hl">caps the bill.</span></h2>
+  <div class="capgrid">
+    <div class="panel capc">
+      <h3>1-YEAR TERM</h3>
+      <div class="bars">
+        <div class="brow"><span>Full-use estimate</span><div class="bar ghost" style="width:100%"><b>$3,412,647</b></div></div>
+        <div class="brow"><span>Not-to-exceed</span><div class="bar real" style="width:63.9%"><b>$2,181,836</b></div></div>
+      </div>
+      <div class="capsave">$1,230,811 <small>below the full-use estimate</small></div>
+      <div class="capsplit"><div><small>FEDERAL</small>$1,531,948</div><div><small>401 FUND</small>$649,888</div></div>
+    </div>
+    <div class="panel capc hot">
+      <h3>2-YEAR TERM <span class="rec">RECOMMENDED</span></h3>
+      <div class="bars">
+        <div class="brow"><span>Full-use estimate</span><div class="bar ghost" style="width:100%"><b>$6,807,753</b></div></div>
+        <div class="brow"><span>Not-to-exceed</span><div class="bar real" style="width:63.1%"><b>$4,296,341</b></div></div>
+      </div>
+      <div class="capsave">$2,511,412 <small>below the full-use estimate</small></div>
+      <div class="capsplit"><div><small>FEDERAL</small>$3,001,529</div><div><small>401 FUND</small>$1,294,812</div></div>
+    </div>
+  </div>
+  <div class="capfoot">Via cannot bill past the cap without a contract amendment. The cap covers about 32,000 vehicle hours a year: the same as 6 of the 10 vehicles running every scheduled hour. Year two price is locked at $65.95 an hour.</div>
 </section>
 
 <!-- 6 PROOF -->
@@ -442,7 +528,7 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 </section>
 
 <!-- 8 Q&A -->
-<section class="scene" id="s8" data-min="4" data-name="Questions">
+<section class="scene" id="s8" data-min="3" data-name="Questions">
   <div class="s8wrap">
     <div class="kicker">Open floor</div>
     <h1>Questions<span class="hl">?</span></h1>
@@ -476,7 +562,9 @@ const NOTES=[
  ["Let the sim run 30 to 60 seconds. Point out riders outside the yellow line walking a long way.","Illustrative only, not a forecast."],
  ["Phone booking keeps it open to riders without smartphones.","Paratransit is half the value: today trip requests arrive as voicemails."],
  ["Key line: no General Fund money.","Be plain about what is still pending: FTA approval of the funding shift and the final service zone.","Act 665 is what makes the 791 purchase legal for services. Legal (Corey Rubin) is on the procurement.","Primary: 2-year microtransit as a service. Fallback: dispatch software only, under $50k."],
- ["Via's free study depends on the partnership being in place before year end, which is why December matters."],
+ ["Full use = all 10 vehicles every scheduled hour. Real use will be lower; Via scales vehicles to demand.","Startup per the service order: 3 wheelchair retrofits at $21,000, 10 wraps at $3,000, software setup.","80% on paratransit depends on the ADA cap (10% or 20% of the yearly apportionment)."],
+ ["Not-to-exceed amounts from Via's Sept 1 service orders.","Be plain: the cap limits what we can be billed. If we ever needed all 10 vehicles every hour, we would hit the cap and come back to Council.","Year 2 rate is locked at $65.95 per hour. $25,000 monthly minimum."],
+ ["Via's free study depends on the partnership being in place before year end, which is why December matters.","Thomas: Dec 2 meeting ideal, Dec 16 second choice."],
  ["Close with the asks. Offer to come back with answers to anything they raise."],
  ["Offer a ride-along or a follow-up with Via."]
 ];
