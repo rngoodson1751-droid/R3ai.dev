@@ -249,14 +249,14 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .lang{font-family:'JetBrains Mono';font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--text)}
 
 /* why it matters */
-.wins{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:50px}
-.win{padding:36px 34px;min-height:600px}
+.wins{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:30px}
+.win{padding:28px 32px;min-height:0}
 .win.hot{border-color:rgba(255,199,44,.45)}
 .wh{display:flex;gap:16px;align-items:center;font-size:27px;font-weight:700;line-height:1.2;margin-bottom:18px}
 .wh small{display:block;font-family:'JetBrains Mono';font-size:14px;letter-spacing:.18em;color:var(--yellow);font-weight:600;margin-bottom:6px}
 .wi{font-size:44px;flex:none}
-.win ul{list-style:none;display:flex;flex-direction:column;gap:24px}
-.win li{font-size:24px;line-height:1.42;color:var(--dim);padding-left:18px;border-left:3px solid var(--line)}
+.win ul{list-style:none;display:flex;flex-direction:column;gap:16px}
+.win li{font-size:21px;line-height:1.42;color:var(--dim);padding-left:18px;border-left:3px solid var(--line)}
 .win li b{color:var(--text);font-weight:600}
 .pend{margin-top:18px;padding:18px 24px;font-size:19px;line-height:1.4;color:var(--dim)}
 .pend b{color:var(--yellow)}
@@ -303,6 +303,11 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
 .cr small{display:block;font-size:14px;color:var(--dim)}
 .cr b{font-size:23px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .cr.hl2 b{color:var(--text)}.cr.hl3 b{color:var(--green)}
+.gapstrip{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:24px;margin-top:22px;align-items:center}
+.gs{display:flex;align-items:center;gap:18px;padding:16px 24px;border-radius:16px;background:rgba(255,199,44,.09);border:1px solid rgba(255,199,44,.35)}
+.gn{font-size:54px;font-weight:700;color:var(--yellow);line-height:1}
+.gt{font-size:19px;line-height:1.35;color:var(--dim)}.gt b{color:var(--text)}
+.gsnote{font-size:16px;line-height:1.45;color:var(--dim)}
 /* notes */
 #notes{position:absolute;left:80px;right:80px;bottom:84px;z-index:30;padding:22px 30px;background:rgba(3,10,24,.94);border:1px solid var(--yellow);border-radius:16px;font-size:22px;line-height:1.5;display:none}
 #notes.show{display:block}
@@ -361,11 +366,16 @@ canvas{display:block;width:100%;height:auto;border-radius:14px;background:#06122
   <h2>One project. Three winners.<br><span class="hl">Affordable transportation for EVERYONE.</span></h2>
   <div class="wins">
     <div class="panel win"><div class="wh"><span class="wi">🏛️</span><div><small>FOR THE CITY</small>Better service at a known cost</div></div>
-      <ul><li><b>Mostly federal dollars.</b> Federal transit funds pay most of the cost. The City share includes the $148,300 startup, from unspent FY26 Transit capital funds.</li><li><b>New procurement innovation.</b> Lake Charles is leading every other city in Louisiana in using the new state law (Act 665 of 2026) to buy services through a purchasing cooperative. Our department brought it to the City, and Legal and Finance vetted it.</li><li><b>A 2-year contract,</b> not a permanent commitment. Council approves it and decides what comes next.</li></ul></div>
+      <ul><li><b>Mostly federal dollars.</b> Federal transit funds pay most of the cost. The City share includes the $148,300 startup, from unspent FY26 Transit capital funds.</li><li><b>New procurement innovation.</b> Lake Charles is among the first cities in Louisiana to use the new state law (Act 665 of 2026) to buy services through a purchasing cooperative. Our department brought it to the City, and Legal and Finance vetted it.</li><li><b>A 2-year contract,</b> not a permanent commitment. Council approves it and decides what comes next.</li></ul></div>
     <div class="panel win"><div class="wh"><span class="wi">🚌</span><div><small>FOR THE TRANSIT DEPARTMENT</small>More reach from the same team</div></div>
       <ul><li><b>Vans, drivers and software</b> provided by Via as a service.</li><li><b>Paratransit modernized:</b> real-time booking and dispatch instead of voicemail and phone tag.</li><li><b>Trip-by-trip data</b> to plan service and back up our federal reporting.</li></ul></div>
     <div class="panel win hot"><div class="wh"><span class="wi">🏘️</span><div><small>FOR YOUR CONSTITUENTS</small>A ride from near the front door</div></div>
       <ul><li><b>No long walk to a fixed line.</b> Pickup at a nearby corner, drop-off close to where they are going.</li><li><b>Book by app, online, or a phone call,</b> so riders without smartphones are not left out.</li><li><b>Jobs, groceries, doctor visits:</b> the trips that are hardest today for seniors, riders with disabilities, and families without a car.</li></ul></div>
+  </div>
+  <div class="gapstrip">
+    <div class="gs"><span class="gn">47%</span><span class="gt"><b>of District F</b> is more than a quarter-mile walk from a bus route</span></div>
+    <div class="gs"><span class="gn">64%</span><span class="gt"><b>of District C</b> is more than a quarter-mile walk from a bus route</span></div>
+    <div class="gsnote">Estimated from the City's council district and route map. A quarter mile is the standard walk to a bus. Beyond a half mile: about 24% of District F and 48% of District C.</div>
   </div>
 </section>
 
@@ -573,7 +583,7 @@ const nav=document.getElementById('nav');
 let cur=0;
 const NOTES=[
  ["About 25 minutes, Via only.","Goal: answer three questions. What is it, how do we pay for it, what does it do for the City, the department and their districts."],
- ["If they remember one slide, it is this one.","Lead with the 2-year term and the contract cap: Council keeps control.","Say it plainly: the City Share includes the $148,300 startup, from unspent FY26 Transit capital funds.","Constituent column: ask which trips their residents struggle to make today."],
+ ["If they remember one slide, it is this one.","Lead with the 2-year term and the contract cap: Council keeps control.","Say it plainly: the City Share includes the $148,300 startup, from unspent FY26 Transit capital funds.","Constituent column: ask which trips their residents struggle to make today.","District numbers: measured from the council district map at 120 pixels per mile, distance to the nearest route line. Distance to an actual stop is longer, so these are conservative. District C runs past the map edge, so its figure covers only what the map shows."],
  ["Let the sim run 30 to 60 seconds. Point out riders outside the yellow line walking a long way.","Illustrative only, not a forecast."],
  ["Phone booking keeps it open to riders without smartphones.","Paratransit is half the value: today trip requests arrive as voicemails."],
  ["Startup: unspent FY26 Transit capital funds. Yearly service: federal 5307 plus the City Share.","Be plain about what is still pending: FTA approval of the funding shift and the final service zone.","Act 665 is what makes the 791 purchase legal for services. Legal (Corey Rubin) is on the procurement."],
