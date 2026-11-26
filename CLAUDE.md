@@ -76,7 +76,7 @@ Robert Goodson's personal site. Read `README.md` for how content, the build and 
 
 ## Via council briefing (unlisted)
 
-- `worker/private/via-council.html` at `/work/via-council/<key>/` (25 November 2026): a short, Via-only version of the council briefing for Council President Craig Marks and Councilman Tommy Bilbo (meeting 30 November 2026). Copy of Robert's Claude artifact of the same name; same look and controls as the council briefing. Never change its address or key once Robert shares it.
+- `worker/private/via-council.html` at `/work/via-council/<key>/` (25 November 2026): a short, Via-only version of the council briefing for Councilman Craig Marks (District F) and Councilman Tommy Bilbo (District C) (meeting 30 November 2026). Copy of Robert's Claude artifact of the same name; same look and controls as the council briefing. Never change its address or key once Robert shares it.
 
 ## Sophie's Unicorn Cloud Race (unlisted game)
 
